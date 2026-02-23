@@ -1,0 +1,16 @@
+{
+  "name": "test-context",
+  "path": "/tmp/test-workspace",
+  "description": "Test context for unit testing",
+  "created": "2026-02-24T00:00:00Z",
+  "type": "smart",
+  "checks": [
+    "git_status",
+    "file_integrity"
+  ],
+  "goals": [],
+  "alerts": {
+    "on_error": true,
+    "on_change": false
+  }
+}

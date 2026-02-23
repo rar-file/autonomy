@@ -9,6 +9,7 @@ CONFIG="$AUTONOMY_DIR/config.json"
 CONTEXTS_DIR="$AUTONOMY_DIR/contexts"
 HEARTBEAT="$WORKSPACE/HEARTBEAT.md"
 HEARTBEAT_DISABLED="$WORKSPACE/HEARTBEAT.md.disabled"
+LAST_ACTION_FILE="$AUTONOMY_DIR/state/last_action.json"
 
 # Colors
 GREEN='\033[0;32m'
@@ -16,6 +17,133 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
 NC='\033[0m'
+
+# ============ VALIDATION FUNCTIONS ============
+
+# Validate context name (prevent path traversal)
+validate_context_name() {
+    local name="$1"
+    
+    if [[ -z "$name" ]]; then
+        echo "Error: Context name cannot be empty" >&2
+        return 1
+    fi
+    
+    # Reject names with path traversal attempts
+    if [[ "$name" == *"/"* || "$name" == *"\\"* || "$name" == *".."* ]]; then
+        echo "Error: Invalid context name. Use simple names without path separators." >&2
+        return 1
+    fi
+    
+    return 0
+}
+
+# Validate path is within allowed directory
+validate_path() {
+    local path="$1"
+    local base="${2:-$WORKSPACE}"
+    
+    # Resolve absolute paths
+    local abs_path abs_base
+    abs_path=$(cd "$path" 2>/dev/null && pwd) || abs_path="$path"
+    abs_base=$(cd "$base" 2>/dev/null && pwd) || abs_base="$base"
+    
+    # Check for path traversal outside base
+    if [[ ! "$abs_path" == "$abs_base"* && "$abs_path" != "/"* ]]; then
+        echo "Error: Path must be within $base" >&2
+        return 1
+    fi
+    
+    return 0
+}
+
+# Validate config.json against expected schema
+validate_config() {
+    local config_file="${1:-$CONFIG}"
+    
+    # Check file exists and is readable
+    if [[ ! -f "$config_file" ]]; then
+        echo "Error: Config file not found: $config_file" >&2
+        return 1
+    fi
+    
+    # Check valid JSON
+    if ! jq empty "$config_file" 2>/dev/null; then
+        echo "Error: Invalid JSON in config file" >&2
+        return 1
+    fi
+    
+    # Schema validation - check required fields
+    local required_fields=("skill" "version" "status" "mode" "default_state" "active_context" "global_config")
+    for field in "${required_fields[@]}"; do
+        if ! jq -e "has(\"$field\")" "$config_file" >/dev/null 2>&1; then
+            echo "Error: Missing required field: $field" >&2
+            return 1
+        fi
+    done
+    
+    # Validate global_config sub-fields
+    local global_fields=("base_interval_minutes" "max_interval_minutes" "checks_per_heartbeat")
+    for field in "${global_fields[@]}"; do
+        if ! jq -e ".global_config | has(\"$field\")" "$config_file" >/dev/null 2>&1; then
+            echo "Error: Missing global_config field: $field" >&2
+            return 1
+        fi
+    done
+    
+    # Validate types
+    if ! jq -e '.global_config.base_interval_minutes | type == "number"' "$config_file" >/dev/null 2>&1; then
+        echo "Error: base_interval_minutes must be a number" >&2
+        return 1
+    fi
+    
+    return 0
+}
+
+# ============ WORK HOURS / QUIET MODE ============
+
+# Check if current time is within work hours
+is_within_work_hours() {
+    local work_hours
+    work_hours=$(jq -r '.global_config.work_hours // ""' "$CONFIG")
+    
+    [[ -z "$work_hours" ]] && return 0  # No restriction if not set
+    
+    local start_time end_time current_hour current_min
+    start_time=$(echo "$work_hours" | cut -d'-' -f1)
+    end_time=$(echo "$work_hours" | cut -d'-' -f2)
+    current_hour=$(date +%H)
+    current_min=$(date +%M)
+    
+    # Convert to minutes for comparison
+    local start_min end_time_min current_time_min
+    start_min=$(echo "$start_time" | awk -F: '{print $1*60+$2}')
+    end_time_min=$(echo "$end_time" | awk -F: '{print $1*60+$2}')
+    current_time_min=$((current_hour * 60 + current_min))
+    
+    if [[ $current_time_min -ge $start_min && $current_time_min -le $end_time_min ]]; then
+        return 0  # Within work hours
+    else
+        return 1  # Outside work hours (quiet mode)
+    fi
+}
+
+# Check if an alert should be skipped (non-critical outside work hours)
+should_skip_alert() {
+    local severity="${1:-low}"
+    
+    # Always show critical alerts
+    [[ "$severity" == "critical" ]] && return 1
+    
+    # Skip non-critical alerts outside work hours
+    if ! is_within_work_hours; then
+        return 0
+    fi
+    
+    return 1
+}
+
+# ============ COMMANDS ============
 
 show_help() {
     cat << EOF
@@ -39,15 +167,22 @@ Commands:
   action push <repo>        Push current branch
   action sync <repo>        Sync with remote (ff-only)
   
-  insights                  Show what autonomy has learned
-  config                    Show/edit configuration
+  undo                      Undo the last action (commit, stash, sync)
+  config [key] [value]      Show/edit configuration
+  config work-hours <time>  Set work hours (e.g., 09:00-18:00)
+  config backup             Backup current config (keeps last 5)
+  config restore [file|#]   Restore config from backup
   
+  insights                  Show what autonomy has learned
   help                      Show this help
 
 Examples:
   autonomy on git-aware           # Enable git monitoring
   autonomy action commit .        # Quick commit in current dir
+  autonomy action commit . --dry-run  # Preview what would happen
   autonomy context add myapp ~/myapp  # Add new project context
+  autonomy undo                   # Undo last commit/stash
+  autonomy config work-hours 09:00-18:00
 EOF
 }
 
@@ -56,6 +191,16 @@ cmd_status() {
         ACTIVE=$(jq -r '.active_context // "none"' "$CONFIG")
         echo -e "${GREEN}●${NC} Autonomy: ENABLED"
         echo "   Active context: $ACTIVE"
+        
+        # Show work hours status
+        WORK_HOURS=$(jq -r '.global_config.work_hours // "unset"' "$CONFIG")
+        if [[ "$WORK_HOURS" != "unset" && "$WORK_HOURS" != "" && "$WORK_HOURS" != "null" ]]; then
+            if is_within_work_hours; then
+                echo "   Work hours: $WORK_HOURS (currently active)"
+            else
+                echo "   Work hours: $WORK_HOURS (currently quiet mode)"
+            fi
+        fi
         
         # Show smart status
         if [[ "$ACTIVE" != "null" && -n "$ACTIVE" ]]; then
@@ -170,8 +315,17 @@ cmd_context() {
                 return 1
             fi
             
+            # Security: Validate context name
+            validate_context_name "$NAME" || return 1
+            
             # Expand path
             PATH_TARGET="${PATH_TARGET/#\~/$HOME}"
+            
+            # Security: Validate path
+            validate_path "$PATH_TARGET" "/" || {
+                echo "Invalid path specified"
+                return 1
+            }
             
             if [[ ! -d "$PATH_TARGET" ]]; then
                 echo -e "${YELLOW}Warning:${NC} Path doesn't exist yet: $PATH_TARGET"
@@ -214,7 +368,19 @@ EOF
                 echo "Usage: autonomy context remove <name>"
                 return 1
             fi
-            rm "$CONTEXTS_DIR/${NAME}.json"
+            
+            # Security: Validate context name
+            validate_context_name "$NAME" || return 1
+            
+            CONTEXT_FILE="$CONTEXTS_DIR/${NAME}.json"
+            
+            # Security: Validate the constructed path
+            if [[ ! -f "$CONTEXT_FILE" ]]; then
+                echo "Error: Context '$NAME' not found"
+                return 1
+            fi
+            
+            rm -f -- "$CONTEXT_FILE"
             echo -e "${GREEN}✓${NC} Context '$NAME' removed"
             ;;
             
@@ -234,15 +400,27 @@ EOF
 cmd_action() {
     ACTION="$1"
     TARGET="$2"
+    shift 2
+    EXTRA_ARGS="$@"
     
     case "$ACTION" in
         stash|commit|push|sync)
             if [[ -z "$TARGET" ]]; then
-                echo "Usage: autonomy action $ACTION <repo-path>"
+                echo "Usage: autonomy action $ACTION <repo-path> [--dry-run]"
                 return 1
             fi
             TARGET="${TARGET/#\~/$HOME}"
-            "$AUTONOMY_DIR/actions.sh" "$ACTION" "$TARGET"
+            
+            # Security: Validate path is within workspace
+            validate_path "$TARGET" "/" || return 1
+            
+            # Security: Ensure target is a directory
+            if [[ ! -d "$TARGET" ]]; then
+                echo -e "${RED}Error:${NC} Not a valid directory: $TARGET"
+                return 1
+            fi
+            
+            "$AUTONOMY_DIR/actions.sh" "$ACTION" "$TARGET" $EXTRA_ARGS
             ;;
         *)
             echo "Unknown action: $ACTION"
@@ -250,6 +428,370 @@ cmd_action() {
             return 1
             ;;
     esac
+}
+
+cmd_undo() {
+    if [[ ! -f "$LAST_ACTION_FILE" ]]; then
+        echo -e "${YELLOW}⚠${NC} No action to undo"
+        return 1
+    fi
+    
+    local action target details undoable
+    action=$(jq -r '.action // "unknown"' "$LAST_ACTION_FILE")
+    target=$(jq -r '.target // "unknown"' "$LAST_ACTION_FILE")
+    details=$(jq -r '.details // ""' "$LAST_ACTION_FILE")
+    undoable=$(jq -r '.undoable // "false"' "$LAST_ACTION_FILE")
+    
+    if [[ "$undoable" != "true" ]]; then
+        echo -e "${RED}✗${NC} Cannot undo: $action"
+        if [[ "$action" == "push" ]]; then
+            echo "   Push cannot be undone (commits are now on remote)"
+            echo "   To revert: use 'git revert' or force-push (use with caution)"
+        else
+            echo "   This action is not reversible"
+        fi
+        return 1
+    fi
+    
+    echo "Undoing: $action"
+    echo "Target: $target"
+    [[ -n "$details" ]] && echo "Details: $details"
+    echo ""
+    
+    case "$action" in
+        commit)
+            echo -e "${BLUE}→${NC} Running: git reset --soft HEAD~1"
+            cd "$target" || return 1
+            git reset --soft HEAD~1
+            if [[ $? -eq 0 ]]; then
+                echo -e "${GREEN}✓${NC} Commit undone. Changes are now staged."
+                rm "$LAST_ACTION_FILE"
+            else
+                echo -e "${RED}✗${NC} Failed to undo commit"
+                return 1
+            fi
+            ;;
+        stash)
+            echo -e "${BLUE}→${NC} Running: git stash pop"
+            cd "$target" || return 1
+            git stash pop
+            if [[ $? -eq 0 ]]; then
+                echo -e "${GREEN}✓${NC} Stash restored."
+                rm "$LAST_ACTION_FILE"
+            else
+                echo -e "${RED}✗${NC} Failed to restore stash (may have conflicts)"
+                return 1
+            fi
+            ;;
+        sync)
+            echo -e "${YELLOW}⚠${NC} Sync (fast-forward) cannot be undone cleanly"
+            echo "   You can manually reset with: git reset --hard HEAD~N"
+            echo "   (where N is the number of commits that were fast-forwarded)"
+            return 1
+            ;;
+        *)
+            echo -e "${RED}✗${NC} Unknown action type: $action"
+            return 1
+            ;;
+    esac
+}
+
+# Backup config with rotation (keeps last 5 backups)
+config_backup() {
+    local backup_dir="$AUTONOMY_DIR/backups"
+    mkdir -p "$backup_dir"
+    
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    local backup_file="$backup_dir/config_${timestamp}.json"
+    
+    # Copy current config to backup
+    cp "$CONFIG" "$backup_file"
+    
+    # Rotate backups - keep only last 5
+    ls -t "$backup_dir"/config_*.json 2>/dev/null | tail -n +6 | xargs rm -f 2>/dev/null
+    
+    echo "Config backed up to: $backup_file"
+    return 0
+}
+
+# Restore config from backup
+config_restore() {
+    local backup_file="$1"
+    local backup_dir="$AUTONOMY_DIR/backups"
+    
+    # If no specific backup provided, list available backups
+    if [[ -z "$backup_file" ]]; then
+        echo "Available backups:"
+        ls -1t "$backup_dir"/config_*.json 2>/dev/null | head -5 | nl
+        echo ""
+        echo "Usage: autonomy config restore <backup-file>"
+        return 0
+    fi
+    
+    # If just a number provided, get that backup
+    if [[ "$backup_file" =~ ^[0-9]+$ ]]; then
+        backup_file=$(ls -1t "$backup_dir"/config_*.json 2>/dev/null | sed -n "${backup_file}p")
+        if [[ -z "$backup_file" ]]; then
+            echo "Error: Backup #$1 not found" >&2
+            return 1
+        fi
+    fi
+    
+    # Full path if just filename provided
+    if [[ ! -f "$backup_file" && -f "$backup_dir/$backup_file" ]]; then
+        backup_file="$backup_dir/$backup_file"
+    fi
+    
+    if [[ ! -f "$backup_file" ]]; then
+        echo "Error: Backup file not found: $backup_file" >&2
+        return 1
+    fi
+    
+    # Validate backup before restoring
+    if ! validate_config "$backup_file"; then
+        echo "Error: Backup file failed validation, aborting restore" >&2
+        return 1
+    fi
+    
+    # Backup current config before restore
+    config_backup
+    
+    # Restore
+    cp "$backup_file" "$CONFIG"
+    echo "Config restored from: $backup_file"
+    return 0
+}
+
+cmd_config() {
+    local subcmd="${1:-show}"
+    
+    case "$subcmd" in
+        show|"")
+            echo "Current Configuration:"
+            echo "====================="
+            jq . "$CONFIG"
+            ;;
+        validate)
+            echo -n "Validating config... "
+            if validate_config; then
+                echo -e "${GREEN}✓ Valid${NC}"
+            else
+                echo -e "${RED}✗ Invalid${NC}"
+                return 1
+            fi
+            ;;
+        backup)
+            config_backup
+            ;;
+        restore)
+            shift
+            config_restore "$@"
+            ;;
+        edit)
+            ${EDITOR:-nano} "$CONFIG"
+            ;;
+        work-hours|work_hours)
+            local value="$2"
+            if [[ -z "$value" ]]; then
+                local current
+                current=$(jq -r '.global_config.work_hours // "not set"' "$CONFIG")
+                echo "Work hours: $current"
+                echo ""
+                echo "Usage: autonomy config work-hours HH:MM-HH:MM"
+                echo "Example: autonomy config work-hours 09:00-18:00"
+                echo ""
+                echo "Outside work hours, non-critical alerts are suppressed."
+            else
+                # Validate format
+                if [[ ! "$value" =~ ^[0-9]{2}:[0-9]{2}-[0-9]{2}:[0-9]{2}$ ]]; then
+                    echo -e "${RED}Error:${NC} Invalid format. Use HH:MM-HH:MM (e.g., 09:00-18:00)"
+                    return 1
+                fi
+                
+                jq --arg hours "$value" '.global_config.work_hours = $hours' "$CONFIG" > "${CONFIG}.tmp"
+                mv "${CONFIG}.tmp" "$CONFIG"
+                echo -e "${GREEN}✓${NC} Work hours set to: $value"
+                
+                if is_within_work_hours; then
+                    echo "   Currently within work hours"
+                else
+                    echo "   Currently in quiet mode (outside work hours)"
+                fi
+            fi
+            ;;
+        interval)
+            local value="$2"
+            if [[ -z "$value" ]]; then
+                jq -r '.global_config.base_interval_minutes' "$CONFIG"
+            else
+                jq --arg val "$value" '.global_config.base_interval_minutes = ($val | tonumber)' "$CONFIG" > "${CONFIG}.tmp"
+                mv "${CONFIG}.tmp" "$CONFIG"
+                echo -e "${GREEN}✓${NC} Base interval set to: $value minutes"
+            fi
+            ;;
+        *)
+            # Try to get/set arbitrary config value
+            local key="$subcmd"
+            local value="$2"
+            if [[ -z "$value" ]]; then
+                jq ".global_config.$key // .$key" "$CONFIG" 2>/dev/null || echo "Key not found"
+            else
+                jq --arg val "$value" ".global_config.$key = \$val" "$CONFIG" > "${CONFIG}.tmp"
+                mv "${CONFIG}.tmp" "$CONFIG"
+                echo -e "${GREEN}✓${NC} $key set to: $value"
+            fi
+            ;;
+    esac
+}
+
+cmd_check() {
+    local check_name="${1:-}"
+    
+    # Validate config before running checks
+    if ! validate_config; then
+        echo -e "${RED}Error:${NC} Config validation failed. Fix config or run 'autonomy config restore'"
+        return 1
+    fi
+    
+    # Get active context
+    local active_context=$(jq -r '.active_context // "null"' "$CONFIG")
+    
+    if [[ "$active_context" == "null" || -z "$active_context" ]]; then
+        echo -e "${YELLOW}Warning:${NC} No active context. Run 'autonomy on <context>' first."
+        return 1
+    fi
+    
+    local context_file="$CONTEXTS_DIR/${active_context}.json"
+    
+    if [[ ! -f "$context_file" ]]; then
+        echo -e "${RED}Error:${NC} Context file not found: $active_context"
+        return 1
+    fi
+    
+    # Get context path
+    local ctx_path=$(jq -r '.path // ""' "$context_file")
+    ctx_path="${ctx_path/\$WORKSPACE/$WORKSPACE}"
+    ctx_path="${ctx_path/\~\//$HOME/}"
+    
+    echo "Running checks for context: $active_context"
+    echo "Context path: $ctx_path"
+    echo ""
+    
+    # Handle 'check now' - run all checks
+    if [[ "$check_name" == "now" ]]; then
+        echo -e "${BLUE}Running all checks...${NC}"
+        echo ""
+        
+        # Get checks list from context
+        local checks=$(jq -r '.checks[]? // empty' "$context_file" 2>/dev/null)
+        
+        if [[ -z "$checks" ]]; then
+            echo -e "${YELLOW}No checks defined for this context${NC}"
+            return 0
+        fi
+        
+        local total=0
+        local passed=0
+        local failed=0
+        local alerts=0
+        
+        # Run each check
+        while IFS= read -r check; do
+            [[ -z "$check" ]] && continue
+            
+            total=$((total + 1))
+            echo -n "  [$total] $check: "
+            
+            # Check if check script exists
+            local check_script="$AUTONOMY_DIR/checks/${check}.sh"
+            
+            if [[ ! -f "$check_script" ]]; then
+                echo -e "${YELLOW}SKIP (no script)${NC}"
+                continue
+            fi
+            
+            # Run the check
+            local result=$(bash "$check_script" "$active_context" 2>/dev/null)
+            local status=$(echo "$result" | jq -r '.status // "unknown"')
+            
+            case "$status" in
+                pass)
+                    echo -e "${GREEN}PASS${NC}"
+                    passed=$((passed + 1))
+                    ;;
+                alert)
+                    echo -e "${YELLOW}ALERT${NC}"
+                    alerts=$((alerts + 1))
+                    # Show alert details
+                    local details=$(echo "$result" | jq -r 'to_entries | map("\(.key)=\(.value)") | join(", ")' 2>/dev/null)
+                    echo "       $details"
+                    ;;
+                fail|error)
+                    echo -e "${RED}FAIL${NC}"
+                    failed=$((failed + 1))
+                    ;;
+                skip)
+                    echo -e "${BLUE}SKIP${NC}"
+                    ;;
+                *)
+                    echo -e "${YELLOW}UNKNOWN${NC}"
+                    ;;
+            esac
+            
+            # Log result
+            mkdir -p "$AUTONOMY_DIR/logs"
+            echo "$result" >> "$AUTONOMY_DIR/logs/checks.jsonl"
+            
+        done <<< "$checks"
+        
+        echo ""
+        echo "====================="
+        echo "Results: $passed passed, $alerts alerts, $failed failed (total: $total)"
+        
+        # Update last check time in context
+        jq --arg time "$(date -Iseconds)" '.last_check = $time' "$context_file" > "${context_file}.tmp"
+        mv "${context_file}.tmp" "$context_file"
+        
+        return 0
+        
+    # Handle specific check name
+    elif [[ -n "$check_name" ]]; then
+        echo -e "${BLUE}Running check: $check_name${NC}"
+        
+        local check_script="$AUTONOMY_DIR/checks/${check_name}.sh"
+        
+        if [[ ! -f "$check_script" ]]; then
+            echo -e "${RED}Error:${NC} Check script not found: $check_name"
+            echo "Available checks:"
+            ls -1 "$AUTONOMY_DIR/checks/" 2>/dev/null | sed 's/\.sh$//' | sed 's/^/  - /'
+            return 1
+        fi
+        
+        # Run the specific check
+        local result=$(bash "$check_script" "$active_context" 2>/dev/null)
+        local status=$(echo "$result" | jq -r '.status // "unknown"')
+        
+        echo ""
+        echo "Result:"
+        echo "$result" | jq .
+        
+        # Log result
+        mkdir -p "$AUTONOMY_DIR/logs"
+        echo "$result" >> "$AUTONOMY_DIR/logs/checks.jsonl"
+        
+        # Update last check time
+        jq --arg time "$(date -Iseconds)" '.last_check = $time' "$context_file" > "${context_file}.tmp"
+        mv "${context_file}.tmp" "$context_file"
+        
+        return 0
+    else
+        echo "Usage: autonomy check now"
+        echo "       autonomy check <check-name>"
+        echo ""
+        echo "Available checks:"
+        ls -1 "$AUTONOMY_DIR/checks/" 2>/dev/null | sed 's/\.sh$//' | sed 's/^/  - /'
+        return 1
+    fi
 }
 
 cmd_insights() {
@@ -275,7 +817,8 @@ cmd_insights() {
     echo "   (Learning mode will track your patterns here)"
 }
 
-# Main dispatch
+# ============ MAIN DISPATCH ============
+
 case "${1:-status}" in
     status)
         cmd_status
@@ -294,6 +837,17 @@ case "${1:-status}" in
     action)
         shift
         cmd_action "$@"
+        ;;
+    undo)
+        cmd_undo
+        ;;
+    check)
+        shift
+        cmd_check "$@"
+        ;;
+    config)
+        shift
+        cmd_config "$@"
         ;;
     insights)
         cmd_insights

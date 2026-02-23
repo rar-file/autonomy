@@ -1,11 +1,11 @@
 {
   "skill": "autonomy",
-  "version": "1.0.0",
-  "status": "active",
+  "version": "1.0.0-test",
+  "status": "test",
   "mode": "contextual",
   "default_state": "off",
-  "active_context": "git-aware",
-  "last_activated": "2026-02-23T23:36:44+01:00",
+  "active_context": null,
+  "last_activated": null,
   "last_deactivated": null,
   "global_config": {
     "base_interval_minutes": 20,
@@ -14,11 +14,6 @@
     "token_target": 800,
     "token_hard_limit": 3000,
     "checks_per_heartbeat": 3,
-    "min_checks": 1,
-    "work_hours": "09:00-18:00",
-    "quiet_mode_enabled": true
-  },
-  "contexts_dir": "contexts",
-  "checks_dir": "checks",
-  "logs_dir": "logs"
+    "min_checks": 1
+  }
 }

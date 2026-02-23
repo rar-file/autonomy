@@ -14,7 +14,7 @@ class AutonomyBot(commands.Bot):
         super().__init__(
             command_prefix="!",  # Keep prefix as fallback
             intents=intents,
-            activity=discord.CustomActivity(name="🟢 | Autonomy standby")
+            activity=discord.CustomActivity(name="⚫ | Autonomy OFF")
         )
         
         self.workspace = Path("/root/.openclaw/workspace")
@@ -78,21 +78,24 @@ class AutonomyBot(commands.Bot):
             return None
     
     def calculate_autonomy_status(self, state):
-        """Determine current autonomy status"""
+        """Determine current autonomy status with clear on/off indication"""
         if not state:
-            return "off", "Autonomy offline"
+            return "off", "⚫ Autonomy OFF"
         
         if not state["enabled"]:
-            return "off", "Autonomy disabled"
+            return "off", "⚫ Autonomy OFF"
         
         now = datetime.now()
+        
+        # Show active context clearly
+        context = state.get('active_context', 'unknown')
         
         # Parse times
         next_eval = state.get("next_evaluation")
         last_eval = state.get("last_evaluation")
         
         if not next_eval or not last_eval:
-            return "active", f"Active | {state['active_context']}"
+            return "active", f"🔵 Autonomy ON | {context}"
         
         try:
             next_time = datetime.fromisoformat(next_eval.replace('Z', '+00:00').replace('+00:00', ''))
@@ -104,30 +107,30 @@ class AutonomyBot(commands.Bot):
             
             # About to check (within 30s of next heartbeat)
             if -10 < time_until_next < 30:
-                return "idle", f"Next heartbeat in {max(0, int(time_until_next))}s"
+                return "idle", f"🟡 Autonomy ON | Next check {max(0, int(time_until_next))}s"
             
             # Just checked (within 15s of last heartbeat)
             if 0 < time_since_last < 15:
-                return "checking", "Checking..."
+                return "checking", f"🔵 Autonomy ON | Checking {context}..."
             
             # Recently active (within last 5 min)
             if time_since_last < 300:
-                return "active", f"Active | {state['active_context']}"
+                return "active", f"🔵 Autonomy ON | {context}"
             
             # Calculate idle time
             idle_minutes = time_since_last / 60
             
             # Long idle (sleeping) - more than 2x base interval
             if idle_minutes > (state["base_interval"] * 2):
-                return "sleeping", f"Sleeping | {int(idle_minutes)}m idle"
+                return "sleeping", f"🔴 Autonomy ON | Idle {int(idle_minutes)}m"
             
             # Normal idle - in between heartbeats
             next_in_min = time_until_next / 60 if time_until_next > 0 else 0
-            return "idle", f"Idle | Next in {int(next_in_min)}m"
+            return "idle", f"🟢 Autonomy ON | {context}"
             
         except Exception as e:
             print(f"[Autonomy] Error calculating status: {e}")
-            return "active", f"Active | {state['active_context']}"
+            return "active", f"🔵 Autonomy ON | {context}"
     
     @tasks.loop(seconds=30)
     async def update_presence_loop(self):
@@ -136,11 +139,9 @@ class AutonomyBot(commands.Bot):
             state = self.read_autonomy_state()
             status_key, status_text = self.calculate_autonomy_status(state)
             
-            emoji = self.status_config["emojis"].get(status_key, "⚪")
+            # Use the status_text directly which includes emoji
+            activity = discord.CustomActivity(name=status_text)
             discord_status = self.status_config["discord_status"].get(status_key, discord.Status.online)
-            
-            # Create custom activity
-            activity = discord.CustomActivity(name=f"{emoji} | {status_text}")
             
             # Update presence
             await self.change_presence(activity=activity, status=discord_status)
@@ -159,6 +160,41 @@ class AutonomyBot(commands.Bot):
         print(f"[Autonomy] Monitoring workspace: {self.workspace}")
         print(f"[Autonomy] Invite URL: https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=2048&scope=bot%20applications.commands")
     
+    def validate_context_name(self, name: str) -> bool:
+        """Validate context name - prevent path traversal and injection"""
+        import re
+        # Only allow alphanumeric, dash, underscore
+        if not name:
+            return False
+        if not re.match(r'^[a-zA-Z0-9_-]+$', name):
+            return False
+        # Block reserved names
+        reserved = {'test', 'help', 'list', 'add', 'remove', 'on', 'off', 'config'}
+        if name.lower() in reserved:
+            return False
+        return True
+    
+    def update_config_with_lock(self, config: dict) -> bool:
+        """Update config with file locking for atomic writes"""
+        import fcntl
+        import os
+        
+        try:
+            # Write to temp file first
+            temp_file = f"{self.config_file}.tmp"
+            with open(temp_file, 'w') as f:
+                json.dump(config, f, indent=2)
+            
+            # Use flock for atomic replacement
+            with open(self.config_file, 'a') as lock_file:
+                fcntl.flock(lock_file, fcntl.LOCK_EX)
+                os.replace(temp_file, self.config_file)
+                fcntl.flock(lock_file, fcntl.LOCK_UN)
+            return True
+        except Exception as e:
+            print(f"[Autonomy] Config update error: {e}")
+            return False
+    
     # ========== SLASH COMMANDS ==========
     
     @app_commands.command(name="autonomy", description="Show autonomy system status")
@@ -172,18 +208,17 @@ class AutonomyBot(commands.Bot):
         
         if not state["enabled"]:
             await interaction.response.send_message(
-                "⚫ Autonomy disabled. Use `/autonomy_on` to enable.", 
+                "⚫ Autonomy OFF. Use `/autonomy_on` to enable.", 
                 ephemeral=True
             )
             return
         
         status_key, status_text = self.calculate_autonomy_status(state)
-        emoji = self.status_config["emojis"].get(status_key, "⚪")
         
         embed = discord.Embed(
-            title=f"{emoji} Autonomy Status",
+            title="🔵 Autonomy Status - ON",
             description=f"**Context:** `{state['active_context']}`\n**Status:** {status_text}",
-            color=discord.Color.blue() if status_key == "active" else discord.Color.green(),
+            color=discord.Color.green(),
             timestamp=datetime.now()
         )
         embed.add_field(name="Check Interval", value=f"`{state['base_interval']}` min", inline=True)
@@ -198,15 +233,25 @@ class AutonomyBot(commands.Bot):
         """Enable autonomy"""
         ctx_name = context or "default"
         
-        # Update config
+        # Validate context name
+        if not self.validate_context_name(ctx_name):
+            embed = discord.Embed(
+                title="❌ Invalid Context Name",
+                description="Context name must be alphanumeric with dashes/underscores only.",
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+        
+        # Update config with lock
         try:
             with open(self.config_file, 'r') as f:
                 config = json.load(f)
             
             config["active_context"] = ctx_name
             
-            with open(self.config_file, 'w') as f:
-                json.dump(config, f, indent=2)
+            if not self.update_config_with_lock(config):
+                raise Exception("Failed to update config")
             
             # Enable heartbeat
             heartbeat = self.workspace / "HEARTBEAT.md"
@@ -216,7 +261,7 @@ class AutonomyBot(commands.Bot):
                     disabled.rename(heartbeat)
             
             embed = discord.Embed(
-                title="🟢 Autonomy Enabled",
+                title="🔵 Autonomy ON",
                 description=f"Context: `{ctx_name}`",
                 color=discord.Color.green()
             )
@@ -246,7 +291,7 @@ class AutonomyBot(commands.Bot):
                 heartbeat.rename(self.workspace / "HEARTBEAT.md.disabled")
             
             embed = discord.Embed(
-                title="⚫ Autonomy Disabled",
+                title="⚫ Autonomy OFF",
                 description="System is now offline",
                 color=discord.Color.red()
             )
@@ -262,6 +307,16 @@ class AutonomyBot(commands.Bot):
     @app_commands.describe(name="Name of the context to activate")
     async def slash_autonomy_context(self, interaction: discord.Interaction, name: str):
         """Switch context"""
+        # Validate context name first
+        if not self.validate_context_name(name):
+            embed = discord.Embed(
+                title="❌ Invalid Context Name",
+                description="Context name must be alphanumeric with dashes/underscores only.",
+                color=discord.Color.red()
+            )
+            await interaction.response.send_message(embed=embed, ephemeral=True)
+            return
+        
         try:
             with open(self.config_file, 'r') as f:
                 config = json.load(f)
@@ -283,8 +338,8 @@ class AutonomyBot(commands.Bot):
             
             config["active_context"] = name
             
-            with open(self.config_file, 'w') as f:
-                json.dump(config, f, indent=2)
+            if not self.update_config_with_lock(config):
+                raise Exception("Failed to update config")
             
             embed = discord.Embed(
                 title="🟡 Context Switched",
@@ -342,8 +397,16 @@ class AutonomyBot(commands.Bot):
 def main():
     import os
     
+    # Security: Mask token for logging/error display
+    def mask_token(token):
+        """Mask token for safe display in logs/errors"""
+        if not token or len(token) < 8:
+            return "[REDACTED]"
+        return token[:4] + "****" + token[-4:]
+    
     # Get token from environment or OpenClaw config
     token = os.getenv("DISCORD_BOT_TOKEN")
+    token_source = "environment variable"
     
     if not token:
         # Try reading from OpenClaw config
@@ -354,8 +417,13 @@ def main():
             
             # Extract token from channels config (direct path)
             token = config.get("channels", {}).get("discord", {}).get("token")
+            token_source = "OpenClaw config"
         except Exception as e:
-            print(f"Error reading config: {e}")
+            # Security: Mask any potential token in error message
+            error_str = str(e)
+            if token and token in error_str:
+                error_str = error_str.replace(token, mask_token(token))
+            print(f"Error reading config: {error_str}")
     
     if not token:
         print("Error: Could not find Discord bot token")
@@ -363,8 +431,24 @@ def main():
         print("Or ensure OpenClaw has the Discord channel configured")
         return
     
+    # Security: Validate token format (basic check)
+    if not token.replace('.', '').replace('_', '').replace('-', '').isalnum():
+        print("Error: Discord token appears to have invalid format")
+        return
+    
     bot = AutonomyBot()
-    bot.run(token)
+    
+    # Security: Wrap bot.run to catch and sanitize any errors that might contain the token
+    try:
+        bot.run(token)
+    except Exception as e:
+        # Security: Ensure token is never leaked in error messages
+        error_msg = str(e)
+        # Mask the token if it appears anywhere in the error
+        if token in error_msg:
+            error_msg = error_msg.replace(token, mask_token(token))
+        print(f"[Autonomy] Bot error: {error_msg}")
+        raise
 
 
 if __name__ == "__main__":

@@ -31,13 +31,25 @@
     "prevent_context_switch_with_dirty_repo": true
   },
   "actions": {
-    "can_autofix": ["git_add_all", "git_stash"],
-    "can_suggest": ["git_commit", "git_push", "git_branch_cleanup"],
-    "can_notify": ["discord", "toast", "log"]
+    "can_autofix": [
+      "git_add_all",
+      "git_stash"
+    ],
+    "can_suggest": [
+      "git_commit",
+      "git_push",
+      "git_branch_cleanup"
+    ],
+    "can_notify": [
+      "discord",
+      "toast",
+      "log"
+    ]
   },
   "severity": {
     "dirty_repo": "high",
     "unpushed_commits": "medium",
     "stale_branch": "low"
-  }
+  },
+  "last_check": "2026-02-24T00:21:21+01:00"
 }

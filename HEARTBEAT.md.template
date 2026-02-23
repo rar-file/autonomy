@@ -1,0 +1,53 @@
+# HEARTBEAT.md - Context-Aware Autonomous Operation
+
+## Current State
+
+- **Mode:** CONTEXTUAL
+- **Status:** Check `skills/autonomy/config.json` for active state
+- **Active Context:** See config.json
+
+## How This Works Now
+
+This HEARTBEAT.md works with the **autonomy skill**:
+
+1. Check if autonomy is enabled (config.json)
+2. If disabled → HEARTBEAT_OK, no work
+3. If enabled → Load active context, run context-specific checks
+4. Context determines WHAT to check, not generic everything
+
+## Minimal Execution Rules
+
+- **Read config first** — if no active context, done
+- **Load only active context** — don't scan everything
+- **Run only context's checks** — not all checks
+- **Stay under token budget** defined in context
+
+## Instructions
+
+```
+1. Read skills/autonomy/config.json
+2. If active_context is null → HEARTBEAT_OK, exit
+3. Load skills/autonomy/contexts/{active}.json
+4. Run each check in context.checks array
+5. Log results to skills/autonomy/logs/
+6. Respond based on results
+```
+
+## Response Rules
+
+- Nothing to do → HEARTBEAT_OK
+- Context alert → Brief alert with context name
+- Error → Full error details
+
+## Commands
+
+To control autonomy:
+- `autonomy status` — check state
+- `autonomy on [context]` — activate
+- `autonomy off` — deactivate
+- `autonomy context add <name> <path>` — new context
+
+## Philosophy
+
+**Only work on what you're asked to work on.**
+Default: off. Activate when needed. Stay quiet otherwise.
