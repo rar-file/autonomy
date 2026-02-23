@@ -1,0 +1,18 @@
+{
+  "name": "business",
+  "path": "/root/.openclaw/workspace/business",
+  "description": "Business operations and metrics monitoring",
+  "created": "2026-02-23T22:20:00Z",
+  "checks": [
+    "file_integrity",
+    "goal_progress",
+    "metrics_review"
+  ],
+  "goals": [],
+  "alerts": {
+    "on_error": true,
+    "on_change": true
+  },
+  "token_budget": 1500,
+  "check_interval": 60
+}

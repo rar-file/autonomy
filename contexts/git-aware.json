@@ -1,0 +1,43 @@
+{
+  "name": "git-aware",
+  "path": "${WORKSPACE}",
+  "description": "Intelligent git monitoring - prevents lost work and keeps repos clean",
+  "created": "2026-02-23T23:30:00Z",
+  "type": "smart",
+  "intelligence": {
+    "learns_patterns": true,
+    "adapts_frequency": true,
+    "context_aware": true
+  },
+  "triggers": {
+    "on_file_change": true,
+    "on_git_event": true,
+    "on_context_switch": true,
+    "scheduled": true
+  },
+  "checks": [
+    "git_dirty_warning",
+    "git_stale_commit",
+    "git_unpushed_check",
+    "git_branch_sync",
+    "git_stash_reminder"
+  ],
+  "config": {
+    "dirty_warning_threshold": 7200,
+    "stale_commit_threshold": 3600,
+    "unpushed_warning_threshold": 86400,
+    "auto_suggest_commit": true,
+    "auto_suggest_message": true,
+    "prevent_context_switch_with_dirty_repo": true
+  },
+  "actions": {
+    "can_autofix": ["git_add_all", "git_stash"],
+    "can_suggest": ["git_commit", "git_push", "git_branch_cleanup"],
+    "can_notify": ["discord", "toast", "log"]
+  },
+  "severity": {
+    "dirty_repo": "high",
+    "unpushed_commits": "medium",
+    "stale_branch": "low"
+  }
+}

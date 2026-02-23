@@ -1,0 +1,19 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-02-23T23:40:00Z",
+  "autonomy_loop": {
+    "base_interval_minutes": 20,
+    "current_interval_minutes": 20,
+    "last_evaluation": "2026-02-23T23:56:00+01:00",
+    "next_evaluation": "2026-02-24T00:16:00+01:00",
+    "evaluation_count": 2
+  },
+  "adaptive_frequency": {
+    "high_tension_threshold": 0.7,
+    "high_tension_multiplier": 0.5,
+    "low_tension_threshold": 0.3,
+    "low_tension_multiplier": 3.0,
+    "min_interval": 5,
+    "max_interval": 240
+  }
+}

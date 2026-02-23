@@ -1,0 +1,30 @@
+{
+  "name": "webapp",
+  "path": "/root/.openclaw/workspace/projects/webapp",
+  "description": "Web application project monitoring",
+  "created": "2026-02-23T22:20:00Z",
+  "checks": [
+    "git_status",
+    "dependency_check",
+    "test_status",
+    "security_scan"
+  ],
+  "goals": [
+    {"description": "All tests passing", "priority": "high"},
+    {"description": "No uncommitted changes >24h", "priority": "medium"},
+    {"description": "Dependencies up to date", "priority": "low"}
+  ],
+  "alerts": {
+    "on_error": true,
+    "on_test_failure": true,
+    "on_security_issue": true,
+    "on_change": false
+  },
+  "notifications": {
+    "discord": false,
+    "on_check_fail": true,
+    "on_goal_due": true
+  },
+  "token_budget": 1200,
+  "check_interval": 30
+}

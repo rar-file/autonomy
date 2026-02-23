@@ -1,0 +1,17 @@
+{
+  "name": "example-default",
+  "path": "/root/.openclaw/workspace",
+  "description": "Example context - copy to default.json and customize",
+  "created": "2026-02-23T22:20:00Z",
+  "checks": [
+    "identity_integrity",
+    "goal_progress",
+    "memory_consolidation"
+  ],
+  "goals": [],
+  "alerts": {
+    "on_error": true,
+    "on_change": false
+  },
+  "token_budget": 800
+}

@@ -1,0 +1,51 @@
+{
+  "audited_at": "2026-02-23T23:46:31+01:00",
+  "hostname": "openclaw",
+  "workspace": "/root/.openclaw/workspace",
+  "integrations": {
+    "git": {
+      "available": true,
+      "version": "2.43.0",
+      "capabilities": [
+        "init",
+        "add",
+        "commit",
+        "push",
+        "pull",
+        "branch",
+        "merge",
+        "stash"
+      ],
+      "configured": false,
+      "setup_note": "Run: git config --global user.name/email",
+      "workspaces": []
+    },
+    "github": {
+      "available": false,
+      "install": "wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee /usr/share/keyrings/githubcli-archive-keyring.gpg > /dev/null"
+    },
+    "docker": {
+      "available": false,
+      "install": "apt install docker.io"
+    },
+    "ssh": {
+      "available": true,
+      "version": "9.6p1",
+      "keys_present": [],
+      "setup_command": "ssh-keygen -t ed25519 -C \"autonomy@$(hostname)\"",
+      "capabilities": [
+        "none"
+      ],
+      "note": "SSH available but no keys configured"
+    },
+    "discord": {
+      "available": false,
+      "setup_command": "openclaw channels add --channel discord --token TOKEN --name autonomy-bot",
+      "workaround": "Use webhook notifications instead"
+    },
+    "kubernetes": {
+      "available": false,
+      "install": "clawhub install kubectl"
+    }
+  }
+}

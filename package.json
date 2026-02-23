@@ -1,0 +1,29 @@
+{
+  "name": "autonomy",
+  "version": "1.0.0",
+  "description": "Context-aware autonomous monitoring and execution framework for OpenClaw",
+  "author": "Janus",
+  "license": "MIT",
+  "keywords": ["autonomy", "monitoring", "heartbeat", "checks", "context"],
+  "openclaw": {
+    "minVersion": "1.0.0",
+    "skills": [],
+    "bins": [],
+    "hooks": {
+      "postInstall": "./scripts/install.sh",
+      "postEnable": "./scripts/enable.sh"
+    }
+  },
+  "scripts": {
+    "test": "echo 'Tests not implemented'"
+  },
+  "files": [
+    "SKILL.md",
+    "autonomy",
+    "config.json",
+    "contexts/",
+    "checks/",
+    "scripts/",
+    "README.md"
+  ]
+}
