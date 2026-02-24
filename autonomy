@@ -856,6 +856,9 @@ case "${1:-status}" in
         shift
         "$AUTONOMY_DIR/activity.sh" "$@"
         ;;
+    health|doctor)
+        "$AUTONOMY_DIR/health.sh"
+        ;;
     help|--help|-h)
         show_help
         ;;
