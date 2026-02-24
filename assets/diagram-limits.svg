@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 300" fill="none">
+  <rect width="700" height="300" fill="#0d1117" rx="10"/>
+  
+  <!-- Title -->
+  <text x="350" y="35" text-anchor="middle" fill="#f85149" font-family="system-ui" font-size="20" font-weight="bold">Safety Limits</text>
+  
+  <!-- Limit 1: Tasks -->
+  <rect x="50" y="70" width="140" height="100" fill="#21262d" stroke="#30363d" stroke-width="2" rx="8"/>
+  <text x="120" y="100" text-anchor="middle" fill="#e6edf3" font-family="system-ui" font-size="14" font-weight="bold">Tasks</text>
+  <text x="120" y="130" text-anchor="middle" fill="#f85149" font-family="system-ui" font-size="28" font-weight="bold">5</text>
+  <text x="120" y="155" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="11">max concurrent</text>
+  
+  <!-- Limit 2: Agents -->
+  <rect x="210" y="70" width="140" height="100" fill="#21262d" stroke="#30363d" stroke-width="2" rx="8"/>
+  <text x="280" y="100" text-anchor="middle" fill="#e6edf3" font-family="system-ui" font-size="14" font-weight="bold">Agents</text>
+  <text x="280" y="130" text-anchor="middle" fill="#f85149" font-family="system-ui" font-size="28" font-weight="bold">3</text>
+  <text x="280" y="155" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="11">max sub-agents</text>
+  
+  <!-- Limit 3: Schedules -->
+  <rect x="370" y="70" width="140" height="100" fill="#21262d" stroke="#30363d" stroke-width="2" rx="8"/>
+  <text x="440" y="100" text-anchor="middle" fill="#e6edf3" font-family="system-ui" font-size="14" font-weight="bold">Schedules</text>
+  <text x="440" y="130" text-anchor="middle" fill="#f85149" font-family="system-ui" font-size="28" font-weight="bold">5</text>
+  <text x="440" y="155" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="11">max recurring</text>
+  
+  <!-- Limit 4: Tokens -->
+  <rect x="530" y="70" width="140" height="100" fill="#21262d" stroke="#30363d" stroke-width="2" rx="8"/>
+  <text x="600" y="100" text-anchor="middle" fill="#e6edf3" font-family="system-ui" font-size="14" font-weight="bold">Tokens</text>
+  <text x="600" y="130" text-anchor="middle" fill="#f85149" font-family="system-ui" font-size="24" font-weight="bold">50K</text>
+  <text x="600" y="155" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="11">daily budget</text>
+  
+  <!-- Bottom info -->
+  <rect x="100" y="200" width="500" height="80" fill="#161b22" stroke="#30363d" stroke-width="1" rx="8"/>
+  <text x="350" y="230" text-anchor="middle" fill="#e6edf3" font-family="system-ui" font-size="14" font-weight="bold">Additional Guards</text>
+  
+  <text x="350" y="255" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="12">Max 5 iterations per task &#8226; Max 3 attempts before stop &#8226; Verification required</text>
+  <text x="350" y="272" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="12">Approval for risky actions &#8226; Anti-hallucination checks &#8226; Token tracking</text>
+</svg>

@@ -1,17 +1,38 @@
 # Agentic Autonomy for OpenClaw
 
-**AI-driven self-improving autonomy system.**
+<p align="center">
+  <img src="assets/logo-banner.svg" alt="Agentic Autonomy" width="600">
+</p>
 
-The AI decides what to do, creates its own tasks, and improves itself - with safety guards to prevent runaway usage.
+<p align="center">
+  <img src="https://img.shields.io/badge/version-2.0.0-blue.svg" alt="Version 2.0.0">
+  <img src="https://img.shields.io/badge/mode-agentic-green.svg" alt="Mode: Agentic">
+  <img src="https://img.shields.io/badge/status-active-brightgreen.svg" alt="Status: Active">
+</p>
+
+**AI-driven self-improving autonomy system for OpenClaw.**
+
+The AI decides what to do, creates its own tasks, and improves itself — with safety guards to prevent runaway usage.
+
+---
 
 ## What It Does
 
 Instead of following scripts, the AI:
-- **Reasons** about what needs attention
-- **Creates** its own tasks
-- **Decides** how to solve problems
-- **Verifies** its work (anti-hallucination)
-- **Stops** when done (not endless building)
+
+| Traditional | Agentic (This) |
+|------------|----------------|
+| Follows hardcoded phases | **Reasons** about what needs attention |
+| Runs predefined checks | **Creates** its own tasks |
+| Executes commands | **Decides** how to solve problems |
+| Reports results | **Verifies** its work (anti-hallucination) |
+| Keeps running | **Stops** when done (not endless building) |
+
+<p align="center">
+  <img src="assets/diagram-workflow.svg" alt="Workflow" width="700">
+</p>
+
+---
 
 ## Quick Start
 
@@ -25,38 +46,73 @@ autonomy work "Build a memory tracker for token usage"
 # The AI decides, plans, builds, tests, and reports back
 ```
 
+---
+
 ## Commands
+
+### Core Commands
 
 | Command | Description |
 |---------|-------------|
 | `autonomy on` | Activate agentic mode |
 | `autonomy off` | Deactivate |
 | `autonomy work "instruction"` | Give the AI a task |
+| `autonomy status` | Show workstation status |
+
+### Task Management
+
+| Command | Description |
+|---------|-------------|
 | `autonomy task list` | Show active tasks |
+| `autonomy task create <name> [desc]` | Create a new task |
 | `autonomy task complete <name> "proof"` | Mark done (requires proof) |
+
+### Advanced
+
+| Command | Description |
+|---------|-------------|
 | `autonomy spawn "task"` | Spawn sub-agent |
 | `autonomy schedule add <interval> <task>` | Schedule recurring work |
 | `autonomy tool create <name>` | Create custom tool |
-| `autonomy status` | Show workstation status |
 | `autonomy update check` | Check for updates |
 | `autonomy update apply` | Apply latest update |
 
+---
+
 ## Safety Guards
 
-**Hard Limits:**
-- Max 5 concurrent tasks
-- Max 3 sub-agents
-- Max 5 schedules
-- 50k daily token budget
-- Max 5 iterations per task
+### Hard Limits
 
-**Anti-Hallucination:**
-- Must verify work before marking complete
-- Must provide proof: "Tested: X works, Y exists"
-- Max 3 attempts before forced stop
-- Check for existing solutions first
+<p align="center">
+  <img src="assets/diagram-limits.svg" alt="Safety Limits" width="600">
+</p>
 
-**Approval Required:**
+| Limit | Value | Purpose |
+|-------|-------|---------|
+| Max concurrent tasks | 5 | Prevent overload |
+| Max sub-agents | 3 | Limit parallelism |
+| Max schedules | 5 | Control recurring work |
+| Daily token budget | 50,000 | Cost protection |
+| Max iterations per task | 5 | Stop endless building |
+
+### Anti-Hallucination
+
+```
+❌ WRONG: "Task complete" (no proof)
+✅ RIGHT: "Task complete. Proof: Tested X, verified Y exists"
+```
+
+| Guard | Description |
+|-------|-------------|
+| Verification Required | Must prove work before marking complete |
+| Attempt Tracking | Max 3 attempts before forced stop |
+| File Verification | Files must exist (actually checked) |
+| Command Testing | Commands must work (actually run) |
+| Evidence Required | Hand-waving rejected |
+
+### Approval Required
+
+These actions need explicit approval:
 - External API calls
 - Sending messages
 - File deletion
@@ -64,19 +120,28 @@ autonomy work "Build a memory tracker for token usage"
 - Git push
 - Installing packages
 
+---
+
 ## How It Works
 
 ### 1. Heartbeat Triggers
+
 ```
 OpenClaw → Read HEARTBEAT.md → AI decides what to do
 ```
 
+<p align="center">
+  <img src="assets/diagram-heartbeat.svg" alt="Heartbeat Flow" width="500">
+</p>
+
 ### 2. AI Checks Workstation
+
 - Pending tasks?
 - Scheduled work due?
 - What needs attention?
 
 ### 3. AI Reasons & Acts
+
 ```
 "I should build a token tracker"
   ↓
@@ -84,13 +149,16 @@ Create task → Plan approach → Build → Test → Verify → Complete
 ```
 
 ### 4. Verification Required
+
 ```bash
-# WRONG - No proof
+# ❌ WRONG - No proof
 autonomy task complete X
 
-# RIGHT - With proof
+# ✅ RIGHT - With proof  
 autonomy task complete X "Tested: logs tokens, file exists with data"
 ```
+
+---
 
 ## Example Session
 
@@ -117,22 +185,46 @@ Workstation: ACTIVE
 Active Tasks: 0 (all complete)
 ```
 
+---
+
 ## Architecture
 
 ```
 skills/autonomy/
-├── autonomy           # Main CLI
-├── config.json        # Configuration & limits
-├── HEARTBEAT.md       # AI instructions (read each heartbeat)
-├── ARCHITECTURE.md    # Design docs
-├── checks/            # Update checker
-├── lib/               # Shared libraries
-├── tasks/             # Active tasks (JSON)
-├── agents/            # Running agents
-├── tools/             # Custom tools created by AI
-├── logs/              # Activity logs
-└── state/             # Runtime state
+├── autonomy              # Main CLI
+├── config.json           # Configuration & limits
+├── HEARTBEAT.md          # AI instructions
+├── ARCHITECTURE.md       # Design docs
+├── README.md             # This file
+├── checks/               # Update checker
+│   └── self_update.sh
+├── lib/                  # Shared libraries
+├── tasks/                # Active tasks (JSON)
+├── agents/               # Running agents
+├── tools/                # Custom tools created by AI
+├── logs/                 # Activity logs
+└── state/                # Runtime state
 ```
+
+<p align="center">
+  <img src="assets/diagram-architecture.svg" alt="Architecture" width="700">
+</p>
+
+---
+
+## Assets
+
+<p align="center">
+  <img src="assets/logo.svg" alt="Logo" width="200">
+</p>
+
+This plugin includes visual assets:
+- `assets/logo.svg` - Main logo
+- `assets/logo-banner.svg` - Banner for README
+- `assets/logo-ascii.txt` - ASCII art for terminal
+- `assets/favicon.svg` - Favicon for web UI
+
+---
 
 ## Configuration
 
@@ -145,10 +237,20 @@ Edit `config.json`:
       "max_concurrent_tasks": 5,
       "max_sub_agents": 3,
       "daily_token_budget": 50000
+    },
+    "completion_criteria": {
+      "require_verification": true,
+      "max_attempts": 3
+    },
+    "innovation_guards": {
+      "prevent_redundant_builds": true,
+      "max_iterations_per_task": 5
     }
   }
 }
 ```
+
+---
 
 ## Self-Update
 
@@ -159,6 +261,18 @@ autonomy update check    # Check if new version available
 autonomy update apply    # Download and install
 ```
 
+<p align="center">
+  <img src="assets/diagram-update.svg" alt="Self-Update" width="500">
+</p>
+
+---
+
 ## License
 
 MIT
+
+---
+
+<p align="center">
+  <sub>Built for OpenClaw — AI that decides, verifies, and improves itself.</sub>
+</p>

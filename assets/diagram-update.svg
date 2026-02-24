@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 250" fill="none">
+  <rect width="600" height="250" fill="#0d1117" rx="10"/>
+  
+  <!-- Title -->
+  <text x="300" y="35" text-anchor="middle" fill="#f78166" font-family="system-ui" font-size="20" font-weight="bold">Self-Update Flow</text>
+  
+  <!-- Local System -->
+  <rect x="50" y="70" width="140" height="140" fill="#21262d" stroke="#30363d" stroke-width="2" rx="8"/>
+  <text x="120" y="100" text-anchor="middle" fill="#e6edf3" font-family="system-ui" font-size="14" font-weight="bold">Local</text>
+  <rect x="70" y="115" width="100" height="30" fill="#161b22" rx="4"/>
+  <text x="120" y="134" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="10">Version: 2.0.0</text>
+  <rect x="70" y="155" width="100" height="40" fill="#161b22" rx="4"/>
+  <text x="120" y="175" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="10">Current</text>
+  <text x="120" y="188" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="10">Installation</text>
+  
+  <!-- GitHub -->
+  <rect x="410" y="70" width="140" height="140" fill="#21262d" stroke="#f78166" stroke-width="2" rx="8"/>
+  <text x="480" y="100" text-anchor="middle" fill="#f78166" font-family="system-ui" font-size="14" font-weight="bold">GitHub</text>
+  <rect x="430" y="115" width="100" height="30" fill="#161b22" rx="4"/>
+  <text x="480" y="134" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="10">Latest Version</text>
+  <rect x="430" y="155" width="100" height="40" fill="#161b22" rx="4"/>
+  <text x="480" y="175" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="10">rar-file/</text>
+  <text x="480" y="188" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="10">autonomy</text>
+  
+  <!-- Arrow: Check -->
+  <path d="M 190 120 L 280 120" stroke="#8b949e" stroke-width="2" marker-end="url(#arrowgray)"/>
+  <text x="235" y="110" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="10">Check</text>
+  
+  <!-- Arrow: Update Available -->
+  <path d="M 320 140 L 410 140" stroke="#f85149" stroke-width="2" marker-end="url(#arrowred)"/>
+  <text x="365" y="155" text-anchor="middle" fill="#f85149" font-family="system-ui" font-size="10">Update Available</text>
+  
+  <!-- Arrow: Download -->
+  <path d="M 320 165 L 410 165" stroke="#238636" stroke-width="2" marker-end="url(#arrowgreen)"/>
+  <text x="365" y="180" text-anchor="middle" fill="#238636" font-family="system-ui" font-size="10">Download & Apply</text>
+  
+  <!-- Status Box -->
+  <rect x="230" y="70" width="140" height="90" fill="#161b22" stroke="#30363d" stroke-width="1" rx="6"/>
+  <text x="300" y="95" text-anchor="middle" fill="#e6edf3" font-family="system-ui" font-size="11" font-weight="bold">Update Check</text>
+  <text x="300" y="115" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="9">Compare versions</text>
+  <text x="300" y="130" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="9">Backup current</text>
+  <text x="300" y="145" text-anchor="middle" fill="#8b949e" font-family="system-ui" font-size="9">Preserve configs</text>
+  
+  <defs>
+    <marker id="arrowgray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#8b949e"/>
+    </marker>
+    <marker id="arrowred" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#f85149"/>
+    </marker>
+    <marker id="arrowgreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#238636"/>
+    </marker>
+  </defs>
+</svg>
