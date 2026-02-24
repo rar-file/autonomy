@@ -1,0 +1,50 @@
+{
+  "name": "github-self-improve",
+  "path": "/root/.openclaw/workspace/skills/autonomy",
+  "description": "Self-improving autonomy - generates ideas, reasons, implements, repeats",
+  "created": "2026-02-24T00:45:00Z",
+  "type": "smart",
+  "mode": "iterative",
+  "cycle": {
+    "duration_minutes": 20,
+    "phases": [
+      "generate",
+      "reason",
+      "implement",
+      "cycle"
+    ]
+  },
+  "triggers": {
+    "scheduled": true,
+    "on_heartbeat": true
+  },
+  "checks": [
+    "self_improvement_cycle"
+  ],
+  "config": {
+    "ideas_per_cycle": 5,
+    "implementation_branch": "auto-improvements",
+    "commit_prefix": "[AUTO]",
+    "max_cycles_before_review": 10
+  },
+  "goals": [
+    {
+      "description": "Continuously improve the autonomy skill",
+      "priority": "high"
+    },
+    {
+      "description": "Generate and implement 1 improvement per cycle",
+      "priority": "high"
+    },
+    {
+      "description": "Maintain test pass rate >95%",
+      "priority": "critical"
+    }
+  ],
+  "alerts": {
+    "on_error": true,
+    "on_implementation": true,
+    "on_discord": true
+  },
+  "last_check": "2026-02-24T01:24:14+01:00"
+}

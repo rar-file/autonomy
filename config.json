@@ -4,9 +4,9 @@
   "status": "active",
   "mode": "contextual",
   "default_state": "off",
-  "active_context": "git-aware",
-  "last_activated": "2026-02-23T23:36:44+01:00",
-  "last_deactivated": null,
+  "active_context": "github-self-improve",
+  "last_activated": "2026-02-24T01:24:14+01:00",
+  "last_deactivated": "2026-02-24T01:24:08+01:00",
   "global_config": {
     "base_interval_minutes": 20,
     "max_interval_minutes": 240,
