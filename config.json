@@ -10,7 +10,7 @@
     "reasoning_model": "kimi-coding/k2p5",
     "thinking": "high",
     "hard_limits": {
-      "max_concurrent_tasks": 5,
+      "max_concurrent_tasks": 999,
       "max_sub_agents": 3,
       "max_schedules": 5,
       "daily_token_budget": 50000,
