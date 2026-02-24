@@ -66,6 +66,20 @@ autonomy work "Build a memory tracker for token usage"
 | `autonomy update check` | Check for updates |
 | `autonomy update apply` | Apply latest update |
 
+### Web UI
+
+| Command | Description |
+|---------|-------------|
+| `python3 web_ui.py` | Start web dashboard (default port 8765) |
+| `AUTONOMY_WEB_PORT=8080 python3 web_ui.py` | Start on custom port |
+
+The web UI provides a visual dashboard for:
+- Monitoring workstation status
+- Viewing active tasks
+- Creating new tasks
+- Viewing activity logs
+- Controlling workstation (activate/deactivate)
+
 ---
 
 ## Safety Guards
