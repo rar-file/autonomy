@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.0.0-blue.svg" alt="Version 2.0.0">
+  <img src="https://img.shields.io/badge/version-2.0.2-blue.svg" alt="Version 2.0.2">
   <img src="https://img.shields.io/badge/mode-agentic-green.svg" alt="Mode: Agentic">
   <img src="https://img.shields.io/badge/status-active-brightgreen.svg" alt="Status: Active">
 </p>
@@ -83,10 +83,6 @@ autonomy work "Build a memory tracker for token usage"
 
 ### Hard Limits
 
-<p align="center">
-  <img src="assets/diagram-limits.svg" alt="Safety Limits" width="600">
-</p>
-
 | Limit | Value | Purpose |
 |-------|-------|---------|
 | Max concurrent tasks | 5 | Prevent overload |
@@ -94,6 +90,10 @@ autonomy work "Build a memory tracker for token usage"
 | Max schedules | 5 | Control recurring work |
 | Daily token budget | 50,000 | Cost protection |
 | Max iterations per task | 5 | Stop endless building |
+
+<p align="center">
+  <img src="assets/diagram-limits.svg" alt="Safety Limits" width="600">
+</p>
 
 ### Anti-Hallucination
 
