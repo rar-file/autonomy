@@ -1,0 +1,25 @@
+{
+  "name": "auto-evolve",
+  "path": "/root/.openclaw/workspace/skills/autonomy",
+  "description": "Self-learning autonomous system - continuous multi-agent improvement",
+  "created": "2026-02-24T02:00:00Z",
+  "type": "autonomous",
+  "mode": "self_learning",
+  "learning": {
+    "enabled": true,
+    "agents": ["code_reviewer", "idea_generator", "security_auditor", "performance_analyzer", "doc_writer"],
+    "parallel": true,
+    "cycle_interval": "triggered",
+    "implementation": "automatic"
+  },
+  "checks": [
+    "evolution_cycle"
+  ],
+  "config": {
+    "min_improvement_score": 7,
+    "auto_implement": true,
+    "test_before_commit": true,
+    "learning_rate": "aggressive",
+    "max_parallel_agents": 5
+  }
+}
