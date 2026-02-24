@@ -1,0 +1,9 @@
+{
+  "skill": "autonomy",
+  "version": "1.0.0",
+  "active_context": "git-aware",
+  "global_config": {
+    "base_interval_minutes": 20,
+    "token_target": 1000
+  }
+}

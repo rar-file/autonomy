@@ -1,0 +1,4 @@
+{"timestamp":"2026-02-24T01:43:52+01:00","action":"test_action","target":"/path","message":"Processing with token_[MASKED]"}
+{"timestamp":"2026-02-24T01:43:52+01:00","action":"test_action","target":"/path","message":"API key: [MASKED]"}
+{"timestamp":"2026-02-24T01:43:52+01:00","action":"test_action","target":"/path","message":"Secret: super[MASKED]"}
+{"timestamp":"2026-02-24T01:43:52+01:00","action":"test_action","target":"/path","message":"Normal message without secrets"}

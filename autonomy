@@ -852,6 +852,10 @@ case "${1:-status}" in
     insights)
         cmd_insights
         ;;
+    activity)
+        shift
+        "$AUTONOMY_DIR/activity.sh" "$@"
+        ;;
     help|--help|-h)
         show_help
         ;;

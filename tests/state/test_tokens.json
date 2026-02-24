@@ -1,0 +1,6 @@
+{
+  "api_key": "sk-test-1234567890abcdef",
+  "token": "ghp_supersecrettoken123456",
+  "secret": "super-secret-value-12345",
+  "public_setting": "visible-value"
+}

@@ -1,0 +1,27 @@
+{
+  "name": "janus-improve",
+  "path": "/root/.openclaw/workspace/skills/autonomy",
+  "description": "Janus continuous improvement - organic enhancement of autonomy",
+  "created": "2026-02-24T02:00:00Z",
+  "type": "organic",
+  "mode": "continuous",
+  "philosophy": "Think, implement, test, reflect. No rigid schedule.",
+  "focus_areas": [
+    "code_quality",
+    "bug_fixes", 
+    "features_that_matter",
+    "documentation",
+    "testing",
+    "refactoring"
+  ],
+  "principles": [
+    "Fix before feature",
+    "Test everything",
+    "Clean as you go",
+    "Document what you change",
+    "Reflect on what works"
+  ],
+  "next_check": null,
+  "work_log": [],
+  "backlog": []
+}
