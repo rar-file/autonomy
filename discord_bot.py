@@ -134,8 +134,13 @@ class AutonomyBot(commands.Bot):
     
     @tasks.loop(seconds=30)
     async def update_presence_loop(self):
-        """Update bot presence every 30 seconds"""
+        """Update bot presence every 30 seconds with error recovery"""
         try:
+            # Check if bot is still connected
+            if not self.is_ready():
+                print("[Autonomy] Bot not ready, skipping presence update")
+                return
+            
             state = self.read_autonomy_state()
             status_key, status_text = self.calculate_autonomy_status(state)
             
@@ -143,9 +148,20 @@ class AutonomyBot(commands.Bot):
             activity = discord.CustomActivity(name=status_text)
             discord_status = self.status_config["discord_status"].get(status_key, discord.Status.online)
             
-            # Update presence
-            await self.change_presence(activity=activity, status=discord_status)
+            # Update presence with timeout protection
+            try:
+                await asyncio.wait_for(
+                    self.change_presence(activity=activity, status=discord_status),
+                    timeout=10.0
+                )
+            except asyncio.TimeoutError:
+                print("[Autonomy] Presence update timed out, will retry next cycle")
             
+        except discord.HTTPException as e:
+            print(f"[Autonomy] Discord API error: {e}")
+            if e.status == 429:  # Rate limited
+                print("[Autonomy] Rate limited, backing off...")
+                await asyncio.sleep(60)
         except Exception as e:
             print(f"[Autonomy] Presence update error: {e}")
     
@@ -153,12 +169,18 @@ class AutonomyBot(commands.Bot):
     async def before_presence_loop(self):
         """Wait for bot to be ready"""
         await self.wait_until_ready()
+        print("[Autonomy] Presence loop started")
     
     async def on_ready(self):
         """Called when bot connects"""
         print(f"[Autonomy] Bot logged in as {self.user}")
         print(f"[Autonomy] Monitoring workspace: {self.workspace}")
         print(f"[Autonomy] Invite URL: https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=2048&scope=bot%20applications.commands")
+        
+        # Ensure presence loop is running
+        if not self.update_presence_loop.is_running():
+            print("[Autonomy] Restarting presence loop...")
+            self.update_presence_loop.start()
     
     def validate_context_name(self, name: str) -> bool:
         """Validate context name - prevent path traversal and injection"""
