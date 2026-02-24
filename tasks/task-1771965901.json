@@ -1,0 +1,15 @@
+{
+  "name": "task-1771965901",
+  "description": "Build real-time charts for token usage and task completion in web UI dashboard. Add dark/light mode toggle, task search/filter, and export to CSV/JSON functionality. Make it production-ready with responsive design.",
+  "status": "completed",
+  "priority": "normal",
+  "created": "2026-02-24T21:45:01+01:00",
+  "assignee": "self",
+  "subtasks": [],
+  "completed": true,
+  "attempts": 1,
+  "max_attempts": 3,
+  "verification": "Enhanced web UI with Chart.js real-time charts showing task status, dark/light mode toggle with localStorage persistence, task search and filter functionality, export to JSON/CSV buttons, and fully responsive design. All features tested and working at http://localhost:8767",
+  "evidence": [],
+  "completed_at": "2026-02-24T21:48:59+01:00"
+}
