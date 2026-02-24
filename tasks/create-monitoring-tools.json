@@ -1,0 +1,14 @@
+{
+  "name": "create-monitoring-tools",
+  "description": "Create monitoring tools: token usage tracker, performance metrics, error logging, health checks",
+  "status": "pending",
+  "priority": "normal",
+  "created": "2026-02-24T21:18:40+01:00",
+  "assignee": "self",
+  "subtasks": [],
+  "completed": false,
+  "attempts": 0,
+  "max_attempts": 3,
+  "verification": null,
+  "evidence": []
+}

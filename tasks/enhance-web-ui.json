@@ -1,0 +1,14 @@
+{
+  "name": "enhance-web-ui",
+  "description": "Enhance web UI dashboard: Add real-time charts, dark mode toggle, task filtering, search functionality, export capabilities",
+  "status": "pending",
+  "priority": "normal",
+  "created": "2026-02-24T21:18:39+01:00",
+  "assignee": "self",
+  "subtasks": [],
+  "completed": false,
+  "attempts": 0,
+  "max_attempts": 3,
+  "verification": null,
+  "evidence": []
+}

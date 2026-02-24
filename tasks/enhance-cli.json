@@ -1,0 +1,14 @@
+{
+  "name": "enhance-cli",
+  "description": "Enhance CLI with: command completion, better help text, aliases, configuration wizard, update notifications",
+  "status": "pending",
+  "priority": "normal",
+  "created": "2026-02-24T21:18:40+01:00",
+  "assignee": "self",
+  "subtasks": [],
+  "completed": false,
+  "attempts": 0,
+  "max_attempts": 3,
+  "verification": null,
+  "evidence": []
+}

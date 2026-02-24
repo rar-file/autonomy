@@ -1,0 +1,14 @@
+{
+  "name": "add-api-endpoints",
+  "description": "Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing",
+  "status": "pending",
+  "priority": "normal",
+  "created": "2026-02-24T21:18:39+01:00",
+  "assignee": "self",
+  "subtasks": [],
+  "completed": false,
+  "attempts": 0,
+  "max_attempts": 3,
+  "verification": null,
+  "evidence": []
+}
