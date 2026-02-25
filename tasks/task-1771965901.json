@@ -1,7 +1,7 @@
 {
   "name": "task-1771965901",
   "description": "Build real-time charts for token usage and task completion in web UI dashboard. Add dark/light mode toggle, task search/filter, and export to CSV/JSON functionality. Make it production-ready with responsive design.",
-  "status": "completed",
+  "status": "pending",
   "priority": "normal",
   "created": "2026-02-24T21:45:01+01:00",
   "assignee": "self",

@@ -6,9 +6,17 @@
   "created": "2026-02-24T21:18:40+01:00",
   "assignee": "self",
   "subtasks": [],
-  "completed": false,
-  "attempts": 0,
+  "completed": true,
+  "attempts": 1,
   "max_attempts": 3,
-  "verification": null,
-  "evidence": []
+  "verification": "Added CLI enhancements: 1) Tab completion script (completion.sh) with autocomplete for all commands, 2) Configuration wizard (autonomy wizard) - interactive setup for workstation, scheduler, web UI, 3) Command aliases (autonomy alias add/remove/list) - create shortcuts like 'autonomy alias add st status', 4) Update notifications (autonomy check-updates) - checks git for updates, 5) Version command (autonomy version) - shows current version. All features tested and working.",
+  "evidence": [
+    "completion.sh - Tab completion script",
+    "autonomy wizard - Interactive configuration",
+    "autonomy alias - Command aliasing system",
+    "autonomy check-updates - Update checking",
+    "autonomy version - Version display",
+    "Enhanced help text with new commands"
+  ],
+  "completed_at": "2026-02-25T00:35:00+01:00"
 }

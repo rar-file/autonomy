@@ -31,7 +31,8 @@
       "writing_workspace_files",
       "local_commands",
       "web_search",
-      "memory_search"
+      "memory_search",
+      "creating_tasks"
     ],
     "completion_criteria": {
       "require_verification": true,
@@ -50,7 +51,37 @@
       "require_impact_assessment": true,
       "max_iterations_per_task": 5,
       "completion_threshold": "good_enough_not_perfect"
+    },
+    "autonomy_level": "semi-autonomous"
+  },
+  "integrations": {
+    "discord": {
+      "enabled": false,
+      "webhook_url": ""
+    },
+    "telegram": {
+      "enabled": false,
+      "bot_token": "",
+      "chat_id": ""
+    },
+    "slack": {
+      "enabled": false,
+      "webhook_url": ""
+    },
+    "email": {
+      "enabled": false,
+      "smtp_host": "",
+      "smtp_port": 587,
+      "username": "",
+      "password": "",
+      "from": "",
+      "to": ""
     }
+  },
+  "scheduler": {
+    "type": "daemon",
+    "auto_start": true,
+    "interval_minutes": 10
   },
   "workstation": {
     "active": true,
@@ -83,17 +114,20 @@
       }
     ],
     "created_tools": [],
-    "token_usage_today": 0
+    "token_usage_today": 0,
+    "daemon_running": true,
+    "daemon_started": "2026-02-25T08:15:11+01:00",
+    "daemon_stopped": "2026-02-25T00:00:35+01:00"
   },
   "default_state": "off",
   "active_context": null,
-  "last_activated": "2026-02-24T21:18:39+01:00",
-  "last_deactivated": "2026-02-24T20:23:47+01:00",
+  "last_activated": "2026-02-24T22:45:11+01:00",
+  "last_deactivated": "2026-02-24T22:45:10+01:00",
   "global_config": {
     "heartbeat_prompt": "You are in AGENTIC mode. Reason about what needs attention. Check your schedules, running tasks, and pending work. Decide what to do next based on priority and impact. Create tasks if needed. You have hard limits - respect them.",
     "base_interval_minutes": 10,
     "max_interval_minutes": 120,
-    "work_hours": "09:00-18:00",
+    "work_hours": "00:00-23:59",
     "quiet_mode_enabled": true
   },
   "contexts_dir": "contexts",

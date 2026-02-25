@@ -6,9 +6,10 @@
   "created": "2026-02-24T21:18:39+01:00",
   "assignee": "self",
   "subtasks": [],
-  "completed": false,
-  "attempts": 0,
+  "completed": true,
+  "attempts": 1,
   "max_attempts": 3,
-  "verification": null,
-  "evidence": []
+  "verification": "Web UI enhanced with proper navigation, bright colors, and working sidebar. All pages accessible: Dashboard, Tasks, Agents, Schedules, Settings. rar-file/autonomy branding visible.",
+  "evidence": [],
+  "completed_at": "2026-02-24T22:30:22+01:00"
 }
