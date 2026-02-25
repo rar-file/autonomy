@@ -1,0 +1,14 @@
+{
+  "name": "research",
+  "description": "Research topic: search, summarize, document findings",
+  "status": "pending",
+  "priority": "normal",
+  "subtasks": [
+    "Search for relevant information",
+    "Read and analyze sources",
+    "Summarize findings",
+    "Document conclusions",
+    "Create actionable recommendations"
+  ],
+  "max_attempts": 3
+}

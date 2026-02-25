@@ -1,0 +1,14 @@
+{
+  "name": "refactor",
+  "description": "Refactor code: analyze, improve, test, verify",
+  "status": "pending",
+  "priority": "low",
+  "subtasks": [
+    "Analyze current code",
+    "Identify improvement areas",
+    "Refactor with tests passing",
+    "Verify no regressions",
+    "Update documentation"
+  ],
+  "max_attempts": 3
+}

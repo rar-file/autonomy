@@ -1,0 +1,14 @@
+{
+  "name": "feature",
+  "description": "Implement new feature: design, code, test, document",
+  "status": "pending",
+  "priority": "normal",
+  "subtasks": [
+    "Design the feature",
+    "Implement core functionality",
+    "Add tests",
+    "Update documentation",
+    "Deploy and verify"
+  ],
+  "max_attempts": 3
+}

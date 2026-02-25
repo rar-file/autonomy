@@ -1,0 +1,14 @@
+{
+  "name": "bug-fix",
+  "description": "Fix a bug: investigate, reproduce, fix, test",
+  "status": "pending",
+  "priority": "high",
+  "subtasks": [
+    "Investigate the bug and understand root cause",
+    "Reproduce the bug locally",
+    "Implement the fix",
+    "Write/update tests",
+    "Verify fix works"
+  ],
+  "max_attempts": 3
+}

@@ -1,0 +1,14 @@
+{
+  "name": "documentation",
+  "description": "Write documentation: outline, draft, review, publish",
+  "status": "pending",
+  "priority": "normal",
+  "subtasks": [
+    "Create outline",
+    "Write first draft",
+    "Review and edit",
+    "Add examples",
+    "Publish/update"
+  ],
+  "max_attempts": 3
+}
