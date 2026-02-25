@@ -1,0 +1,21 @@
+{
+  "name": "security-fix-lock-race-condition",
+  "description": "CRITICAL: Fix race condition in heartbeat-lock.sh - TOCTOU vulnerability allows two processes to acquire lock simultaneously",
+  "status": "needs_ai_attention",
+  "priority": "critical",
+  "created": "2026-02-26T00:00:00+01:00",
+  "assignee": "self",
+  "subtasks": [
+    "Replace non-atomic lock check with flock",
+    "Test concurrent lock acquisition",
+    "Verify lock cleanup on all exit paths"
+  ],
+  "completed": false,
+  "attempts": 0,
+  "max_attempts": 3,
+  "verification": null,
+  "evidence": [],
+  "source": "security_audit",
+  "flagged_at": "2026-02-26T00:56:45+01:00",
+  "flagged_by": "daemon"
+}

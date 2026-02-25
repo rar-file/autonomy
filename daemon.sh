@@ -199,9 +199,9 @@ start_daemon() {
                 process_cycle
             fi
             
-            # Sleep 10 minutes (check stop signal every 10 seconds)
+            # Sleep 5 minutes (check stop signal every 10 seconds)
             local sleep_count=0
-            while [[ $sleep_count -lt 60 ]]; do
+            while [[ $sleep_count -lt 30 ]]; do
                 if [[ -f "$AUTONOMY_DIR/state/daemon.stop" ]]; then
                     break
                 fi

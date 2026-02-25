@@ -1,0 +1,22 @@
+{
+  "name": "security-fix-auth-web-ui",
+  "description": "CRITICAL: Add authentication to Web UI - currently no auth mechanism, anyone with network access can control the agent",
+  "status": "needs_ai_attention",
+  "priority": "critical",
+  "created": "2026-02-26T00:00:00+01:00",
+  "assignee": "self",
+  "subtasks": [
+    "Add API key/bearer token authentication to web_ui.py",
+    "Add login page/modal",
+    "Store auth token securely",
+    "Add session management"
+  ],
+  "completed": false,
+  "attempts": 0,
+  "max_attempts": 3,
+  "verification": null,
+  "evidence": [],
+  "source": "security_audit",
+  "flagged_at": "2026-02-26T00:56:45+01:00",
+  "flagged_by": "daemon"
+}

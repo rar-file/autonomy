@@ -1,0 +1,22 @@
+{
+  "name": "security-input-validation",
+  "description": "HIGH: Add input validation to Web UI endpoints - no validation on POST data, potential JSON injection",
+  "status": "needs_ai_attention",
+  "priority": "high",
+  "created": "2026-02-26T00:00:00+01:00",
+  "assignee": "self",
+  "subtasks": [
+    "Add JSON schema validation for task creation",
+    "Validate content-type headers",
+    "Sanitize task names (whitelist characters)",
+    "Add max length validation"
+  ],
+  "completed": false,
+  "attempts": 0,
+  "max_attempts": 3,
+  "verification": null,
+  "evidence": [],
+  "source": "security_audit",
+  "flagged_at": "2026-02-26T00:56:45+01:00",
+  "flagged_by": "daemon"
+}
