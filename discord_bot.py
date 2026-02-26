@@ -14,7 +14,7 @@ class AutonomyBot(commands.Bot):
         super().__init__(
             command_prefix="!",  # Keep prefix as fallback
             intents=intents,
-            activity=discord.CustomActivity(name="⚫ | Autonomy OFF")
+            activity=discord.Game(name="⚫ | Autonomy OFF")
         )
         
         self.workspace = Path("/root/.openclaw/workspace")
@@ -144,8 +144,8 @@ class AutonomyBot(commands.Bot):
             state = self.read_autonomy_state()
             status_key, status_text = self.calculate_autonomy_status(state)
             
-            # Use the status_text directly which includes emoji
-            activity = discord.CustomActivity(name=status_text)
+            # Use Game activity instead of CustomActivity to avoid "typing" bug
+            activity = discord.Game(name=status_text)
             discord_status = self.status_config["discord_status"].get(status_key, discord.Status.online)
             
             # Update presence with timeout protection
