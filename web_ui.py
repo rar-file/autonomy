@@ -1182,28 +1182,29 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             }
         }
         
-        // Heartbeat Timer - Shows real daemon activity
+        // Heartbeat Timer - SIMPLE and RELIABLE
+        // Shows actual last check time from daemon, always 5 min interval
         async function updateHeartbeatTimer() {
             try {
                 const res = await fetch('/api/heartbeat');
                 const data = await res.json();
                 
-                // Update interval from server
-                heartbeatInterval = (data.interval_minutes || 5) * 60 * 1000;
-                
-                if (data.last_activity) {
-                    // Use actual last daemon activity time
-                    lastHeartbeat = new Date(data.last_activity).getTime();
-                } else {
-                    // No activity recorded yet
-                    lastHeartbeat = Date.now();
+                // Use actual last check time from daemon
+                if (data.last_check) {
+                    lastHeartbeat = new Date(data.last_check).getTime();
                 }
+                
+                // Fixed 5 minute interval
+                heartbeatInterval = 5 * 60 * 1000;
                 
                 // Update daemon status display
                 const statusEl = document.getElementById('system-status');
                 if (statusEl) {
                     if (data.daemon_running) {
-                        statusEl.innerHTML = '<i class="fas fa-circle" style="color: #22c55e;"></i> <span>System Healthy</span>';
+                        const lastCheckStr = data.last_check ? 
+                            new Date(data.last_check).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) :
+                            'Unknown';
+                        statusEl.innerHTML = '<i class="fas fa-circle" style="color: #22c55e;"></i> <span>Daemon Running - Last check: ' + lastCheckStr + '</span>';
                     } else {
                         statusEl.innerHTML = '<i class="fas fa-circle" style="color: #ef4444;"></i> <span>Daemon Stopped</span>';
                     }
@@ -1215,21 +1216,20 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         
         function updateTimerDisplay() {
             const now = Date.now();
-            const nextHeartbeat = lastHeartbeat + heartbeatInterval;
-            const timeLeft = Math.max(0, nextHeartbeat - now);
+            const nextCheck = lastHeartbeat + heartbeatInterval;
+            const timeLeft = Math.max(0, nextCheck - now);
             
             const minutes = Math.floor(timeLeft / 60000);
             const seconds = Math.floor((timeLeft % 60000) / 1000);
             
             const timerEl = document.getElementById('heartbeat-timer');
             if (timerEl) {
-                timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                // Show time remaining until next check
                 if (timeLeft === 0) {
-                    timerEl.textContent = 'DUE';
+                    timerEl.textContent = 'CHECKING...';
                     timerEl.style.color = '#e94560';
-                } else if (minutes === 0 && seconds < 30) {
-                    timerEl.style.color = '#ffc107';  // Yellow warning
                 } else {
+                    timerEl.textContent = minutes + ':' + seconds.toString().padStart(2, '0');
                     timerEl.style.color = '#ffffff';
                 }
             }
@@ -1770,64 +1770,46 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"active": False})
     
     def serve_heartbeat(self):
+        """Serve heartbeat info - simple fixed interval, always reliable"""
         try:
-            last_activity = None
+            # Read from the simple check file
+            check_file = f"{AUTONOMY_DIR}/state/last-check.json"
+            last_check = None
+            interval_seconds = 300  # 5 minutes default
             
-            # First check the heartbeat activity log (most accurate for daemon)
-            heartbeat_log = f"{LOGS_DIR}/heartbeat-activity.jsonl"
-            if os.path.exists(heartbeat_log):
+            if os.path.exists(check_file):
                 try:
-                    with open(heartbeat_log, 'r') as f:
-                        lines = f.readlines()
-                        # Find last daemon entry
-                        for line in reversed(lines):
-                            try:
-                                data = json.loads(line.strip())
-                                if data.get('status') == 'daemon':
-                                    last_activity = data.get("timestamp")
-                                    break
-                            except:
-                                continue
+                    with open(check_file, 'r') as f:
+                        data = json.load(f)
+                        last_check = data.get("last_check")
+                        interval_seconds = data.get("interval_seconds", 300)
                 except:
                     pass
             
-            # Fall back to state file
-            if not last_activity:
-                state_file = f"{AUTONOMY_DIR}/state/last-heartbeat.json"
-                if os.path.exists(state_file):
+            # Fallback to log file if no check file
+            if not last_check:
+                log_file = f"{AUTONOMY_DIR}/logs/heartbeat.log"
+                if os.path.exists(log_file):
                     try:
-                        with open(state_file, 'r') as f:
-                            state_data = json.load(f)
-                            last_activity = state_data.get("timestamp")
+                        with open(log_file, 'r') as f:
+                            lines = f.readlines()
+                            for line in reversed(lines):
+                                if "HEARTBEAT CHECK:" in line:
+                                    # Parse timestamp from log line
+                                    last_check = line.split("HEARTBEAT CHECK:")[1].strip()
+                                    break
                     except:
                         pass
             
-            # Fall back to agentic log
-            if not last_activity:
-                log_file = f"{LOGS_DIR}/agentic.jsonl"
-                if os.path.exists(log_file):
-                    with open(log_file, 'r') as f:
-                        lines = f.readlines()
-                        if lines:
-                            try:
-                                data = json.loads(lines[-1].strip())
-                                last_activity = data.get("timestamp")
-                            except: pass
-            
-            # Get interval from config
-            interval_minutes = 5
-            if os.path.exists(CONFIG_FILE):
-                with open(CONFIG_FILE) as f:
-                    config = json.load(f)
-                    interval_minutes = config.get("global_config", {}).get("base_interval_minutes", 5)
-            
             # Check if daemon is running
-            daemon_running = os.path.exists(f"{AUTONOMY_DIR}/state/heartbeat-daemon.pid")
+            pid_file = f"{AUTONOMY_DIR}/state/daemon.pid"
+            daemon_running = os.path.exists(pid_file) and os.path.getsize(pid_file) > 0
             
             self.send_json({
-                "last_activity": last_activity,
-                "interval_minutes": interval_minutes,
-                "daemon_running": daemon_running
+                "last_check": last_check,
+                "interval_seconds": interval_seconds,
+                "daemon_running": daemon_running,
+                "next_check": "in 5 minutes"
             })
         except Exception as e:
             self.send_json({"error": str(e)}, 500)
