@@ -16,7 +16,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <meta name="theme-color" content="#e94560">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -526,44 +526,452 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             margin: 0 auto 20px;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        /* ============================================
+           MOBILE RESPONSIVE STYLES
+           ============================================ */
+        
+        /* Tablet breakpoint */
         @media (max-width: 1024px) {
             .app { grid-template-columns: 1fr; }
             .sidebar { display: none; }
         }
         
-        /* Onboarding Modal */
+        /* Phone breakpoint - comprehensive mobile optimization */
+        @media (max-width: 768px) {
+            /* Layout adjustments */
+            body {
+                font-size: 16px; /* Prevent iOS zoom on input focus */
+            }
+            
+            .app {
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+                padding-bottom: 80px; /* Space for bottom nav */
+            }
+            
+            .main {
+                padding: 16px;
+                max-height: none;
+                overflow-y: visible;
+            }
+            
+            /* Header mobile optimization */
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                margin-bottom: 24px;
+                padding-bottom: 16px;
+            }
+            
+            .header-title h2 {
+                font-size: 24px;
+            }
+            
+            .header-title p {
+                font-size: 13px;
+            }
+            
+            /* Stats grid - single column on phone */
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin-bottom: 24px;
+            }
+            
+            .stat-card {
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            
+            .stat-card::before {
+                left: 0;
+                width: 4px;
+                height: 100%;
+            }
+            
+            .stat-value {
+                font-size: 32px;
+                margin-bottom: 0;
+                order: 2;
+            }
+            
+            .stat-label {
+                font-size: 12px;
+                order: 1;
+            }
+            
+            /* Cards mobile optimization */
+            .card {
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+            
+            .card h3 {
+                font-size: 16px;
+                margin-bottom: 16px;
+            }
+            
+            /* Task items mobile */
+            .task-item {
+                padding: 16px;
+            }
+            
+            .task-header {
+                flex-direction: column;
+                gap: 8px;
+                margin-bottom: 8px;
+            }
+            
+            .task-name {
+                font-size: 15px;
+                word-break: break-word;
+            }
+            
+            .task-status {
+                align-self: flex-start;
+                font-size: 10px;
+                padding: 4px 10px;
+            }
+            
+            .task-desc {
+                font-size: 13px;
+                line-height: 1.5;
+            }
+            
+            .task-meta {
+                flex-wrap: wrap;
+                gap: 12px;
+                font-size: 11px;
+            }
+            
+            /* Button mobile sizing */
+            .btn {
+                padding: 14px 20px;
+                font-size: 15px;
+                min-height: 48px; /* Touch-friendly */
+                justify-content: center;
+            }
+            
+            /* Header action buttons - wrap nicely */
+            .header > div[style*="flex-direction: column"] {
+                width: 100%;
+            }
+            
+            .header > div[style*="gap: 12px"] {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                width: 100%;
+            }
+            
+            .header > div[style*="gap: 12px"] .btn {
+                flex: 1;
+                min-width: 120px;
+            }
+            
+            /* Heartbeat box mobile */
+            .heartbeat-box {
+                padding: 10px 16px;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .heartbeat-timer {
+                font-size: 20px;
+            }
+            
+            .system-status-box {
+                width: 100%;
+                justify-content: center;
+                padding: 8px 12px;
+            }
+            
+            /* Modal mobile optimization */
+            .modal {
+                width: 100%;
+                max-width: 100%;
+                height: 100vh;
+                max-height: 100vh;
+                border-radius: 0;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .modal-header {
+                padding: 16px 20px;
+                flex-shrink: 0;
+            }
+            
+            .modal-title {
+                font-size: 18px;
+                word-break: break-word;
+                padding-right: 40px;
+            }
+            
+            .modal-close {
+                position: absolute;
+                top: 16px;
+                right: 16px;
+            }
+            
+            .modal-body {
+                padding: 20px;
+                flex: 1;
+                overflow-y: auto;
+                max-height: none;
+            }
+            
+            .modal-section {
+                margin-bottom: 20px;
+            }
+            
+            .modal-meta-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .modal-meta-item {
+                padding: 12px;
+            }
+            
+            .modal-verification {
+                padding: 16px;
+                font-size: 13px;
+            }
+            
+            /* Bottom navigation bar */
+            .mobile-nav {
+                display: flex;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+                border-top: 1px solid rgba(233,69,96,0.2);
+                padding: 8px 4px 12px;
+                z-index: 100;
+                justify-content: space-around;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+            }
+            
+            .mobile-nav-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                padding: 8px 12px;
+                border-radius: 12px;
+                cursor: pointer;
+                color: #8080a0;
+                font-size: 11px;
+                font-weight: 500;
+                transition: all 0.2s;
+                flex: 1;
+                max-width: 80px;
+            }
+            
+            .mobile-nav-item i {
+                font-size: 20px;
+                color: #ff6b8a;
+                transition: all 0.2s;
+            }
+            
+            .mobile-nav-item.active {
+                color: #ffffff;
+                background: linear-gradient(135deg, rgba(233, 69, 96, 0.25), rgba(233, 69, 96, 0.1));
+            }
+            
+            .mobile-nav-item.active i {
+                color: #ffffff;
+                transform: scale(1.1);
+            }
+            
+            /* Hide desktop sidebar */
+            .sidebar {
+                display: none;
+            }
+            
+            /* Onboarding modal mobile */
+            .onboarding-modal-content {
+                padding: 24px;
+                margin: 16px;
+                max-height: 85vh;
+                width: calc(100% - 32px);
+            }
+            
+            .onboarding-modal-content h2 {
+                font-size: 22px;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .feature-item {
+                padding: 12px;
+            }
+            
+            .onboarding-step {
+                padding: 16px;
+            }
+            
+            .onboarding-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .onboarding-actions .btn {
+                width: 100%;
+            }
+            
+            /* Loading spinner mobile */
+            .loading {
+                padding: 40px;
+            }
+            
+            /* Pulse animation for mobile */
+            @keyframes pulse-mobile {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.7; }
+            }
+            
+            /* Touch feedback */
+            .task-item:active,
+            .mobile-nav-item:active,
+            .btn:active {
+                transform: scale(0.98);
+                opacity: 0.9;
+            }
+        }
+        
+        /* Extra small phones */
+        @media (max-width: 380px) {
+            .main {
+                padding: 12px;
+            }
+            
+            .header-title h2 {
+                font-size: 20px;
+            }
+            
+            .stat-value {
+                font-size: 28px;
+            }
+            
+            .mobile-nav-item {
+                padding: 6px 8px;
+                font-size: 10px;
+            }
+            
+            .mobile-nav-item i {
+                font-size: 18px;
+            }
+            
+            .btn {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+        }
+        
+        /* Hide mobile nav on desktop */
+        .mobile-nav {
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-nav {
+                display: flex;
+            }
+        }
+        
+        /* Safe area support for notched phones */
+        @supports (padding: max(0px)) {
+            @media (max-width: 768px) {
+                .mobile-nav {
+                    padding-bottom: max(12px, env(safe-area-inset-bottom));
+                }
+                
+                .main {
+                    padding-left: max(16px, env(safe-area-inset-left));
+                    padding-right: max(16px, env(safe-area-inset-right));
+                }
+                
+                .modal {
+                    padding-top: env(safe-area-inset-top);
+                    padding-bottom: env(safe-area-inset-bottom);
+                }
+            }
+        }
+        @media (max-width: 768px) and (orientation: landscape) {
+            .mobile-nav {
+                position: relative;
+                bottom: auto;
+                left: auto;
+                right: auto;
+                border-top: none;
+                border-bottom: 1px solid rgba(233,69,96,0.2);
+                padding: 4px;
+            }
+            
+            .app {
+                padding-bottom: 0;
+            }
+            
+            .modal {
+                height: 100vh;
+            }
+        }
+        
+        /* Onboarding Modal - Fixed */
         .onboarding-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            display: flex;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            display: none;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
+            pointer-events: none;
         }
-        .onboarding-modal {
+        
+        .onboarding-overlay.active {
+            display: flex;
+            pointer-events: auto;
+        }
+        
+        .onboarding-modal-content {
             background: var(--bg-2);
             border-radius: 20px;
             padding: 40px;
             max-width: 600px;
             width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
             border: 1px solid var(--bg-3);
             box-shadow: 0 25px 50px rgba(0,0,0,0.5);
             animation: slideIn 0.3s ease;
         }
+        
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .onboarding-modal h2 {
+        
+        .onboarding-modal-content h2 {
             font-size: 28px;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 12px;
         }
-        .onboarding-modal h2 i {
+        
+        .onboarding-modal-content h2 i {
             color: var(--accent);
         }
         .onboarding-step {
@@ -617,8 +1025,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
     <div class="bg-animation"></div>
     
     <!-- Onboarding Modal -->
-    <div id="onboarding-modal" class="onboarding-overlay" style="display: none;">
-        <div class="onboarding-modal">
+    <div id="onboarding-modal" class="onboarding-overlay">
+        <div class="onboarding-modal-content">
             <h2><i class="fas fa-robot"></i> Welcome to Autonomy</h2>
             <p style="color: var(--text-muted); margin-bottom: 20px;">
                 Your AI-powered self-improvement system. Let's get you set up in 2 minutes.
@@ -707,9 +1115,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 <div class="nav-item" onclick="window.open('/metrics', '_blank')"><i class="fas fa-chart-line"></i> Metrics</div>
                 <div class="nav-item" onclick="showPage('settings', this)"><i class="fas fa-cog"></i> Settings</div>
             </div>
-        </aside>
-        
         <main class="main">
+            <!-- Dashboard Page -->
             <!-- Dashboard Page -->
             <div id="page-dashboard" class="page active">
                 <header class="header">
@@ -819,6 +1226,34 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             <div id="page-schedules" class="page"><header class="header"><div class="header-title"><h2>Schedules</h2></div></header><div class="card"><p style="text-align:center;padding:40px;">Every 10 Minutes - Check for improvements</p></div></div>
             <div id="page-settings" class="page"><header class="header"><div class="header-title"><h2>Settings</h2></div></header><div class="card"><button class="btn btn-primary" onclick="workstationOn()" style="margin-right:10px;">Activate</button><button class="btn btn-secondary" onclick="workstationOff()">Deactivate</button></div></div>
         </main>
+        
+        <!-- Mobile Bottom Navigation -->
+        <nav class="mobile-nav">
+            <div class="mobile-nav-item active" onclick="showPage('dashboard', this); window.scrollTo({top: 0, behavior: 'smooth'});">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </div>
+            <div class="mobile-nav-item" onclick="showPage('tasks', this); window.scrollTo({top: 0, behavior: 'smooth'});">
+                <i class="fas fa-tasks"></i>
+                <span>Tasks</span>
+            </div>
+            <div class="mobile-nav-item" onclick="showPage('agents', this); window.scrollTo({top: 0, behavior: 'smooth'});">
+                <i class="fas fa-microchip"></i>
+                <span>Agents</span>
+            </div>
+            <div class="mobile-nav-item" onclick="showPage('schedules', this); window.scrollTo({top: 0, behavior: 'smooth'});">
+                <i class="fas fa-clock"></i>
+                <span>Schedules</span>
+            </div>
+            <div class="mobile-nav-item" onclick="window.location.href='/metrics'">
+                <i class="fas fa-chart-line"></i>
+                <span>Metrics</span>
+            </div>
+            <div class="mobile-nav-item" onclick="showPage('settings', this); window.scrollTo({top: 0, behavior: 'smooth'});">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </div>
+        </nav>
     </div>
     
     <!-- Task Detail Modal -->
@@ -956,8 +1391,31 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         function showPage(pageId, navItem) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById('page-' + pageId).classList.add('active');
+            
+            // Update desktop nav
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            if (navItem) navItem.classList.add('active');
+            if (navItem && navItem.classList.contains('nav-item')) {
+                navItem.classList.add('active');
+            }
+            
+            // Update mobile nav
+            document.querySelectorAll('.mobile-nav-item').forEach(n => n.classList.remove('active'));
+            if (navItem && navItem.classList.contains('mobile-nav-item')) {
+                navItem.classList.add('active');
+            } else {
+                // Find the mobile nav item for this page
+                const mobileNavItems = document.querySelectorAll('.mobile-nav-item');
+                mobileNavItems.forEach(item => {
+                    if (item.getAttribute('onclick').includes(`'${pageId}'`)) {
+                        item.classList.add('active');
+                    }
+                });
+            }
+            
+            // Load data if going to tasks page
+            if (pageId === 'tasks') {
+                loadData();
+            }
         }
         
         async function loadData() {
@@ -1296,11 +1754,19 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         }
         
         function showOnboarding() {
-            document.getElementById('onboarding-modal').style.display = 'flex';
+            const modal = document.getElementById('onboarding-modal');
+            if (modal) {
+                modal.classList.add('active');
+                modal.style.display = 'flex';
+            }
         }
         
         function hideOnboarding() {
-            document.getElementById('onboarding-modal').style.display = 'none';
+            const modal = document.getElementById('onboarding-modal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
         }
         
         function activateWorkstation() {
@@ -1345,11 +1811,74 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         // Initialize
         initTheme();
         checkOnboarding();
+        
+        // Ensure dashboard is visible on load
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById('page-dashboard').classList.add('active');
+        document.querySelectorAll('.mobile-nav-item').forEach(n => n.classList.remove('active'));
+        document.querySelector('.mobile-nav-item')?.classList.add('active');
+        
         loadData();
         updateHeartbeatTimer();
         setInterval(loadData, 5000);
         setInterval(updateTimerDisplay, 1000);
         setInterval(updateHeartbeatTimer, 30000);
+        
+        // Swipe gesture support for mobile page navigation
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+        
+        const pages = ['dashboard', 'tasks', 'agents', 'schedules', 'settings'];
+        
+        function handleTouchStart(e) {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }
+        
+        function handleTouchEnd(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleSwipe();
+        }
+        
+        function handleSwipe() {
+            // Only on mobile
+            if (window.innerWidth > 768) return;
+            
+            const swipeThreshold = 80;
+            const verticalThreshold = 100; // Prevent swipe if scrolling vertically
+            
+            const horizontalDiff = touchEndX - touchStartX;
+            const verticalDiff = Math.abs(touchEndY - touchStartY);
+            
+            // Ignore if vertical scroll is dominant
+            if (verticalDiff > verticalThreshold) return;
+            
+            // Find current page
+            let currentPageIndex = 0;
+            pages.forEach((page, index) => {
+                const pageEl = document.getElementById('page-' + page);
+                if (pageEl && pageEl.classList.contains('active')) {
+                    currentPageIndex = index;
+                }
+            });
+            
+            if (Math.abs(horizontalDiff) > swipeThreshold) {
+                if (horizontalDiff > 0 && currentPageIndex > 0) {
+                    // Swipe right - go to previous page
+                    showPage(pages[currentPageIndex - 1], null);
+                } else if (horizontalDiff < 0 && currentPageIndex < pages.length - 1) {
+                    // Swipe left - go to next page
+                    showPage(pages[currentPageIndex + 1], null);
+                }
+            }
+        }
+        
+        // Add touch listeners
+        document.addEventListener('touchstart', handleTouchStart, {passive: true});
+        document.addEventListener('touchend', handleTouchEnd, {passive: true});
         
         // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
@@ -1365,7 +1894,7 @@ METRICS_TEMPLATE = '''<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
     <title>rar-file/autonomy - Metrics</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1501,6 +2030,116 @@ METRICS_TEMPLATE = '''<!DOCTYPE html>
         }
         .refresh-btn:hover {
             background: var(--accent-light);
+        }
+        
+        /* Mobile Responsive Styles for Metrics */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+                padding-bottom: 80px; /* Space for potential mobile nav */
+            }
+            
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                padding: 16px;
+                margin-bottom: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.25rem;
+            }
+            
+            .header > div {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                width: 100%;
+            }
+            
+            .refresh-btn {
+                flex: 1;
+                min-width: 100px;
+                justify-content: center;
+                padding: 12px 16px;
+                min-height: 44px;
+            }
+            
+            .back-link {
+                padding: 12px 16px;
+                background: var(--bg-3);
+                border-radius: 8px;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+            }
+            
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+            
+            .card {
+                padding: 16px;
+            }
+            
+            .card h3 {
+                font-size: 0.75rem;
+                margin-bottom: 10px;
+            }
+            
+            .stat-value {
+                font-size: 1.75rem;
+            }
+            
+            .stat-label {
+                font-size: 0.75rem;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+            
+            /* Full width for chart and activity on mobile */
+            .grid > .card[style*="span 2"] {
+                grid-column: span 2 !important;
+            }
+            
+            .activity-log {
+                max-height: 250px;
+            }
+            
+            .activity-item {
+                font-size: 0.85rem;
+                padding: 8px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid > .card[style*="span 2"] {
+                grid-column: span 1 !important;
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+        
+        /* Safe area support for notched phones */
+        @supports (padding: max(0px)) {
+            @media (max-width: 768px) {
+                body {
+                    padding-left: max(12px, env(safe-area-inset-left));
+                    padding-right: max(12px, env(safe-area-inset-right));
+                    padding-bottom: max(12px, env(safe-area-inset-bottom));
+                }
+            }
         }
     </style>
 </head>
