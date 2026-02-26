@@ -1183,16 +1183,41 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         }
         
         // Heartbeat Timer
+        let lastHeartbeat = Date.now();
+        let heartbeatInterval = 5 * 60 * 1000; // 5 minutes default
+        
         async function updateHeartbeatTimer() {
             try {
                 const res = await fetch('/api/heartbeat');
                 const data = await res.json();
+                
+                // Update interval from server
+                heartbeatInterval = (data.interval_minutes || 5) * 60 * 1000;
+                
                 if (data.last_activity) {
-                    lastHeartbeat = new Date(data.last_activity).getTime();
-                    heartbeatInterval = (data.interval_minutes || 10) * 60 * 1000;
+                    const activityTime = new Date(data.last_activity).getTime();
+                    // Only use activity time if it's recent (within last interval)
+                    if (Date.now() - activityTime < heartbeatInterval * 2) {
+                        lastHeartbeat = activityTime;
+                    } else {
+                        // If no recent activity, assume timer started now
+                        lastHeartbeat = Date.now() - (heartbeatInterval * 0.5);
+                    }
+                } else {
+                    lastHeartbeat = Date.now();
+                }
+                
+                // Update daemon status display
+                const statusEl = document.getElementById('system-status');
+                if (statusEl) {
+                    if (data.daemon_running) {
+                        statusEl.innerHTML = '<i class="fas fa-circle" style="color: #22c55e;"></i> <span>System Healthy</span>';
+                    } else {
+                        statusEl.innerHTML = '<i class="fas fa-circle" style="color: #ef4444;"></i> <span>Daemon Stopped</span>';
+                    }
                 }
             } catch (e) {
-                console.log('Using default timer');
+                console.log('Heartbeat fetch failed');
             }
         }
         
@@ -1752,25 +1777,43 @@ class Handler(BaseHTTPRequestHandler):
     def serve_heartbeat(self):
         try:
             last_activity = None
-            log_file = f"{LOGS_DIR}/agentic.jsonl"
-            if os.path.exists(log_file):
-                with open(log_file, 'r') as f:
-                    lines = f.readlines()
-                    if lines:
-                        try:
-                            data = json.loads(lines[-1].strip())
-                            last_activity = data.get("timestamp")
-                        except: pass
             
-            interval_minutes = 10
+            # First check the dedicated heartbeat state file (most accurate)
+            state_file = f"{AUTONOMY_DIR}/state/last-heartbeat.json"
+            if os.path.exists(state_file):
+                try:
+                    with open(state_file, 'r') as f:
+                        state_data = json.load(f)
+                        last_activity = state_data.get("timestamp")
+                except:
+                    pass
+            
+            # Fall back to agentic log if no state file
+            if not last_activity:
+                log_file = f"{LOGS_DIR}/agentic.jsonl"
+                if os.path.exists(log_file):
+                    with open(log_file, 'r') as f:
+                        lines = f.readlines()
+                        if lines:
+                            try:
+                                data = json.loads(lines[-1].strip())
+                                last_activity = data.get("timestamp")
+                            except: pass
+            
+            # Get interval from config (now 5 minutes)
+            interval_minutes = 5
             if os.path.exists(CONFIG_FILE):
                 with open(CONFIG_FILE) as f:
                     config = json.load(f)
-                    interval_minutes = config.get("global_config", {}).get("base_interval_minutes", 10)
+                    interval_minutes = config.get("global_config", {}).get("base_interval_minutes", 5)
+            
+            # Check if daemon is running
+            daemon_running = os.path.exists(f"{AUTONOMY_DIR}/state/heartbeat-daemon.pid")
             
             self.send_json({
                 "last_activity": last_activity,
-                "interval_minutes": interval_minutes
+                "interval_minutes": interval_minutes,
+                "daemon_running": daemon_running
             })
         except Exception as e:
             self.send_json({"error": str(e)}, 500)
