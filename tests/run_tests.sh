@@ -24,6 +24,11 @@ SUITES_FAILED=0
 # Test utilities
 source "$SCRIPT_DIR/test_utils.sh"
 
+# Ensure config.json exists for tests (copy from example if needed)
+if [[ ! -f "$AUTONOMY_DIR/config.json" && -f "$AUTONOMY_DIR/config.example.json" ]]; then
+    cp "$AUTONOMY_DIR/config.example.json" "$AUTONOMY_DIR/config.json"
+fi
+
 echo "========================================"
 echo "  Autonomy Skill Test Suite"
 echo "========================================"

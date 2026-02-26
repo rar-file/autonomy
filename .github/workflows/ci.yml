@@ -45,6 +45,8 @@ jobs:
     
     - name: Validate JSON configs
       run: |
+        # Use example config for CI testing
+        cp config.example.json config.json
         jq empty config.json
         for f in tasks/*.json; do
           jq empty "$f" || echo "Invalid JSON: $f"
