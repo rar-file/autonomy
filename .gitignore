@@ -31,12 +31,14 @@ config.json
 *.swo
 *~
 
-# OS
-.DS_Store
-Thumbs.db
+# Internal development files (not for public repo)
+HEARTBEAT_IMPROVEMENTS.md
+REDUNDANCY_REPORT.md
+docs/HEARTBEAT_COORDINATION.md
+docs/SCHEDULER_OPTIONS.md
 
-# Temporary files
-*.tmp
-*.bak
-*.log
-nohup.out
+# Generated reports (created during runtime)
+tests/TEST_REPORT.md
+
+# Metrics data (runtime only)
+monitoring/metrics/*.jsonl
