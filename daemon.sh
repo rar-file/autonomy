@@ -14,6 +14,11 @@ source "$AUTONOMY_DIR/lib/heartbeat-lock.sh" 2>/dev/null || {
     exit 1
 }
 
+# Import heartbeat logger
+source "$AUTONOMY_DIR/lib/heartbeat-logger.sh" 2>/dev/null || {
+    echo "Warning: heartbeat-logger.sh not found"
+}
+
 mkdir -p "$AUTONOMY_DIR/state" "$AUTONOMY_DIR/logs"
 
 log() {
@@ -66,6 +71,11 @@ wait_for_heartbeat() {
 # Process one task cycle (respects locks)
 process_cycle() {
     log "=== Starting daemon cycle ==="
+    
+    # Log daemon heartbeat
+    if command -v log_heartbeat >/dev/null 2>&1; then
+        log_heartbeat "daemon" "Daemon cycle started" '{"source": "daemon"}' >/dev/null 2>&1
+    fi
     
     # Wait for any running heartbeat to complete
     if check_status | grep -q "LOCKED:"; then

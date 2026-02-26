@@ -109,32 +109,34 @@ clear_logs() {
     echo "Heartbeat logs cleared"
 }
 
-# Command dispatch
-case "${1:-last}" in
-    log)
-        log_heartbeat "$2" "$3" "${4:-{}}"
-        ;;
-    recent|list)
-        get_recent "${2:-10}"
-        ;;
-    last|status)
-        get_last
-        ;;
-    stats)
-        get_stats
-        ;;
-    clear)
-        clear_logs
-        ;;
-    *)
-        echo "Usage: $0 {log|recent|last|stats|clear}"
-        echo ""
-        echo "Commands:"
-        echo "  log <status> <message> [details]  - Log a heartbeat activity"
-        echo "  recent [count]                       - Show recent heartbeats"
-        echo "  last                                 - Show last heartbeat message"
-        echo "  stats                                - Show heartbeat statistics"
-        echo "  clear                                - Clear all logs"
-        exit 1
-        ;;
-esac
+# Command dispatch - only run if executed directly, not when sourced
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    case "${1:-last}" in
+        log)
+            log_heartbeat "$2" "$3" "${4:-{}}"
+            ;;
+        recent|list)
+            get_recent "${2:-10}"
+            ;;
+        last|status)
+            get_last
+            ;;
+        stats)
+            get_stats
+            ;;
+        clear)
+            clear_logs
+            ;;
+        *)
+            echo "Usage: $0 {log|recent|last|stats|clear}"
+            echo ""
+            echo "Commands:"
+            echo "  log <status> <message> [details]  - Log a heartbeat activity"
+            echo "  recent [count]                       - Show recent heartbeats"
+            echo "  last                                 - Show last heartbeat message"
+            echo "  stats                                - Show heartbeat statistics"
+            echo "  clear                                - Clear all logs"
+            exit 1
+            ;;
+    esac
+fi

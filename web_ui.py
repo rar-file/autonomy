@@ -1182,7 +1182,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             }
         }
         
-        // Heartbeat Timer
+        // Heartbeat Timer - Shows real daemon activity
         async function updateHeartbeatTimer() {
             try {
                 const res = await fetch('/api/heartbeat');
@@ -1192,15 +1192,10 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 heartbeatInterval = (data.interval_minutes || 5) * 60 * 1000;
                 
                 if (data.last_activity) {
-                    const activityTime = new Date(data.last_activity).getTime();
-                    // Only use activity time if it's recent (within last interval)
-                    if (Date.now() - activityTime < heartbeatInterval * 2) {
-                        lastHeartbeat = activityTime;
-                    } else {
-                        // If no recent activity, assume timer started now
-                        lastHeartbeat = Date.now() - (heartbeatInterval * 0.5);
-                    }
+                    // Use actual last daemon activity time
+                    lastHeartbeat = new Date(data.last_activity).getTime();
                 } else {
+                    // No activity recorded yet
                     lastHeartbeat = Date.now();
                 }
                 
@@ -1229,8 +1224,11 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             const timerEl = document.getElementById('heartbeat-timer');
             if (timerEl) {
                 timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                if (minutes === 0 && seconds < 30) {
+                if (timeLeft === 0) {
+                    timerEl.textContent = 'DUE';
                     timerEl.style.color = '#e94560';
+                } else if (minutes === 0 && seconds < 30) {
+                    timerEl.style.color = '#ffc107';  // Yellow warning
                 } else {
                     timerEl.style.color = '#ffffff';
                 }
@@ -1775,17 +1773,36 @@ class Handler(BaseHTTPRequestHandler):
         try:
             last_activity = None
             
-            # First check the dedicated heartbeat state file (most accurate)
-            state_file = f"{AUTONOMY_DIR}/state/last-heartbeat.json"
-            if os.path.exists(state_file):
+            # First check the heartbeat activity log (most accurate for daemon)
+            heartbeat_log = f"{LOGS_DIR}/heartbeat-activity.jsonl"
+            if os.path.exists(heartbeat_log):
                 try:
-                    with open(state_file, 'r') as f:
-                        state_data = json.load(f)
-                        last_activity = state_data.get("timestamp")
+                    with open(heartbeat_log, 'r') as f:
+                        lines = f.readlines()
+                        # Find last daemon entry
+                        for line in reversed(lines):
+                            try:
+                                data = json.loads(line.strip())
+                                if data.get('status') == 'daemon':
+                                    last_activity = data.get("timestamp")
+                                    break
+                            except:
+                                continue
                 except:
                     pass
             
-            # Fall back to agentic log if no state file
+            # Fall back to state file
+            if not last_activity:
+                state_file = f"{AUTONOMY_DIR}/state/last-heartbeat.json"
+                if os.path.exists(state_file):
+                    try:
+                        with open(state_file, 'r') as f:
+                            state_data = json.load(f)
+                            last_activity = state_data.get("timestamp")
+                    except:
+                        pass
+            
+            # Fall back to agentic log
             if not last_activity:
                 log_file = f"{LOGS_DIR}/agentic.jsonl"
                 if os.path.exists(log_file):
@@ -1797,7 +1814,7 @@ class Handler(BaseHTTPRequestHandler):
                                 last_activity = data.get("timestamp")
                             except: pass
             
-            # Get interval from config (now 5 minutes)
+            # Get interval from config
             interval_minutes = 5
             if os.path.exists(CONFIG_FILE):
                 with open(CONFIG_FILE) as f:
