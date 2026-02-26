@@ -1,8 +1,9 @@
 #!/bin/bash
 # Health Check - Comprehensive diagnostic tool
 
-AUTONOMY_DIR="/root/.openclaw/workspace/skills/autonomy"
-WORKSPACE="/root/.openclaw/workspace"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AUTONOMY_DIR="$SCRIPT_DIR"
+WORKSPACE="$(dirname "$(dirname "$AUTONOMY_DIR")")"
 
 # Colors
 RED='\033[0;31m'
@@ -125,7 +126,8 @@ if pgrep -f "discord_bot.py" >/dev/null; then
     echo -e "$PASS Discord bot running (PID: $PID)"
     
     # Check if token is configured
-    if jq -e '.channels.discord' "/root/.openclaw/openclaw.json" >/dev/null 2>&1; then
+    OPENCLAW_CONFIG="${OPENCLAW_CONFIG:-$HOME/.openclaw/openclaw.json}"
+    if jq -e '.channels.discord' "$OPENCLAW_CONFIG" >/dev/null 2>&1; then
         echo -e "$PASS Discord token configured"
     else
         echo -e "$WARN Discord token not configured"

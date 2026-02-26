@@ -60,11 +60,14 @@ if [ ! -f "$AUTONOMY_DIR/config.json" ]; then
     cat > "$AUTONOMY_DIR/config.json" << 'EOF'
 {
   "skill": "autonomy",
-  "version": "2.0.8",
+  "version": "2.1.0",
   "name": "Agentic Autonomy",
   "description": "AI-driven self-improving autonomy for OpenClaw agents",
   "status": "active",
   "mode": "agentic",
+  "daemon": {
+    "interval_minutes": 5
+  },
   "agentic_config": {
     "enabled": true,
     "reasoning_model": "kimi-coding/k2p5",

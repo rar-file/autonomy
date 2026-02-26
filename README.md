@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/version-2.0.2-blue.svg" alt="Version 2.0.2">
+  <img src="https://img.shields.io/badge/version-2.1.0-blue.svg" alt="Version 2.1.0">
   <img src="https://img.shields.io/badge/mode-agentic-green.svg" alt="Mode: Agentic">
   <img src="https://img.shields.io/badge/status-active-brightgreen.svg" alt="Status: Active">
 </p>

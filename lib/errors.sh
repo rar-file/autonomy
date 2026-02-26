@@ -1,7 +1,7 @@
 #!/bin/bash
 # Error handler with smart suggestions
 
-AUTONOMY_DIR="/root/.openclaw/workspace/skills/autonomy"
+AUTONOMY_DIR="${AUTONOMY_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 
 # Smart error messages with actionable suggestions
 suggest_fix() {

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Unified logging utility for autonomy
 
-AUTONOMY_DIR="/root/.openclaw/workspace/skills/autonomy"
+AUTONOMY_DIR="${AUTONOMY_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 LOG_DIR="$AUTONOMY_DIR/logs"
 
 # Ensure log directory exists

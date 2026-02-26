@@ -1,6 +1,6 @@
 {
   "name": "autonomy",
-  "version": "1.0.0",
+  "version": "2.1.0",
   "description": "Context-aware autonomous monitoring and execution framework for OpenClaw",
   "author": "Janus",
   "license": "MIT",

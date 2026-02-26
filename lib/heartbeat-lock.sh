@@ -2,7 +2,7 @@
 # Heartbeat Lock Functions (Library - no command dispatch)
 # Source this file to use the functions
 
-AUTONOMY_DIR="${AUTONOMY_DIR:-/root/.openclaw/workspace/skills/autonomy}"
+AUTONOMY_DIR="${AUTONOMY_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 STATE_DIR="$AUTONOMY_DIR/state"
 LOCK_FILE="$STATE_DIR/heartbeat.lock"
 LOCK_TIMEOUT_SECONDS=300  # 5 minutes max heartbeat time

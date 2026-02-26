@@ -2,8 +2,8 @@
 # GitHub Actions Integration
 # Manage CI/CD workflows and GitHub integration
 
-AUTONOMY_DIR="${AUTONOMY_DIR:-/root/.openclaw/workspace/skills/autonomy}"
-REPO_DIR="${REPO_DIR:-/root/.openclaw/workspace}"
+AUTONOMY_DIR="${AUTONOMY_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+REPO_DIR="${REPO_DIR:-$(dirname "$(dirname "$AUTONOMY_DIR")")}"
 WORKFLOWS_DIR="$REPO_DIR/.github/workflows"
 
 # Check if GitHub CLI is installed

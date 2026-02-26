@@ -77,11 +77,11 @@ run_health_checks() {
     issues=0
     
     # Check daemon
-    if [[ -f "$AUTONOMY_DIR/state/heartbeat-daemon.pid" ]]; then
-        pid=$(cat "$AUTONOMY_DIR/state/heartbeat-daemon.pid")
-        if ! ps -p "$pid" > /dev/null 2>&1; then
+    if [[ -f "$AUTONOMY_DIR/state/daemon.pid" ]]; then
+        pid=$(cat "$AUTONOMY_DIR/state/daemon.pid")
+        if ! kill -0 "$pid" 2>/dev/null; then
             log "WARNING: Daemon PID file exists but process not running"
-            rm -f "$AUTONOMY_DIR/state/heartbeat-daemon.pid"
+            rm -f "$AUTONOMY_DIR/state/daemon.pid"
             issues=$((issues + 1))
         fi
     fi

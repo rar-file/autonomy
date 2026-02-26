@@ -1,8 +1,9 @@
 #!/bin/bash
-# validate_config_fast - Optimized version using single jq call
-# Usage: source validate_config_fast.sh && validate_config
+# validate_config - Optimized single-jq-call schema validator
+# Usage: source validate_config.sh && validate_config
 
-CONFIG="${CONFIG:-/root/.openclaw/workspace/skills/autonomy/config.json}"
+AUTONOMY_DIR="${AUTONOMY_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+CONFIG="${CONFIG:-$AUTONOMY_DIR/config.json}"
 
 # Optimized: Single jq call validates entire schema
 validate_config() {
@@ -15,11 +16,8 @@ validate_config() {
     fi
     
     # Single jq call for ALL validations
-    # 12x faster than original (12 jq calls → 1)
     jq -e '
         def validate:
-            # File must be valid JSON (implicit)
-            
             # Required top-level fields
             has("skill") and
             has("version") and
@@ -32,12 +30,14 @@ validate_config() {
             # Required global_config fields
             (.global_config | 
                 has("base_interval_minutes") and
-                has("max_interval_minutes") and
-                has("checks_per_heartbeat")
+                has("max_concurrent_tasks") or has("max_schedules")
             ) and
             
             # Type validations
-            (.global_config.base_interval_minutes | type == "number")
+            (.global_config.base_interval_minutes | type == "number") and
+            
+            # Agentic config basics
+            (has("agentic_config") and (.agentic_config | has("hard_limits")))
         ;
         validate
     ' "$config_file" >/dev/null 2>&1 || {

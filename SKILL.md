@@ -1,6 +1,6 @@
 # Agentic Autonomy - OpenClaw Plugin
 
-**Version:** 2.0.8  
+**Version:** 2.1.0  
 **Type:** Agentic Self-Improvement System  
 **Requires:** OpenClaw Gateway, bash, jq, python3
 

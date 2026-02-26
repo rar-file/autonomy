@@ -2,7 +2,8 @@
 # AI Heartbeat Runner - Handles locking automatically
 # Usage: bash ai-heartbeat.sh
 
-AUTONOMY_DIR="/root/.openclaw/workspace/skills/autonomy"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AUTONOMY_DIR="$SCRIPT_DIR"
 cd "$AUTONOMY_DIR"
 
 # Source lock manager

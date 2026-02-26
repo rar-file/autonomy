@@ -4,7 +4,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 AUTONOMY_DIR="$SCRIPT_DIR"
-WORKSPACE="/root/.openclaw/workspace"
+WORKSPACE="$(dirname "$(dirname "$AUTONOMY_DIR")")"
 CONFIG="$AUTONOMY_DIR/config.json"
 TASKS_DIR="$AUTONOMY_DIR/tasks"
 AGENTS_DIR="$AUTONOMY_DIR/agents"
@@ -13,6 +13,52 @@ LOGS_DIR="$AUTONOMY_DIR/logs"
 STATE_DIR="$AUTONOMY_DIR/state"
 
 mkdir -p "$TASKS_DIR" "$AGENTS_DIR" "$TOOLS_DIR" "$LOGS_DIR" "$STATE_DIR"
+
+# ── Config-free defaults: auto-create config if missing ─────
+ensure_config() {
+    [[ -f "$CONFIG" ]] && return 0
+    cat > "$CONFIG" << 'DEFAULTS'
+{
+  "version": "2.1.0",
+  "workstation": {
+    "active": false,
+    "mode": "agentic",
+    "level": "semi-autonomous",
+    "running_agents": [],
+    "schedules": [],
+    "created_tools": [],
+    "token_usage_today": 0
+  },
+  "daemon": {
+    "interval_minutes": 5
+  },
+  "global_config": {
+    "base_interval_minutes": 5,
+    "max_schedules": 5,
+    "max_concurrent_tasks": 5,
+    "max_sub_agents": 3
+  },
+  "agentic_config": {
+    "autonomy_level": "semi-autonomous",
+    "hard_limits": {
+      "max_concurrent_tasks": 5,
+      "max_sub_agents": 3,
+      "max_schedules": 5,
+      "daily_token_budget": 50000,
+      "max_file_edits_per_session": 50,
+      "max_web_searches": 10,
+      "max_iterations_per_task": 5
+    },
+    "completion_criteria": {
+      "require_verification": true,
+      "max_attempts": 3
+    }
+  }
+}
+DEFAULTS
+    echo -e "${GREEN}✓${NC} Created default config.json (zero-config mode)"
+}
+ensure_config
 
 # Colors
 GREEN='\033[0;32m'
@@ -157,31 +203,47 @@ cmd_on() {
     log_activity "workstation_activated" "{}"
     
     # Auto-start heartbeat daemon if not already running
-    local scheduler_type=$(get_config '.scheduler.type // "daemon"')
-    if [[ "$scheduler_type" == "daemon" ]]; then
-        if [[ -f "$AUTONOMY_DIR/state/heartbeat-daemon.pid" ]]; then
-            local daemon_pid=$(cat "$AUTONOMY_DIR/state/heartbeat-daemon.pid" 2>/dev/null)
-            if ! ps -p "$daemon_pid" > /dev/null 2>&1; then
-                rm -f "$AUTONOMY_DIR/state/heartbeat-daemon.pid"
-                echo ""
-                echo "  Starting heartbeat daemon..."
-                "$AUTONOMY_DIR/daemon.sh" start > /dev/null 2>&1
-                sleep 1
-                if [[ -f "$AUTONOMY_DIR/state/heartbeat-daemon.pid" ]]; then
-                    echo -e "  ${GREEN}✓${NC} Daemon started (auto-runs every 10 min)"
-                fi
-            else
-                echo ""
-                echo -e "  ${GREEN}✓${NC} Daemon already running (PID: $daemon_pid)"
-            fi
+    local daemon_pid_file="$AUTONOMY_DIR/state/daemon.pid"
+    local daemon_running=false
+    if [[ -f "$daemon_pid_file" ]]; then
+        local daemon_pid
+        daemon_pid=$(cat "$daemon_pid_file" 2>/dev/null)
+        if [[ -n "$daemon_pid" ]] && kill -0 "$daemon_pid" 2>/dev/null; then
+            daemon_running=true
         else
-            echo ""
-            echo "  Starting heartbeat daemon..."
-            "$AUTONOMY_DIR/daemon.sh" start > /dev/null 2>&1
-            sleep 1
-            if [[ -f "$AUTONOMY_DIR/state/heartbeat-daemon.pid" ]]; then
-                echo -e "  ${GREEN}✓${NC} Daemon started (auto-runs every 10 min)"
-            fi
+            rm -f "$daemon_pid_file"
+        fi
+    fi
+
+    if [[ "$daemon_running" == true ]]; then
+        echo ""
+        echo -e "  ${GREEN}✓${NC} Daemon already running (PID: $daemon_pid)"
+    else
+        echo ""
+        echo "  Starting heartbeat daemon..."
+        "$AUTONOMY_DIR/daemon.sh" start > /dev/null 2>&1
+        sleep 1
+        if [[ -f "$daemon_pid_file" ]]; then
+            local interval
+            interval=$(jq -r '.daemon.interval_minutes // .global_config.base_interval_minutes // 5' "$CONFIG" 2>/dev/null || echo 5)
+            echo -e "  ${GREEN}✓${NC} Daemon started (auto-runs every ${interval}m)"
+        else
+            echo -e "  ${RED}✗${NC} Daemon failed to start — try: autonomy daemon start"
+        fi
+    fi
+
+    # Auto-start web UI if not already running
+    if pgrep -f "web_ui.py" >/dev/null 2>&1; then
+        echo -e "  ${GREEN}✓${NC} Web UI already running — http://localhost:8767"
+    else
+        echo "  Starting web UI..."
+        cd "$AUTONOMY_DIR"
+        nohup python3 "$AUTONOMY_DIR/web_ui.py" >> "$AUTONOMY_DIR/logs/webui.log" 2>&1 &
+        sleep 2
+        if pgrep -f "web_ui.py" >/dev/null 2>&1; then
+            echo -e "  ${GREEN}✓${NC} Web UI started — http://localhost:8767"
+        else
+            echo -e "  ${RED}✗${NC} Web UI failed to start — check logs/webui.log"
         fi
     fi
 }
@@ -192,8 +254,11 @@ cmd_off() {
     
     jq '.workstation.active = false | .last_deactivated = "'$(date -Iseconds)'"' "$CONFIG" > "$tmp_file" && mv "$tmp_file" "$CONFIG"
     
+    # Stop daemon
+    "$AUTONOMY_DIR/daemon.sh" stop > /dev/null 2>&1
+    
     echo -e "${RED}○${NC} Agentic Autonomy DEACTIVATED"
-    echo "  Workstation stopped."
+    echo "  Daemon stopped. Web UI still available for monitoring."
     
     log_activity "workstation_deactivated" "{}"
 }
@@ -277,9 +342,45 @@ EOF
                 fi
                 log_activity "task_completed" "{\"name\": \"$name\", \"verification\": \"$verification\"}"
                 
-                # Send email notification if enabled
+                # ── Completion notifications (multi-channel) ────────
+                # 1. Write completed.md summary
+                local desc
+                desc=$(jq -r '.description // ""' "$TASKS_DIR/${name}.json" 2>/dev/null)
+                {
+                    echo ""
+                    echo "## ✅ $name — Completed $(date '+%Y-%m-%d %H:%M')"
+                    echo "**Description:** $desc"
+                    echo "**Verification:** $verification"
+                    echo ""
+                } >> "$STATE_DIR/completed.md"
+
+                # 2. Clear needs_attention if this was the active task
+                if [[ -f "$STATE_DIR/needs_attention.json" ]]; then
+                    local attn_task
+                    attn_task=$(jq -r '.task_name // ""' "$STATE_DIR/needs_attention.json" 2>/dev/null)
+                    [[ "$attn_task" == "$name" ]] && rm -f "$STATE_DIR/needs_attention.json"
+                fi
+
+                # 3. Journal entry
+                if [[ -f "$AUTONOMY_DIR/lib/journal.sh" ]]; then
+                    bash "$AUTONOMY_DIR/lib/journal.sh" append "$name" \
+                        "Task completed. Verification: $verification" "completed" "" > /dev/null 2>&1
+                fi
+
+                # 4. Email notification
                 if [[ -f "$AUTONOMY_DIR/lib/notify.sh" ]]; then
                     bash "$AUTONOMY_DIR/lib/notify.sh" task-complete "$name" "$verification" > /dev/null 2>&1 || true
+                fi
+
+                # 5. Discord notification (if integration exists)
+                if [[ -f "$AUTONOMY_DIR/integrations/discord.sh" ]]; then
+                    bash "$AUTONOMY_DIR/integrations/discord.sh" send \
+                        "✅ Task **$name** completed: $verification" > /dev/null 2>&1 || true
+                fi
+
+                # 6. Rebuild HEARTBEAT.md so next cycle sees the updated state
+                if [[ -f "$AUTONOMY_DIR/lib/heartbeat-builder.sh" ]]; then
+                    bash "$AUTONOMY_DIR/lib/heartbeat-builder.sh" build > /dev/null 2>&1
                 fi
             else
                 echo -e "${RED}Error:${NC} Task not found: $name"
@@ -505,6 +606,97 @@ cmd_install() {
     esac
 }
 
+# ═══════════════════════════════════════════════════════════════
+# autonomy go — One-shot bootstrap: activate + task + heartbeat
+# "Start this project and keep going"
+# ═══════════════════════════════════════════════════════════════
+cmd_go() {
+    local instruction="$*"
+
+    echo ""
+    echo "═══════════════════════════════════════════════════════════"
+    echo "  AUTONOMY GO — Bootstrapping agentic mode"
+    echo "═══════════════════════════════════════════════════════════"
+    echo ""
+
+    # 1. Ensure config exists (config-free defaults handle this)
+    ensure_config
+
+    # 2. Activate workstation if not already active
+    local active=$(get_config '.workstation.active')
+    if [[ "$active" != "true" ]]; then
+        echo "  [1/5] Activating workstation..."
+        cmd_on
+        echo ""
+    else
+        echo "  [1/5] Workstation already active ✓"
+    fi
+
+    # 3. Scan workspace
+    echo "  [2/5] Scanning workspace..."
+    if [[ -f "$AUTONOMY_DIR/lib/workspace-scanner.sh" ]]; then
+        local scan_result
+        scan_result=$(bash "$AUTONOMY_DIR/lib/workspace-scanner.sh" oneliner 2>/dev/null)
+        echo "         $scan_result"
+    fi
+    echo ""
+
+    # 4. Create task if instruction provided
+    if [[ -n "$instruction" ]]; then
+        echo "  [3/5] Creating task from instruction..."
+        local task_name="go-$(date +%s)"
+        cmd_task create "$task_name" "$instruction"
+        echo ""
+
+        # 5. Immediately flag it + rebuild HEARTBEAT.md
+        echo "  [4/5] Flagging task for AI processing..."
+        local tmp="${TASKS_DIR}/${task_name}.json.tmp.$$"
+        jq --arg ts "$(date -Iseconds)" \
+           '.status = "needs_ai_attention" | .flagged_at = $ts | .flagged_by = "go"' \
+           "$TASKS_DIR/${task_name}.json" > "$tmp" && mv "$tmp" "$TASKS_DIR/${task_name}.json"
+
+        # Write needs_attention state
+        cat > "$STATE_DIR/needs_attention.json" <<EOF
+{
+  "timestamp": "$(date -Iseconds)",
+  "task_name": "$task_name",
+  "task_file": "$TASKS_DIR/${task_name}.json",
+  "description": "$instruction",
+  "status": "needs_ai_attention",
+  "flagged_by": "go"
+}
+EOF
+        log_activity "go_task_flagged" "{\"task\": \"$task_name\", \"instruction\": \"$instruction\"}"
+    else
+        echo "  [3/5] No instruction — AI will decide what to do"
+        echo "  [4/5] Skipping task creation"
+    fi
+
+    # 5. Build fresh HEARTBEAT.md
+    echo "  [5/5] Building HEARTBEAT.md with live context..."
+    if [[ -f "$AUTONOMY_DIR/lib/heartbeat-builder.sh" ]]; then
+        bash "$AUTONOMY_DIR/lib/heartbeat-builder.sh" build > /dev/null 2>&1
+        echo -e "         ${GREEN}✓${NC} HEARTBEAT.md ready"
+    fi
+
+    echo ""
+    echo "═══════════════════════════════════════════════════════════"
+    echo ""
+    echo -e "  ${GREEN}AUTONOMY IS GO${NC}"
+    echo ""
+    if [[ -n "$instruction" ]]; then
+        echo "  Instruction: $instruction"
+        echo ""
+    fi
+    echo "  The AI will pick this up on the next heartbeat cycle."
+    echo "  Monitor: http://localhost:8767"
+    echo "  Logs:    autonomy logs"
+    echo "  Status:  autonomy status"
+    echo "  Stop:    autonomy off"
+    echo ""
+    echo "═══════════════════════════════════════════════════════════"
+}
+
 # Work on something (the main entry point)
 cmd_work() {
     local instruction="$*"
@@ -706,6 +898,8 @@ Agentic Autonomy - AI-driven self-improvement for OpenClaw
 QUICK START:
   onboard                  Interactive setup wizard (first time)
   onboard quick            Quick auto-setup
+  go "<instruction>"       ONE-SHOT: activate + task + go (plug & play)
+  go                       Activate with no task (AI decides)
   work "<instruction>"      Give the AI a task and let it decide how
   on                       Activate agentic mode (auto-starts daemon)
   off                      Deactivate
@@ -813,6 +1007,9 @@ UTILITIES:
   version                  Show version
 
 EXAMPLES:
+  autonomy go "Build a REST API for user management"
+  autonomy go "Fix all the bugs in src/ and write tests"
+  autonomy go                    # activate, AI decides what to do
   autonomy work "Build a system to track my daily token usage"
   autonomy work "Research best practices for memory management"
   autonomy spawn "Analyze the codebase for security issues"
@@ -843,6 +1040,10 @@ case "${1:-status}" in
         ;;
     off)
         cmd_off
+        ;;
+    go)
+        shift
+        cmd_go "$@"
         ;;
     work)
         shift

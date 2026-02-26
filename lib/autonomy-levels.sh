@@ -2,7 +2,7 @@
 # Autonomy Levels Manager
 # Implements supervised, semi-autonomous, and fully autonomous modes
 
-AUTONOMY_DIR="/root/.openclaw/workspace/skills/autonomy"
+AUTONOMY_DIR="${AUTONOMY_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 CONFIG="$AUTONOMY_DIR/config.json"
 
 # Colors

@@ -1,0 +1,6 @@
+#!/bin/bash
+# GitHub Actions wrapper — delegates to lib/gh-actions.sh
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export AUTONOMY_DIR="$SCRIPT_DIR"
+export REPO_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"
+bash "$SCRIPT_DIR/lib/gh-actions.sh" "$@"

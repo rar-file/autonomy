@@ -13,7 +13,7 @@ source "$TEST_DIR/test_utils.sh"
 # Daemon test state directory
 DAEMON_TEST_STATE="$TEST_DIR/state/daemon_test"
 TEST_LOG_FILE="$DAEMON_TEST_STATE/daemon.log"
-TEST_PID_FILE="$DAEMON_TEST_STATE/heartbeat-daemon.pid"
+TEST_PID_FILE="$DAEMON_TEST_STATE/daemon.pid"
 
 echo "Running Daemon Functionality Tests"
 echo "==================================="

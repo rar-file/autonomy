@@ -1,45 +1,28 @@
 #!/bin/bash
-# Persistent Web UI Launcher
-# Ensures web UI is always running
+# Persistent Web UI Guardian
+# Ensures web UI is always running — daemon.sh also monitors this,
+# but this script can be run standalone for extra reliability.
 
-AUTONOMY_DIR="/root/.openclaw/workspace/skills/autonomy"
-PID_FILE="/tmp/webui.pid"
-LOG_FILE="/tmp/webui.log"
-PORT=8767
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AUTONOMY_DIR="$SCRIPT_DIR"
+LOG_FILE="$AUTONOMY_DIR/logs/webui.log"
+PORT=${AUTONOMY_WEB_PORT:-8767}
+
+mkdir -p "$AUTONOMY_DIR/logs"
 
 start_webui() {
     echo "[$(date)] Starting Web UI..." >> "$LOG_FILE"
     cd "$AUTONOMY_DIR"
-    python3 web_ui.py >> "$LOG_FILE" 2>&1 &
-    echo $! > "$PID_FILE"
-    echo "[$(date)] Web UI started with PID: $(cat $PID_FILE)" >> "$LOG_FILE"
-}
-
-check_webui() {
-    if [[ -f "$PID_FILE" ]]; then
-        PID=$(cat "$PID_FILE")
-        if ps -p "$PID" > /dev/null 2>&1; then
-            return 0  # Running
-        fi
-    fi
-    return 1  # Not running
+    python3 "$AUTONOMY_DIR/web_ui.py" >> "$LOG_FILE" 2>&1 &
+    echo "[$(date)] Web UI started (PID: $!)" >> "$LOG_FILE"
 }
 
 # Main loop
 while true; do
-    if ! check_webui; then
+    if ! pgrep -f "web_ui.py" >/dev/null 2>&1; then
         echo "[$(date)] Web UI not running, restarting..." >> "$LOG_FILE"
         start_webui
+        sleep 5
     fi
-    
-    # Also check if port is responding
-    sleep 5
-    if ! curl -s http://localhost:$PORT/api/status >/dev/null 2>&1; then
-        echo "[$(date)] Web UI not responding, restarting..." >> "$LOG_FILE"
-        pkill -f "web_ui.py" 2>/dev/null
-        sleep 1
-        start_webui
-    fi
-    
-    sleep 10  # Check every 10 seconds
+    sleep 15
 done

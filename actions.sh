@@ -2,8 +2,9 @@
 # Smart Action System
 # Takes actions based on check results, not just alerts
 
-WORKSPACE="/root/.openclaw/workspace"
-AUTONOMY_DIR="$WORKSPACE/skills/autonomy"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AUTONOMY_DIR="$SCRIPT_DIR"
+WORKSPACE="$(dirname "$(dirname "$AUTONOMY_DIR")")"
 ACTION_LOG="$AUTONOMY_DIR/logs/actions.jsonl"
 LAST_ACTION_FILE="$AUTONOMY_DIR/state/last_action.json"
 

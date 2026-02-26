@@ -3,14 +3,24 @@
 
 import json
 import os
+import signal
 import subprocess
+import sys
+import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
 from datetime import datetime, timedelta
 
-AUTONOMY_DIR = "/root/.openclaw/workspace/skills/autonomy"
+AUTONOMY_DIR = os.environ.get("AUTONOMY_DIR", os.path.dirname(os.path.abspath(__file__)))
 CONFIG_FILE = f"{AUTONOMY_DIR}/config.json"
 TASKS_DIR = f"{AUTONOMY_DIR}/tasks"
 LOGS_DIR = f"{AUTONOMY_DIR}/logs"
+
+
+class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
+    """Multi-threaded HTTP server — prevents single-request hangs from blocking."""
+    daemon_threads = True
+    allow_reuse_address = True
 
 HTML_TEMPLATE = '''<!DOCTYPE html>
 <html lang="en">
@@ -1239,6 +1249,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             <div class="nav-section">
                 <div class="nav-title">System</div>
                 <div class="nav-item" onclick="showPage('schedules', this)"><i class="fas fa-clock"></i> Schedules</div>
+                <div class="nav-item" onclick="showPage('journal', this); loadJournalData();"><i class="fas fa-book"></i> Journal</div>
                 <div class="nav-item" onclick="window.open('/metrics', '_blank')"><i class="fas fa-chart-line"></i> Metrics</div>
                 <div class="nav-item" onclick="showPage('settings', this)"><i class="fas fa-cog"></i> Settings</div>
             </div>
@@ -1368,7 +1379,41 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             <!-- Other pages -->
             <div id="page-agents" class="page"><header class="header"><div class="header-title"><h2>Agents</h2></div></header><div class="card"><p style="text-align:center;padding:60px;color:#a0a0c0;"><i class="fas fa-robot" style="font-size:64px;margin-bottom:20px;opacity:0.3;"></i><br>No Active Agents</p></div></div>
             <div id="page-schedules" class="page"><header class="header"><div class="header-title"><h2>Schedules</h2></div></header><div class="card"><p style="text-align:center;padding:40px;">Every 10 Minutes - Check for improvements</p></div></div>
-            <div id="page-settings" class="page"><header class="header"><div class="header-title"><h2>Settings</h2></div></header><div class="card"><button class="btn btn-primary" onclick="workstationOn()" style="margin-right:10px;">Activate</button><button class="btn btn-secondary" onclick="workstationOff()">Deactivate</button></div></div>
+            <div id="page-settings" class="page"><header class="header"><div class="header-title"><h2>Settings</h2></div></header>
+                <div class="card" style="margin-bottom:16px;">
+                    <h3 style="margin-bottom:12px;">Quick Actions</h3>
+                    <button class="btn btn-primary" onclick="workstationOn()" style="margin-right:10px;">Activate</button>
+                    <button class="btn btn-secondary" onclick="workstationOff()" style="margin-right:10px;">Deactivate</button>
+                </div>
+                <div class="card" style="margin-bottom:16px;">
+                    <h3 style="margin-bottom:12px;"><i class="fas fa-rocket" style="color:var(--accent);"></i> Autonomy GO</h3>
+                    <p style="color:var(--text-muted); margin-bottom:12px; font-size:13px;">One-shot bootstrap: activate + create task + build HEARTBEAT + go.</p>
+                    <input type="text" id="go-instruction" placeholder='e.g., "Build a REST API for users"' style="width:100%; padding:10px; background:var(--bg-0); border:1px solid rgba(233,69,96,0.2); border-radius:8px; color:var(--text); margin-bottom:8px; font-family:inherit;">
+                    <button class="btn btn-primary" onclick="autonomyGo()" style="width:100%;"><i class="fas fa-rocket"></i> GO</button>
+                    <div id="go-result" style="margin-top:8px; font-size:12px; color:var(--text-muted); display:none;"></div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom:12px;"><i class="fas fa-coins" style="color:#ffc107;"></i> Token Budget</h3>
+                    <div id="token-budget-panel" style="color:var(--text-muted);">Loading...</div>
+                </div>
+            </div>
+
+            <!-- Journal / Progress page -->
+            <div id="page-journal" class="page">
+                <header class="header"><div class="header-title"><h2><i class="fas fa-book" style="color:var(--accent);margin-right:8px;"></i>Session Journal</h2></div></header>
+                <div class="card" style="margin-bottom:16px;">
+                    <h3 style="margin-bottom:12px;">Workspace</h3>
+                    <div id="workspace-info" style="color:var(--text-muted); font-size:13px;">Scanning...</div>
+                </div>
+                <div class="card" style="margin-bottom:16px;">
+                    <h3 style="margin-bottom:12px;">Session Timeline</h3>
+                    <div id="journal-timeline" style="max-height:400px; overflow-y:auto;">Loading...</div>
+                </div>
+                <div class="card">
+                    <h3 style="margin-bottom:12px;">Completed Tasks</h3>
+                    <div id="completions-feed" style="color:var(--text-muted); font-size:13px;">No completions yet.</div>
+                </div>
+            </div>
         </main>
         
         <!-- Mobile Bottom Navigation -->
@@ -1388,6 +1433,10 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             <div class="mobile-nav-item" onclick="showPage('schedules', this); window.scrollTo({top: 0, behavior: 'smooth'});">
                 <i class="fas fa-clock"></i>
                 <span>Schedules</span>
+            </div>
+            <div class="mobile-nav-item" onclick="showPage('journal', this); loadJournalData(); window.scrollTo({top: 0, behavior: 'smooth'});">
+                <i class="fas fa-book"></i>
+                <span>Journal</span>
             </div>
             <div class="mobile-nav-item" onclick="window.location.href='/metrics'">
                 <i class="fas fa-chart-line"></i>
@@ -2018,6 +2067,96 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 aiActivityInterval = setInterval(updateAiActivity, 2000); // Poll every 2 seconds
             }
         }
+
+        // ── New: Journal & Live Progress functions ──────────
+
+        async function loadJournalData() {
+            try {
+                // Journal timeline
+                const tlRes = await fetch('/api/journal/timeline');
+                const tlData = await tlRes.json();
+                const tlEl = document.getElementById('journal-timeline');
+                if (tlEl && tlData.html) tlEl.innerHTML = tlData.html;
+
+                // Completions
+                const cRes = await fetch('/api/completions');
+                const cData = await cRes.json();
+                const cEl = document.getElementById('completions-feed');
+                if (cEl) {
+                    if (cData.exists && cData.content) {
+                        cEl.innerHTML = '<pre style="white-space:pre-wrap; font-size:12px; color:var(--text-muted); max-height:300px; overflow-y:auto;">' + cData.content.replace(/</g,'&lt;') + '</pre>';
+                    } else {
+                        cEl.innerHTML = '<p style="color:var(--text-muted);">No completed tasks yet.</p>';
+                    }
+                }
+
+                // Workspace info
+                const wRes = await fetch('/api/workspace');
+                const wData = await wRes.json();
+                const wEl = document.getElementById('workspace-info');
+                if (wEl && !wData.error) {
+                    wEl.innerHTML = `<strong>Language:</strong> ${wData.languages || 'unknown'} | <strong>Framework:</strong> ${wData.framework || 'none'} | <strong>Type:</strong> ${wData.project_type || 'project'} | <strong>Files:</strong> ${wData.file_count || '?'}`;
+                }
+            } catch (e) {
+                console.log('Journal data load failed:', e);
+            }
+        }
+
+        async function loadTokenBudget() {
+            try {
+                const res = await fetch('/api/token-budget');
+                const data = await res.json();
+                const el = document.getElementById('token-budget-panel');
+                if (el) {
+                    const color = data.status === 'exceeded' ? '#e94560' : data.status === 'warning' ? '#ffc107' : '#00d26a';
+                    const pct = data.percent_used || 0;
+                    el.innerHTML = `
+                        <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                            <span>${data.used || 0} / ${data.budget || 50000} tokens</span>
+                            <span style="color:${color};font-weight:600;">${pct}%</span>
+                        </div>
+                        <div style="background:var(--bg-0);height:8px;border-radius:4px;overflow:hidden;">
+                            <div style="background:${color};height:100%;width:${Math.min(pct,100)}%;border-radius:4px;transition:width 0.5s;"></div>
+                        </div>
+                        <div style="margin-top:6px;font-size:11px;color:var(--text-muted);">${data.remaining || 0} remaining | ${data.sessions || 0} sessions today</div>
+                    `;
+                }
+            } catch (e) {
+                console.log('Token budget fetch failed');
+            }
+        }
+
+        async function autonomyGo() {
+            const input = document.getElementById('go-instruction');
+            const resultEl = document.getElementById('go-result');
+            const instruction = input ? input.value.trim() : '';
+            
+            resultEl.style.display = 'block';
+            resultEl.style.color = 'var(--text-muted)';
+            resultEl.textContent = 'Launching...';
+            
+            try {
+                const res = await fetch('/api/go', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({instruction: instruction})
+                });
+                const data = await res.json();
+                if (data.success) {
+                    resultEl.style.color = '#00d26a';
+                    resultEl.textContent = '✓ ' + (data.message || 'Autonomy GO activated!');
+                    if (input) input.value = '';
+                    setTimeout(() => { loadData(); loadTokenBudget(); }, 2000);
+                } else {
+                    resultEl.style.color = '#e94560';
+                    resultEl.textContent = '✗ ' + (data.error || 'Failed');
+                }
+            } catch (e) {
+                resultEl.style.color = '#e94560';
+                resultEl.textContent = '✗ Network error';
+            }
+        }
+
         initTheme();
         checkOnboarding();
         
@@ -2032,9 +2171,11 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         
         loadData();
         updateHeartbeatTimer();
+        loadTokenBudget();
         setInterval(loadData, 5000);
         setInterval(updateTimerDisplay, 1000);
         setInterval(updateHeartbeatTimer, 30000);
+        setInterval(loadTokenBudget, 30000);
         
         // Swipe gesture support for mobile page navigation
         let touchStartX = 0;
@@ -2042,7 +2183,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         let touchEndX = 0;
         let touchEndY = 0;
         
-        const pages = ['dashboard', 'tasks', 'agents', 'schedules', 'settings'];
+        const pages = ['dashboard', 'tasks', 'agents', 'schedules', 'journal', 'settings'];
         
         function handleTouchStart(e) {
             touchStartX = e.changedTouches[0].screenX;
@@ -2518,6 +2659,7 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, format, *args): pass
     
     def do_GET(self):
+      try:
         if self.path in ["/", "/index.html"]:
             self.send_response(200)
             self.send_header("Content-Type", "text/html")
@@ -2547,10 +2689,26 @@ class Handler(BaseHTTPRequestHandler):
             self.serve_coordinator_stats()
         elif self.path == "/api/ai/activity":
             self.serve_ai_activity()
+        elif self.path == "/api/journal":
+            self.serve_journal()
+        elif self.path == "/api/journal/timeline":
+            self.serve_journal_timeline()
+        elif self.path == "/api/completions":
+            self.serve_completions()
+        elif self.path == "/api/token-budget":
+            self.serve_token_budget()
+        elif self.path == "/api/workspace":
+            self.serve_workspace_scan()
         else:
             self.send_error(404)
+      except Exception as e:
+        try:
+            self.send_json({"error": str(e)}, 500)
+        except Exception:
+            pass  # Connection may already be closed
     
     def do_POST(self):
+      try:
         if self.path == "/api/workstation/on":
             self.run_cmd("on")
         elif self.path == "/api/workstation/off":
@@ -2571,8 +2729,15 @@ class Handler(BaseHTTPRequestHandler):
             self.trigger_heartbeat()
         elif self.path == "/api/daemon":
             self.control_daemon()
+        elif self.path == "/api/go":
+            self.handle_go()
         else:
             self.send_error(404)
+      except Exception as e:
+        try:
+            self.send_json({"error": str(e)}, 500)
+        except Exception:
+            pass
     
     def do_DELETE(self):
         if self.path.startswith("/api/task/"):
@@ -2961,7 +3126,7 @@ class Handler(BaseHTTPRequestHandler):
             token_usage = config.get('workstation', {}).get('token_usage_today', 0)
             
             # Check daemon status
-            daemon_running = os.path.exists(f"{AUTONOMY_DIR}/state/heartbeat-daemon.pid")
+            daemon_running = os.path.exists(f"{AUTONOMY_DIR}/state/daemon.pid")
             
             self.send_json({
                 "tasks": tasks,
@@ -2999,6 +3164,168 @@ class Handler(BaseHTTPRequestHandler):
         }
         self.send_json(manifest)
 
+    # ── New live-progress API endpoints ────────────────────
+
+    def serve_journal(self):
+        """Serve raw journal entries (last 20)"""
+        try:
+            journal_file = f"{AUTONOMY_DIR}/state/journal.jsonl"
+            entries = []
+            if os.path.exists(journal_file):
+                with open(journal_file, 'r') as f:
+                    lines = f.readlines()[-20:]
+                for line in lines:
+                    try:
+                        entries.append(json.loads(line.strip()))
+                    except:
+                        pass
+            self.send_json(entries)
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
+
+    def serve_journal_timeline(self):
+        """Serve journal as rendered timeline HTML snippet"""
+        try:
+            journal_file = f"{AUTONOMY_DIR}/state/journal.jsonl"
+            entries = []
+            if os.path.exists(journal_file):
+                with open(journal_file, 'r') as f:
+                    lines = f.readlines()[-10:]
+                for line in lines:
+                    try:
+                        entries.append(json.loads(line.strip()))
+                    except:
+                        pass
+            
+            if not entries:
+                self.send_json({"html": "<p style='color:var(--text-muted)'>No journal entries yet. The AI will log progress here after each heartbeat.</p>"})
+                return
+
+            html_parts = []
+            for e in reversed(entries):
+                status = e.get("status", "unknown")
+                color_map = {"completed": "#00d26a", "failed": "#e94560", "blocked": "#ffc107", "in-progress": "#00b4d8", "pivoted": "#ff6b8a"}
+                color = color_map.get(status, "#6b6b8a")
+                ts = e.get("timestamp", "")[:19].replace("T", " ")
+                task = e.get("task", "")
+                summary = e.get("summary", "")
+                next_step = e.get("next_step", "")
+
+                html_parts.append(f'''
+                <div style="border-left:3px solid {color}; padding:8px 12px; margin:8px 0; background:rgba(255,255,255,0.03); border-radius:0 8px 8px 0;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                        <span style="font-weight:600; color:{color};">[{status.upper()}]</span>
+                        <span style="color:var(--text-muted); font-size:12px;">{ts}</span>
+                    </div>
+                    <div style="font-weight:500; margin-bottom:2px;">{task}</div>
+                    <div style="color:var(--text-muted); font-size:13px;">{summary}</div>
+                    {"<div style='color:#00b4d8; font-size:12px; margin-top:4px;'>→ Next: " + next_step + "</div>" if next_step and next_step != "null" else ""}
+                </div>''')
+
+            self.send_json({"html": "".join(html_parts)})
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
+
+    def serve_completions(self):
+        """Serve completed.md content"""
+        try:
+            completed_file = f"{AUTONOMY_DIR}/state/completed.md"
+            if os.path.exists(completed_file):
+                with open(completed_file, 'r') as f:
+                    content = f.read()
+                self.send_json({"content": content, "exists": True})
+            else:
+                self.send_json({"content": "", "exists": False})
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
+
+    def serve_token_budget(self):
+        """Serve token budget status"""
+        try:
+            token_file = f"{AUTONOMY_DIR}/state/token_usage.json"
+            budget = 50000
+            
+            # Get budget from config
+            if os.path.exists(CONFIG_FILE):
+                with open(CONFIG_FILE, 'r') as f:
+                    config = json.load(f)
+                budget = config.get("agentic_config", {}).get("hard_limits", {}).get("daily_token_budget", 50000)
+            
+            state = {"date": datetime.now().strftime("%Y-%m-%d"), "used": 0, "sessions": 0, "budget": budget}
+            if os.path.exists(token_file):
+                with open(token_file, 'r') as f:
+                    state = json.load(f)
+                state["budget"] = budget
+            
+            state["remaining"] = budget - state.get("used", 0)
+            pct = int((state.get("used", 0) / budget * 100)) if budget > 0 else 0
+            state["percent_used"] = pct
+            
+            if pct >= 100:
+                state["status"] = "exceeded"
+            elif pct >= 80:
+                state["status"] = "warning"
+            else:
+                state["status"] = "ok"
+            
+            self.send_json(state)
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
+
+    def serve_workspace_scan(self):
+        """Serve workspace scan results"""
+        try:
+            scan_file = f"{AUTONOMY_DIR}/state/workspace_scan.json"
+            if os.path.exists(scan_file):
+                with open(scan_file, 'r') as f:
+                    content = f.read()
+                    content = ''.join(c for c in content if ord(c) >= 32 or c in '\n\r\t')
+                    scan = json.loads(content)
+                self.send_json(scan)
+            else:
+                self.send_json({"error": "No workspace scan yet. Run: autonomy go"}, 404)
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
+
+    def handle_go(self):
+        """Handle autonomy go from web UI"""
+        try:
+            content_len = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(content_len)) if content_len > 0 else {}
+            instruction = body.get("instruction", "")
+            
+            cmd = ["bash", f"{AUTONOMY_DIR}/autonomy", "go"]
+            if instruction:
+                cmd.append(instruction)
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+            self.send_json({
+                "success": result.returncode == 0,
+                "output": result.stdout[-500:] if result.stdout else "",
+                "message": "Autonomy GO activated" + (f": {instruction}" if instruction else "")
+            })
+        except Exception as e:
+            self.send_json({"success": False, "error": str(e)}, 500)
+
+    def control_daemon(self):
+        """Control daemon start/stop/restart"""
+        try:
+            content_len = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(content_len)) if content_len > 0 else {}
+            action = body.get("action", "status")
+            
+            result = subprocess.run(
+                ["bash", f"{AUTONOMY_DIR}/daemon.sh", action],
+                capture_output=True, text=True, timeout=15
+            )
+            self.send_json({
+                "success": result.returncode == 0,
+                "output": result.stdout.strip(),
+                "action": action
+            })
+        except Exception as e:
+            self.send_json({"success": False, "error": str(e)}, 500)
+
     def serve_service_worker(self):
         """Serve Service Worker for PWA offline support"""
         sw_js = '''
@@ -3035,6 +3362,21 @@ self.addEventListener('fetch', event => {
 
 if __name__ == "__main__":
     port = int(os.environ.get("AUTONOMY_WEB_PORT", 8767))
-    server = HTTPServer(("0.0.0.0", port), Handler)
+    server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
+
+    # Graceful shutdown on SIGTERM / SIGINT
+    def _shutdown(signum, frame):
+        print("\nShutting down web UI...")
+        threading.Thread(target=server.shutdown).start()
+
+    signal.signal(signal.SIGTERM, _shutdown)
+    signal.signal(signal.SIGINT, _shutdown)
+
     print(f"rar-file/autonomy dashboard at http://localhost:{port}")
-    server.serve_forever()
+    try:
+        server.serve_forever()
+    except Exception as e:
+        print(f"Server error: {e}", file=sys.stderr)
+    finally:
+        server.server_close()
+        print("Web UI stopped.")

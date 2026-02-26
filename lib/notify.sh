@@ -2,7 +2,7 @@
 # Email Notification System for Autonomy
 # Sends email notifications for task completions and important events
 
-AUTONOMY_DIR="${AUTONOMY_DIR:-/root/.openclaw/workspace/skills/autonomy}"
+AUTONOMY_DIR="${AUTONOMY_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 CONFIG_FILE="$AUTONOMY_DIR/config.json"
 
 # Load email config from autonomy config
