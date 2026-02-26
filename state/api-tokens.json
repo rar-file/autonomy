@@ -1,0 +1,15 @@
+{
+  "tokens": {
+    "web-ui": {
+      "token": "api_22a4340b0522a5d635e58bd062e58fa938571485a71196c200f493ae54b8f3e4",
+      "rate_limit": 100,
+      "scopes": [
+        "read",
+        "write"
+      ],
+      "created": "2026-02-25T09:40:52+01:00",
+      "last_used": "2026-02-25T09:40:52+01:00",
+      "active": true
+    }
+  }
+}

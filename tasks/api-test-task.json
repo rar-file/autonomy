@@ -1,0 +1,19 @@
+{
+  "name": "api-test-task",
+  "description": "Testing API endpoint",
+  "status": "pending",
+  "priority": "normal",
+  "created": "2026-02-24T23:28:02+01:00",
+  "assignee": "self",
+  "subtasks": [],
+  "completed": true,
+  "attempts": 1,
+  "max_attempts": 3,
+  "verification": "API endpoint tested successfully. Created via POST /api/task/create and verified via GET /api/task/api-test-task. All API endpoints working correctly.",
+  "evidence": [
+    "Created via API endpoint",
+    "Verified retrieval via GET endpoint",
+    "API working correctly"
+  ],
+  "completed_at": "2026-02-25T00:30:00+01:00"
+}

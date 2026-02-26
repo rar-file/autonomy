@@ -121,9 +121,9 @@
     ],
     "created_tools": [],
     "token_usage_today": 0,
-    "daemon_running": true,
-    "daemon_started": "2026-02-26T00:56:38+01:00",
-    "daemon_stopped": "2026-02-26T00:56:35+01:00"
+    "daemon_running": false,
+    "daemon_started": "2026-02-26T01:33:57+01:00",
+    "daemon_stopped": "2026-02-26T02:20:56+01:00"
   },
   "default_state": "off",
   "active_context": null,
@@ -140,5 +140,8 @@
   "tasks_dir": "tasks",
   "agents_dir": "agents",
   "tools_dir": "tools",
-  "logs_dir": "logs"
+  "logs_dir": "logs",
+  "daemon": {
+    "interval_minutes": 7
+  }
 }

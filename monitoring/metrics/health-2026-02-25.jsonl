@@ -1,0 +1,52 @@
+{
+  "timestamp": "2026-02-25T00:24:39+01:00",
+  "healthy": 8,
+  "warning": 0,
+  "critical": 0,
+  "components": [
+    {
+      "component": "daemon",
+      "status": "healthy",
+      "pid": 228498
+    },
+    {
+      "component": "config",
+      "status": "healthy",
+      "version": "2.0.0"
+    },
+    {
+      "component": "tasks",
+      "status": "healthy",
+      "total": 13,
+      "pending": 8
+    },
+    {
+      "component": "logs",
+      "status": "healthy",
+      "log_files": 8,
+      "today_entries": 0
+    },
+    {
+      "component": "disk",
+      "status": "healthy",
+      "usage_percent": 7
+    },
+    {
+      "component": "memory",
+      "status": "healthy",
+      "usage_percent": 9
+    },
+    {
+      "component": "integrations",
+      "status": "healthy",
+      "enabled": 0
+    },
+    {
+      "component": "token_budget",
+      "status": "healthy",
+      "used": 0,
+      "budget": 50000,
+      "percent": 0
+    }
+  ]
+}

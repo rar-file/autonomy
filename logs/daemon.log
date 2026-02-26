@@ -1,0 +1,1935 @@
+[2026-02-24T23:14:30+01:00] Daemon starting...
+[2026-02-24T23:14:30+01:00] Running heartbeat cycle...
+[2026-02-24T23:14:31+01:00] Found pending task: add-api-endpoints
+[2026-02-24T23:14:31+01:00] Working on: add-api-endpoints
+[2026-02-24T23:14:31+01:00] Description: Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing
+[2026-02-24T23:14:32+01:00] Daemon started with PID: 228384
+[2026-02-24T23:14:33+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:14:33+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:17:08+01:00] Daemon starting...
+[2026-02-24T23:17:08+01:00] Running heartbeat cycle...
+[2026-02-24T23:17:08+01:00] Found pending task: add-api-endpoints
+[2026-02-24T23:17:08+01:00] Working on: add-api-endpoints
+[2026-02-24T23:17:08+01:00] Description: Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing
+[2026-02-24T23:17:09+01:00] Daemon started with PID: 228498
+[2026-02-24T23:17:10+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:17:10+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:17:44+01:00] Daemon starting...
+[2026-02-24T23:17:44+01:00] Running heartbeat cycle...
+[2026-02-24T23:17:44+01:00] Found pending task: add-api-endpoints
+[2026-02-24T23:17:44+01:00] Working on: add-api-endpoints
+[2026-02-24T23:17:44+01:00] Description: Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing
+[2026-02-24T23:17:45+01:00] Daemon started with PID: 228625
+[2026-02-24T23:17:46+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:17:46+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:17:57+01:00] Daemon stopped
+[2026-02-24T23:17:58+01:00] Daemon starting...
+[2026-02-24T23:17:58+01:00] Running heartbeat cycle...
+[2026-02-24T23:17:58+01:00] Found pending task: add-api-endpoints
+[2026-02-24T23:17:58+01:00] Working on: add-api-endpoints
+[2026-02-24T23:17:58+01:00] Description: Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing
+[2026-02-24T23:17:59+01:00] Daemon started with PID: 228719
+[2026-02-24T23:18:00+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:18:00+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:24:33+01:00] Running heartbeat cycle...
+[2026-02-24T23:24:33+01:00] Found pending task: add-api-endpoints
+[2026-02-24T23:24:33+01:00] Working on: add-api-endpoints
+[2026-02-24T23:24:33+01:00] Description: Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing
+[2026-02-24T23:24:35+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:24:35+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:27:10+01:00] Running heartbeat cycle...
+[2026-02-24T23:27:10+01:00] Found pending task: add-api-endpoints
+[2026-02-24T23:27:10+01:00] Working on: add-api-endpoints
+[2026-02-24T23:27:10+01:00] Description: Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing
+[2026-02-24T23:27:12+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:27:12+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:28:00+01:00] Running heartbeat cycle...
+[2026-02-24T23:28:00+01:00] Found pending task: add-api-endpoints
+[2026-02-24T23:28:00+01:00] Working on: add-api-endpoints
+[2026-02-24T23:28:00+01:00] Description: Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing
+[2026-02-24T23:28:02+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:28:02+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:34:35+01:00] Running heartbeat cycle...
+[2026-02-24T23:34:35+01:00] Found pending task: add-api-endpoints
+[2026-02-24T23:34:35+01:00] Working on: add-api-endpoints
+[2026-02-24T23:34:35+01:00] Description: Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing
+[2026-02-24T23:34:37+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:34:37+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:37:12+01:00] Running heartbeat cycle...
+[2026-02-24T23:37:12+01:00] Found pending task: add-api-endpoints
+[2026-02-24T23:37:13+01:00] Working on: add-api-endpoints
+[2026-02-24T23:37:13+01:00] Description: Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing
+[2026-02-24T23:37:15+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:37:15+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:38:02+01:00] Running heartbeat cycle...
+[2026-02-24T23:38:02+01:00] Found pending task: add-api-endpoints
+[2026-02-24T23:38:02+01:00] Working on: add-api-endpoints
+[2026-02-24T23:38:02+01:00] Description: Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing
+[2026-02-24T23:38:05+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:38:05+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:44:37+01:00] Running heartbeat cycle...
+[2026-02-24T23:44:37+01:00] Found pending task: add-api-endpoints
+[2026-02-24T23:44:37+01:00] Working on: add-api-endpoints
+[2026-02-24T23:44:37+01:00] Description: Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing
+[2026-02-24T23:44:39+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:44:39+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:46:25+01:00] Daemon stopped
+[2026-02-24T23:46:26+01:00] Daemon starting...
+[2026-02-24T23:46:26+01:00] Running heartbeat cycle...
+[2026-02-24T23:46:26+01:00] Found pending task: add-api-endpoints
+[2026-02-24T23:46:26+01:00] Working on: add-api-endpoints
+[2026-02-24T23:46:26+01:00] Description: Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing
+[2026-02-24T23:46:26+01:00] Flagging task for AI processing: add-api-endpoints
+[2026-02-24T23:46:26+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-24T23:46:26+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:46:27+01:00] Daemon started with PID: 229339
+[2026-02-24T23:47:15+01:00] Running heartbeat cycle...
+[2026-02-24T23:47:15+01:00] Found pending task: add-api-endpoints
+[2026-02-24T23:47:15+01:00] Working on: add-api-endpoints
+[2026-02-24T23:47:15+01:00] Description: Add more API endpoints to web UI: task management, agent spawning, schedule management, configuration editing
+[2026-02-24T23:47:17+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:47:17+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:54:39+01:00] Running heartbeat cycle...
+[2026-02-24T23:54:39+01:00] Found pending task: add-integrations
+[2026-02-24T23:54:39+01:00] Working on: add-integrations
+[2026-02-24T23:54:39+01:00] Description: Add integrations: Discord notifications, Telegram alerts, Slack webhooks, email reports
+[2026-02-24T23:54:41+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:54:41+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:56:26+01:00] Running heartbeat cycle...
+[2026-02-24T23:56:27+01:00] Found pending task: add-integrations
+[2026-02-24T23:56:27+01:00] Working on: add-integrations
+[2026-02-24T23:56:27+01:00] Description: Add integrations: Discord notifications, Telegram alerts, Slack webhooks, email reports
+[2026-02-24T23:56:27+01:00] Flagging task for AI processing: add-integrations
+[2026-02-24T23:56:27+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-24T23:56:27+01:00] Sleeping for 10 minutes...
+[2026-02-24T23:57:17+01:00] Running heartbeat cycle...
+[2026-02-24T23:57:17+01:00] Found pending task: add-integrations
+[2026-02-24T23:57:17+01:00] Working on: add-integrations
+[2026-02-24T23:57:17+01:00] Description: Add integrations: Discord notifications, Telegram alerts, Slack webhooks, email reports
+[2026-02-24T23:57:19+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-24T23:57:19+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:00:35+01:00] Daemon stopped
+[2026-02-25T00:04:41+01:00] Running heartbeat cycle...
+[2026-02-25T00:04:41+01:00] Found pending task: add-integrations
+[2026-02-25T00:04:41+01:00] Working on: add-integrations
+[2026-02-25T00:04:41+01:00] Description: Add integrations: Discord notifications, Telegram alerts, Slack webhooks, email reports
+[2026-02-25T00:04:43+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-25T00:04:43+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:07:19+01:00] Running heartbeat cycle...
+[2026-02-25T00:07:19+01:00] Found pending task: add-integrations
+[2026-02-25T00:07:19+01:00] Working on: add-integrations
+[2026-02-25T00:07:19+01:00] Description: Add integrations: Discord notifications, Telegram alerts, Slack webhooks, email reports
+[2026-02-25T00:07:21+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-25T00:07:21+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:10:50+01:00] Daemon starting...
+[2026-02-25T00:10:50+01:00] Running heartbeat cycle...
+[2026-02-25T00:10:50+01:00] Found pending task: add-integrations
+[2026-02-25T00:10:50+01:00] Working on: add-integrations
+[2026-02-25T00:10:50+01:00] Description: Add integrations: Discord notifications, Telegram alerts, Slack webhooks, email reports
+[2026-02-25T00:10:50+01:00] Flagging task for AI processing: add-integrations
+[2026-02-25T00:10:50+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T00:10:50+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:10:51+01:00] Daemon started with PID: 229990
+[2026-02-25T00:14:43+01:00] Running heartbeat cycle...
+[2026-02-25T00:14:43+01:00] Found pending task: api-test-task
+[2026-02-25T00:14:43+01:00] Working on: api-test-task
+[2026-02-25T00:14:43+01:00] Description: Testing API endpoint
+[2026-02-25T00:14:45+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-25T00:14:45+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:17:21+01:00] Running heartbeat cycle...
+[2026-02-25T00:17:21+01:00] Found pending task: api-test-task
+[2026-02-25T00:17:21+01:00] Working on: api-test-task
+[2026-02-25T00:17:21+01:00] Description: Testing API endpoint
+[2026-02-25T00:17:23+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-25T00:17:23+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:20:50+01:00] Running heartbeat cycle...
+[2026-02-25T00:20:50+01:00] Found pending task: api-test-task
+[2026-02-25T00:20:50+01:00] Working on: api-test-task
+[2026-02-25T00:20:50+01:00] Description: Testing API endpoint
+[2026-02-25T00:20:50+01:00] Flagging task for AI processing: api-test-task
+[2026-02-25T00:20:50+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T00:20:50+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:24:45+01:00] Running heartbeat cycle...
+[2026-02-25T00:24:45+01:00] Found pending task: api-test-task
+[2026-02-25T00:24:45+01:00] Working on: api-test-task
+[2026-02-25T00:24:45+01:00] Description: Testing API endpoint
+[2026-02-25T00:24:47+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-25T00:24:47+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:27:23+01:00] Running heartbeat cycle...
+[2026-02-25T00:27:23+01:00] Found pending task: api-test-task
+[2026-02-25T00:27:23+01:00] Working on: api-test-task
+[2026-02-25T00:27:23+01:00] Description: Testing API endpoint
+[2026-02-25T00:27:25+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-25T00:27:25+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:30:50+01:00] Running heartbeat cycle...
+[2026-02-25T00:30:51+01:00] Found pending task: api-test-task
+[2026-02-25T00:30:51+01:00] Working on: api-test-task
+[2026-02-25T00:30:51+01:00] Description: Testing API endpoint
+[2026-02-25T00:30:51+01:00] Flagging task for AI processing: api-test-task
+[2026-02-25T00:30:51+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T00:30:51+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:34:47+01:00] Running heartbeat cycle...
+[2026-02-25T00:34:47+01:00] Found pending task: continuous-improvement
+[2026-02-25T00:34:47+01:00] Working on: continuous-improvement
+[2026-02-25T00:34:47+01:00] Description: Master tracking task for continuous autonomy improvements - web UI updates, new features, enhanced capabilities
+[2026-02-25T00:34:49+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-25T00:34:49+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:37:25+01:00] Running heartbeat cycle...
+[2026-02-25T00:37:25+01:00] Found pending task: continuous-improvement
+[2026-02-25T00:37:25+01:00] Working on: continuous-improvement
+[2026-02-25T00:37:25+01:00] Description: Master tracking task for continuous autonomy improvements - web UI updates, new features, enhanced capabilities
+[2026-02-25T00:37:27+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-25T00:37:27+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:40:51+01:00] Running heartbeat cycle...
+[2026-02-25T00:40:51+01:00] Found pending task: continuous-improvement
+[2026-02-25T00:40:51+01:00] Working on: continuous-improvement
+[2026-02-25T00:40:51+01:00] Description: Master tracking task for continuous autonomy improvements - web UI updates, new features, enhanced capabilities
+[2026-02-25T00:40:51+01:00] Flagging task for AI processing: continuous-improvement
+[2026-02-25T00:40:51+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T00:40:51+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:44:49+01:00] Running heartbeat cycle...
+[2026-02-25T00:44:49+01:00] Found pending task: continuous-improvement
+[2026-02-25T00:44:49+01:00] Working on: continuous-improvement
+[2026-02-25T00:44:49+01:00] Description: Master tracking task for continuous autonomy improvements - web UI updates, new features, enhanced capabilities
+[2026-02-25T00:44:51+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-25T00:44:51+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:47:27+01:00] Running heartbeat cycle...
+[2026-02-25T00:47:27+01:00] Found pending task: continuous-improvement
+[2026-02-25T00:47:27+01:00] Working on: continuous-improvement
+[2026-02-25T00:47:27+01:00] Description: Master tracking task for continuous autonomy improvements - web UI updates, new features, enhanced capabilities
+[2026-02-25T00:47:29+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-25T00:47:29+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:50:51+01:00] Running heartbeat cycle...
+[2026-02-25T00:50:51+01:00] Found pending task: continuous-improvement
+[2026-02-25T00:50:51+01:00] Working on: continuous-improvement
+[2026-02-25T00:50:51+01:00] Description: Master tracking task for continuous autonomy improvements - web UI updates, new features, enhanced capabilities
+[2026-02-25T00:50:51+01:00] Flagging task for AI processing: continuous-improvement
+[2026-02-25T00:50:51+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T00:50:51+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:54:51+01:00] Running heartbeat cycle...
+[2026-02-25T00:54:51+01:00] Found pending task: continuous-improvement
+[2026-02-25T00:54:51+01:00] Working on: continuous-improvement
+[2026-02-25T00:54:51+01:00] Description: Master tracking task for continuous autonomy improvements - web UI updates, new features, enhanced capabilities
+[2026-02-25T00:54:53+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-25T00:54:53+01:00] Sleeping for 10 minutes...
+[2026-02-25T00:57:29+01:00] Running heartbeat cycle...
+[2026-02-25T00:57:29+01:00] Found pending task: continuous-improvement
+[2026-02-25T00:57:29+01:00] Working on: continuous-improvement
+[2026-02-25T00:57:29+01:00] Description: Master tracking task for continuous autonomy improvements - web UI updates, new features, enhanced capabilities
+[2026-02-25T00:57:31+01:00] Task progress logged. Next cycle in 10 minutes.
+[2026-02-25T00:57:31+01:00] Sleeping for 10 minutes...
+[2026-02-25T01:00:51+01:00] Running heartbeat cycle...
+[2026-02-25T01:00:51+01:00] Found pending task: continuous-improvement
+[2026-02-25T01:00:51+01:00] Working on: continuous-improvement
+[2026-02-25T01:00:51+01:00] Description: Master tracking task for continuous autonomy improvements - web UI updates, new features, enhanced capabilities
+[2026-02-25T01:00:51+01:00] Flagging task for AI processing: continuous-improvement
+[2026-02-25T01:00:51+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T01:00:51+01:00] Sleeping for 10 minutes...
+[2026-02-25T01:05:12+01:00] Daemon starting...
+[2026-02-25T01:05:12+01:00] Running heartbeat cycle...
+[2026-02-25T01:05:12+01:00] Found pending task: documentation
+[2026-02-25T01:05:12+01:00] Working on: documentation
+[2026-02-25T01:05:12+01:00] Description: Improve documentation: API docs, usage examples, troubleshooting guide, contribution guidelines
+[2026-02-25T01:05:12+01:00] Flagging task for AI processing: documentation
+[2026-02-25T01:05:12+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T01:05:12+01:00] Sleeping for 10 minutes...
+[2026-02-25T01:05:13+01:00] Daemon started with PID: 233818
+[2026-02-25T08:15:10+01:00] Daemon starting (PID: 261731)...
+[2026-02-25T08:15:10+01:00] === Starting daemon cycle ===
+[2026-02-25T08:15:10+01:00] === Starting daemon cycle ===
+[2026-02-25T08:15:10+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T08:15:10+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T08:15:11+01:00] Daemon started with PID: 261737
+[2026-02-25T08:16:10+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T08:16:10+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T08:16:10+01:00] Found eligible task: improvement-1771978250-0 (status: pending, attempts: 0)
+[2026-02-25T08:16:10+01:00] Found eligible task: improvement-1771978250-0 (status: pending, attempts: 0)
+[2026-02-25T08:16:10+01:00] Flagging for AI: improvement-1771978250-0
+[2026-02-25T08:16:10+01:00] Flagging for AI: improvement-1771978250-0
+[2026-02-25T08:16:10+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T08:16:10+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T08:16:10+01:00] === Cycle complete ===
+[2026-02-25T08:16:10+01:00] === Cycle complete ===
+[2026-02-25T08:26:11+01:00] === Starting daemon cycle ===
+[2026-02-25T08:26:11+01:00] === Starting daemon cycle ===
+[2026-02-25T08:26:11+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T08:26:11+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T08:27:11+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T08:27:11+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T08:27:11+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T08:27:11+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T08:27:11+01:00] Found eligible task: improvement-1771978250-1 (status: pending, attempts: 0)
+[2026-02-25T08:27:11+01:00] Found eligible task: improvement-1771978250-1 (status: pending, attempts: 0)
+[2026-02-25T08:27:11+01:00] Flagging for AI: improvement-1771978250-1
+[2026-02-25T08:27:11+01:00] Flagging for AI: improvement-1771978250-1
+[2026-02-25T08:27:11+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T08:27:11+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T08:27:11+01:00] === Cycle complete ===
+[2026-02-25T08:27:11+01:00] === Cycle complete ===
+[2026-02-25T08:37:11+01:00] === Starting daemon cycle ===
+[2026-02-25T08:37:11+01:00] === Starting daemon cycle ===
+[2026-02-25T08:37:11+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T08:37:11+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T08:37:12+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T08:37:12+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T08:37:12+01:00] Found eligible task: improvement-1771978250-2 (status: pending, attempts: 0)
+[2026-02-25T08:37:12+01:00] Found eligible task: improvement-1771978250-2 (status: pending, attempts: 0)
+[2026-02-25T08:37:12+01:00] Flagging for AI: improvement-1771978250-2
+[2026-02-25T08:37:12+01:00] Flagging for AI: improvement-1771978250-2
+[2026-02-25T08:37:12+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T08:37:12+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T08:37:12+01:00] === Cycle complete ===
+[2026-02-25T08:37:12+01:00] === Cycle complete ===
+[2026-02-25T08:47:12+01:00] === Starting daemon cycle ===
+[2026-02-25T08:47:12+01:00] === Starting daemon cycle ===
+[2026-02-25T08:47:12+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T08:47:12+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T08:48:12+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T08:48:12+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T08:48:12+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T08:48:12+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T08:48:12+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T08:48:12+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T08:48:12+01:00] Found eligible task: improvement-1771978250-3 (status: pending, attempts: 0)
+[2026-02-25T08:48:12+01:00] Found eligible task: improvement-1771978250-3 (status: pending, attempts: 0)
+[2026-02-25T08:48:12+01:00] Flagging for AI: improvement-1771978250-3
+[2026-02-25T08:48:12+01:00] Flagging for AI: improvement-1771978250-3
+[2026-02-25T08:48:12+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T08:48:12+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T08:48:12+01:00] === Cycle complete ===
+[2026-02-25T08:48:12+01:00] === Cycle complete ===
+[2026-02-25T08:58:13+01:00] === Starting daemon cycle ===
+[2026-02-25T08:58:13+01:00] === Starting daemon cycle ===
+[2026-02-25T08:58:13+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T08:58:13+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T08:59:13+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T08:59:13+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T08:59:13+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T08:59:13+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T08:59:13+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T08:59:13+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T08:59:13+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T08:59:13+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T08:59:13+01:00] Found eligible task: improvement-1771978250-4 (status: pending, attempts: 0)
+[2026-02-25T08:59:13+01:00] Found eligible task: improvement-1771978250-4 (status: pending, attempts: 0)
+[2026-02-25T08:59:13+01:00] Flagging for AI: improvement-1771978250-4
+[2026-02-25T08:59:13+01:00] Flagging for AI: improvement-1771978250-4
+[2026-02-25T08:59:13+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T08:59:13+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T08:59:13+01:00] === Cycle complete ===
+[2026-02-25T08:59:13+01:00] === Cycle complete ===
+[2026-02-25T09:09:13+01:00] === Starting daemon cycle ===
+[2026-02-25T09:09:13+01:00] === Starting daemon cycle ===
+[2026-02-25T09:09:13+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T09:09:13+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T09:10:14+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T09:10:14+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T09:10:14+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T09:10:14+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T09:10:14+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T09:10:14+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T09:10:14+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T09:10:14+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T09:10:14+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T09:10:14+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T09:10:14+01:00] Found eligible task: improvement-1771978250-5 (status: pending, attempts: 0)
+[2026-02-25T09:10:14+01:00] Found eligible task: improvement-1771978250-5 (status: pending, attempts: 0)
+[2026-02-25T09:10:14+01:00] Flagging for AI: improvement-1771978250-5
+[2026-02-25T09:10:14+01:00] Flagging for AI: improvement-1771978250-5
+[2026-02-25T09:10:14+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T09:10:14+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T09:10:14+01:00] === Cycle complete ===
+[2026-02-25T09:10:14+01:00] === Cycle complete ===
+[2026-02-25T09:20:14+01:00] === Starting daemon cycle ===
+[2026-02-25T09:20:14+01:00] === Starting daemon cycle ===
+[2026-02-25T09:20:14+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T09:20:14+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T09:21:15+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T09:21:15+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T09:21:15+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T09:21:15+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T09:21:15+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T09:21:15+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T09:21:15+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T09:21:15+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T09:21:15+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T09:21:15+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T09:21:15+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T09:21:15+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T09:21:15+01:00] Found eligible task: improvement-1771978250-6 (status: pending, attempts: 0)
+[2026-02-25T09:21:15+01:00] Found eligible task: improvement-1771978250-6 (status: pending, attempts: 0)
+[2026-02-25T09:21:15+01:00] Flagging for AI: improvement-1771978250-6
+[2026-02-25T09:21:15+01:00] Flagging for AI: improvement-1771978250-6
+[2026-02-25T09:21:15+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T09:21:15+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T09:21:15+01:00] === Cycle complete ===
+[2026-02-25T09:21:15+01:00] === Cycle complete ===
+[2026-02-25T09:31:15+01:00] === Starting daemon cycle ===
+[2026-02-25T09:31:15+01:00] === Starting daemon cycle ===
+[2026-02-25T09:31:15+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T09:31:15+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T09:32:15+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T09:32:15+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T09:32:16+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T09:32:16+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T09:32:16+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T09:32:16+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T09:32:16+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T09:32:16+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T09:32:16+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T09:32:16+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T09:32:16+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T09:32:16+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T09:32:16+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T09:32:16+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T09:32:16+01:00] Found eligible task: improvement-1771978250-7 (status: pending, attempts: 0)
+[2026-02-25T09:32:16+01:00] Found eligible task: improvement-1771978250-7 (status: pending, attempts: 0)
+[2026-02-25T09:32:16+01:00] Flagging for AI: improvement-1771978250-7
+[2026-02-25T09:32:16+01:00] Flagging for AI: improvement-1771978250-7
+[2026-02-25T09:32:16+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T09:32:16+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T09:32:16+01:00] === Cycle complete ===
+[2026-02-25T09:32:16+01:00] === Cycle complete ===
+[2026-02-25T09:42:16+01:00] === Starting daemon cycle ===
+[2026-02-25T09:42:16+01:00] === Starting daemon cycle ===
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-7 (status: ai_processing)
+[2026-02-25T09:42:16+01:00] Skipping improvement-1771978250-7 (status: ai_processing)
+[2026-02-25T09:42:16+01:00] Found eligible task: improvement-1771978250-8 (status: pending, attempts: 0)
+[2026-02-25T09:42:16+01:00] Found eligible task: improvement-1771978250-8 (status: pending, attempts: 0)
+[2026-02-25T09:42:16+01:00] Flagging for AI: improvement-1771978250-8
+[2026-02-25T09:42:16+01:00] Flagging for AI: improvement-1771978250-8
+[2026-02-25T09:42:16+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T09:42:16+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T09:42:16+01:00] === Cycle complete ===
+[2026-02-25T09:42:16+01:00] === Cycle complete ===
+[2026-02-25T09:52:17+01:00] === Starting daemon cycle ===
+[2026-02-25T09:52:17+01:00] === Starting daemon cycle ===
+[2026-02-25T09:52:17+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T09:52:17+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T09:53:17+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T09:53:17+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T09:53:17+01:00] Found eligible task: improvement-1771978250-9 (status: pending, attempts: 0)
+[2026-02-25T09:53:17+01:00] Found eligible task: improvement-1771978250-9 (status: pending, attempts: 0)
+[2026-02-25T09:53:17+01:00] Flagging for AI: improvement-1771978250-9
+[2026-02-25T09:53:17+01:00] Flagging for AI: improvement-1771978250-9
+[2026-02-25T09:53:17+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T09:53:17+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T09:53:17+01:00] === Cycle complete ===
+[2026-02-25T09:53:17+01:00] === Cycle complete ===
+[2026-02-25T10:03:17+01:00] === Starting daemon cycle ===
+[2026-02-25T10:03:17+01:00] === Starting daemon cycle ===
+[2026-02-25T10:03:17+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T10:03:17+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T10:04:18+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T10:04:18+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T10:04:18+01:00] Found eligible task: task-1771968610 (status: pending, attempts: 0)
+[2026-02-25T10:04:18+01:00] Found eligible task: task-1771968610 (status: pending, attempts: 0)
+[2026-02-25T10:04:18+01:00] Flagging for AI: task-1771968610
+[2026-02-25T10:04:18+01:00] Flagging for AI: task-1771968610
+[2026-02-25T10:04:18+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T10:04:18+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T10:04:18+01:00] === Cycle complete ===
+[2026-02-25T10:04:18+01:00] === Cycle complete ===
+[2026-02-25T10:14:18+01:00] === Starting daemon cycle ===
+[2026-02-25T10:14:18+01:00] === Starting daemon cycle ===
+[2026-02-25T10:14:18+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T10:14:18+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T10:15:19+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T10:15:19+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T10:15:19+01:00] No eligible tasks found.
+[2026-02-25T10:15:19+01:00] No eligible tasks found.
+[2026-02-25T10:15:19+01:00] === Cycle complete ===
+[2026-02-25T10:15:19+01:00] === Cycle complete ===
+[2026-02-25T10:25:19+01:00] === Starting daemon cycle ===
+[2026-02-25T10:25:19+01:00] === Starting daemon cycle ===
+[2026-02-25T10:25:19+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T10:25:19+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T10:26:20+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T10:26:20+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T10:26:20+01:00] No eligible tasks found.
+[2026-02-25T10:26:20+01:00] No eligible tasks found.
+[2026-02-25T10:26:20+01:00] === Cycle complete ===
+[2026-02-25T10:26:20+01:00] === Cycle complete ===
+[2026-02-25T10:36:20+01:00] === Starting daemon cycle ===
+[2026-02-25T10:36:20+01:00] === Starting daemon cycle ===
+[2026-02-25T10:36:20+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T10:36:20+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-0 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T10:36:51+01:00] No eligible tasks found.
+[2026-02-25T10:36:51+01:00] No eligible tasks found.
+[2026-02-25T10:36:51+01:00] === Cycle complete ===
+[2026-02-25T10:36:51+01:00] === Cycle complete ===
+[2026-02-25T10:46:51+01:00] === Starting daemon cycle ===
+[2026-02-25T10:46:51+01:00] === Starting daemon cycle ===
+[2026-02-25T10:46:51+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T10:46:51+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T10:47:51+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T10:47:51+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T10:47:52+01:00] No eligible tasks found.
+[2026-02-25T10:47:52+01:00] No eligible tasks found.
+[2026-02-25T10:47:52+01:00] === Cycle complete ===
+[2026-02-25T10:47:52+01:00] === Cycle complete ===
+[2026-02-25T10:57:52+01:00] === Starting daemon cycle ===
+[2026-02-25T10:57:52+01:00] === Starting daemon cycle ===
+[2026-02-25T10:57:52+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T10:57:52+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T10:58:52+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T10:58:52+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T10:58:52+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T10:58:52+01:00] Skipping improvement-1771978250-1 (status: needs_ai_attention)
+[2026-02-25T10:58:53+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T10:58:53+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T10:58:53+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T10:58:53+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T10:58:53+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T10:58:53+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T10:58:53+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T10:58:53+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T10:58:53+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T10:58:53+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T10:58:53+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T10:58:53+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T10:58:53+01:00] No eligible tasks found.
+[2026-02-25T10:58:53+01:00] No eligible tasks found.
+[2026-02-25T10:58:53+01:00] === Cycle complete ===
+[2026-02-25T10:58:53+01:00] === Cycle complete ===
+[2026-02-25T11:08:53+01:00] === Starting daemon cycle ===
+[2026-02-25T11:08:53+01:00] === Starting daemon cycle ===
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-1 (status: ai_processing)
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-1 (status: ai_processing)
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T11:08:53+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T11:08:53+01:00] No eligible tasks found.
+[2026-02-25T11:08:53+01:00] No eligible tasks found.
+[2026-02-25T11:08:53+01:00] === Cycle complete ===
+[2026-02-25T11:08:53+01:00] === Cycle complete ===
+[2026-02-25T11:18:54+01:00] === Starting daemon cycle ===
+[2026-02-25T11:18:54+01:00] === Starting daemon cycle ===
+[2026-02-25T11:18:54+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T11:18:54+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T11:19:54+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T11:19:54+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T11:19:54+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T11:19:54+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T11:19:54+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T11:19:54+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T11:19:54+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T11:19:54+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T11:19:54+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T11:19:54+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T11:19:54+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T11:19:54+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T11:19:54+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T11:19:54+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T11:19:54+01:00] No eligible tasks found.
+[2026-02-25T11:19:54+01:00] No eligible tasks found.
+[2026-02-25T11:19:54+01:00] === Cycle complete ===
+[2026-02-25T11:19:54+01:00] === Cycle complete ===
+[2026-02-25T11:29:54+01:00] === Starting daemon cycle ===
+[2026-02-25T11:29:54+01:00] === Starting daemon cycle ===
+[2026-02-25T11:29:54+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T11:29:54+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T11:30:55+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T11:30:55+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T11:30:55+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T11:30:55+01:00] Skipping improvement-1771978250-3 (status: needs_ai_attention)
+[2026-02-25T11:30:55+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T11:30:55+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T11:30:55+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T11:30:55+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T11:30:55+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T11:30:55+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T11:30:55+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T11:30:55+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T11:30:55+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T11:30:55+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T11:30:55+01:00] No eligible tasks found.
+[2026-02-25T11:30:55+01:00] No eligible tasks found.
+[2026-02-25T11:30:55+01:00] === Cycle complete ===
+[2026-02-25T11:30:55+01:00] === Cycle complete ===
+[2026-02-25T11:40:55+01:00] === Starting daemon cycle ===
+[2026-02-25T11:40:55+01:00] === Starting daemon cycle ===
+[2026-02-25T11:40:56+01:00] Skipping improvement-1771978250-3 (status: ai_processing)
+[2026-02-25T11:40:56+01:00] Skipping improvement-1771978250-3 (status: ai_processing)
+[2026-02-25T11:40:56+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T11:40:56+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T11:40:56+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T11:40:56+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T11:40:56+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T11:40:56+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T11:40:56+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T11:40:56+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T11:40:56+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T11:40:56+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T11:40:56+01:00] No eligible tasks found.
+[2026-02-25T11:40:56+01:00] No eligible tasks found.
+[2026-02-25T11:40:56+01:00] === Cycle complete ===
+[2026-02-25T11:40:56+01:00] === Cycle complete ===
+[2026-02-25T11:50:56+01:00] === Starting daemon cycle ===
+[2026-02-25T11:50:56+01:00] === Starting daemon cycle ===
+[2026-02-25T11:50:56+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T11:50:56+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T11:51:56+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T11:51:56+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T11:51:57+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T11:51:57+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T11:51:57+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T11:51:57+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T11:51:57+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T11:51:57+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T11:51:57+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T11:51:57+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T11:51:57+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T11:51:57+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T11:51:57+01:00] No eligible tasks found.
+[2026-02-25T11:51:57+01:00] No eligible tasks found.
+[2026-02-25T11:51:57+01:00] === Cycle complete ===
+[2026-02-25T11:51:57+01:00] === Cycle complete ===
+[2026-02-25T12:01:57+01:00] === Starting daemon cycle ===
+[2026-02-25T12:01:57+01:00] === Starting daemon cycle ===
+[2026-02-25T12:01:57+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T12:01:57+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T12:02:57+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T12:02:57+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T12:02:57+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T12:02:57+01:00] Skipping improvement-1771978250-4 (status: needs_ai_attention)
+[2026-02-25T12:02:57+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T12:02:57+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T12:02:57+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T12:02:57+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T12:02:57+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T12:02:57+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T12:02:58+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T12:02:58+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T12:02:58+01:00] No eligible tasks found.
+[2026-02-25T12:02:58+01:00] No eligible tasks found.
+[2026-02-25T12:02:58+01:00] === Cycle complete ===
+[2026-02-25T12:02:58+01:00] === Cycle complete ===
+[2026-02-25T12:12:58+01:00] === Starting daemon cycle ===
+[2026-02-25T12:12:58+01:00] === Starting daemon cycle ===
+[2026-02-25T12:12:58+01:00] Skipping improvement-1771978250-4 (status: ai_processing)
+[2026-02-25T12:12:58+01:00] Skipping improvement-1771978250-4 (status: ai_processing)
+[2026-02-25T12:12:58+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T12:12:58+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T12:12:58+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T12:12:58+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T12:12:58+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T12:12:58+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T12:12:58+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T12:12:58+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T12:12:58+01:00] No eligible tasks found.
+[2026-02-25T12:12:58+01:00] No eligible tasks found.
+[2026-02-25T12:12:58+01:00] === Cycle complete ===
+[2026-02-25T12:12:58+01:00] === Cycle complete ===
+[2026-02-25T12:22:58+01:00] === Starting daemon cycle ===
+[2026-02-25T12:22:58+01:00] === Starting daemon cycle ===
+[2026-02-25T12:22:58+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T12:22:58+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T12:23:59+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T12:23:59+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T12:23:59+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T12:23:59+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T12:23:59+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T12:23:59+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T12:23:59+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T12:23:59+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T12:23:59+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T12:23:59+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T12:23:59+01:00] No eligible tasks found.
+[2026-02-25T12:23:59+01:00] No eligible tasks found.
+[2026-02-25T12:23:59+01:00] === Cycle complete ===
+[2026-02-25T12:23:59+01:00] === Cycle complete ===
+[2026-02-25T12:33:59+01:00] === Starting daemon cycle ===
+[2026-02-25T12:33:59+01:00] === Starting daemon cycle ===
+[2026-02-25T12:33:59+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T12:33:59+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T12:35:00+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T12:35:00+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T12:35:00+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T12:35:00+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T12:35:00+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T12:35:00+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T12:35:00+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T12:35:00+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T12:35:00+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T12:35:00+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T12:35:00+01:00] No eligible tasks found.
+[2026-02-25T12:35:00+01:00] No eligible tasks found.
+[2026-02-25T12:35:00+01:00] === Cycle complete ===
+[2026-02-25T12:35:00+01:00] === Cycle complete ===
+[2026-02-25T12:45:00+01:00] === Starting daemon cycle ===
+[2026-02-25T12:45:00+01:00] === Starting daemon cycle ===
+[2026-02-25T12:45:00+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T12:45:00+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T12:46:01+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T12:46:01+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T12:46:01+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T12:46:01+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T12:46:01+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T12:46:01+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T12:46:01+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T12:46:01+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T12:46:01+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T12:46:01+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T12:46:01+01:00] No eligible tasks found.
+[2026-02-25T12:46:01+01:00] No eligible tasks found.
+[2026-02-25T12:46:01+01:00] === Cycle complete ===
+[2026-02-25T12:46:01+01:00] === Cycle complete ===
+[2026-02-25T12:56:01+01:00] === Starting daemon cycle ===
+[2026-02-25T12:56:01+01:00] === Starting daemon cycle ===
+[2026-02-25T12:56:01+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T12:56:01+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T12:56:01+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T12:56:01+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T12:56:01+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T12:56:01+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T12:56:01+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T12:56:01+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T12:56:02+01:00] No eligible tasks found.
+[2026-02-25T12:56:02+01:00] No eligible tasks found.
+[2026-02-25T12:56:02+01:00] === Cycle complete ===
+[2026-02-25T12:56:02+01:00] === Cycle complete ===
+[2026-02-25T13:06:02+01:00] === Starting daemon cycle ===
+[2026-02-25T13:06:02+01:00] === Starting daemon cycle ===
+[2026-02-25T13:06:02+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T13:06:02+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T13:06:02+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T13:06:02+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T13:06:02+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T13:06:02+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T13:06:02+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T13:06:02+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T13:06:02+01:00] No eligible tasks found.
+[2026-02-25T13:06:02+01:00] No eligible tasks found.
+[2026-02-25T13:06:02+01:00] === Cycle complete ===
+[2026-02-25T13:06:02+01:00] === Cycle complete ===
+[2026-02-25T13:16:02+01:00] === Starting daemon cycle ===
+[2026-02-25T13:16:02+01:00] === Starting daemon cycle ===
+[2026-02-25T13:16:03+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T13:16:03+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T13:16:03+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T13:16:03+01:00] Skipping improvement-1771978250-6 (status: needs_ai_attention)
+[2026-02-25T13:16:03+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T13:16:03+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T13:16:03+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T13:16:03+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T13:16:03+01:00] No eligible tasks found.
+[2026-02-25T13:16:03+01:00] No eligible tasks found.
+[2026-02-25T13:16:03+01:00] === Cycle complete ===
+[2026-02-25T13:16:03+01:00] === Cycle complete ===
+[2026-02-25T13:26:03+01:00] === Starting daemon cycle ===
+[2026-02-25T13:26:03+01:00] === Starting daemon cycle ===
+[2026-02-25T13:26:03+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T13:26:03+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T13:26:03+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T13:26:03+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T13:26:03+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T13:26:03+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T13:26:03+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T13:26:03+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T13:26:03+01:00] No eligible tasks found.
+[2026-02-25T13:26:03+01:00] No eligible tasks found.
+[2026-02-25T13:26:03+01:00] === Cycle complete ===
+[2026-02-25T13:26:03+01:00] === Cycle complete ===
+[2026-02-25T13:36:04+01:00] === Starting daemon cycle ===
+[2026-02-25T13:36:04+01:00] === Starting daemon cycle ===
+[2026-02-25T13:36:04+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T13:36:04+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T13:36:04+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T13:36:04+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T13:36:04+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T13:36:04+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T13:36:04+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T13:36:04+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T13:36:04+01:00] No eligible tasks found.
+[2026-02-25T13:36:04+01:00] No eligible tasks found.
+[2026-02-25T13:36:04+01:00] === Cycle complete ===
+[2026-02-25T13:36:04+01:00] === Cycle complete ===
+[2026-02-25T13:46:04+01:00] === Starting daemon cycle ===
+[2026-02-25T13:46:04+01:00] === Starting daemon cycle ===
+[2026-02-25T13:46:05+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T13:46:05+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T13:46:05+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T13:46:05+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T13:46:05+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T13:46:05+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T13:46:05+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T13:46:05+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T13:46:05+01:00] No eligible tasks found.
+[2026-02-25T13:46:05+01:00] No eligible tasks found.
+[2026-02-25T13:46:05+01:00] === Cycle complete ===
+[2026-02-25T13:46:05+01:00] === Cycle complete ===
+[2026-02-25T13:56:05+01:00] === Starting daemon cycle ===
+[2026-02-25T13:56:05+01:00] === Starting daemon cycle ===
+[2026-02-25T13:56:05+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T13:56:05+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T13:56:05+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T13:56:05+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T13:56:05+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T13:56:05+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T13:56:05+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T13:56:05+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T13:56:05+01:00] No eligible tasks found.
+[2026-02-25T13:56:05+01:00] No eligible tasks found.
+[2026-02-25T13:56:05+01:00] === Cycle complete ===
+[2026-02-25T13:56:05+01:00] === Cycle complete ===
+[2026-02-25T14:06:05+01:00] === Starting daemon cycle ===
+[2026-02-25T14:06:05+01:00] === Starting daemon cycle ===
+[2026-02-25T14:06:06+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T14:06:06+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T14:06:06+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T14:06:06+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T14:06:06+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T14:06:06+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T14:06:06+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T14:06:06+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T14:06:06+01:00] No eligible tasks found.
+[2026-02-25T14:06:06+01:00] No eligible tasks found.
+[2026-02-25T14:06:06+01:00] === Cycle complete ===
+[2026-02-25T14:06:06+01:00] === Cycle complete ===
+[2026-02-25T14:16:06+01:00] === Starting daemon cycle ===
+[2026-02-25T14:16:06+01:00] === Starting daemon cycle ===
+[2026-02-25T14:16:06+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T14:16:06+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T14:16:06+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T14:16:06+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T14:16:06+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T14:16:06+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T14:16:06+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T14:16:06+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T14:16:06+01:00] No eligible tasks found.
+[2026-02-25T14:16:06+01:00] No eligible tasks found.
+[2026-02-25T14:16:06+01:00] === Cycle complete ===
+[2026-02-25T14:16:06+01:00] === Cycle complete ===
+[2026-02-25T14:26:07+01:00] === Starting daemon cycle ===
+[2026-02-25T14:26:07+01:00] === Starting daemon cycle ===
+[2026-02-25T14:26:07+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T14:26:07+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T14:26:07+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T14:26:07+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T14:26:07+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T14:26:07+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T14:26:07+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T14:26:07+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T14:26:07+01:00] No eligible tasks found.
+[2026-02-25T14:26:07+01:00] No eligible tasks found.
+[2026-02-25T14:26:07+01:00] === Cycle complete ===
+[2026-02-25T14:26:07+01:00] === Cycle complete ===
+[2026-02-25T14:36:07+01:00] === Starting daemon cycle ===
+[2026-02-25T14:36:07+01:00] === Starting daemon cycle ===
+[2026-02-25T14:36:07+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T14:36:07+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T14:36:07+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T14:36:07+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T14:36:08+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T14:36:08+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T14:36:08+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T14:36:08+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T14:36:08+01:00] No eligible tasks found.
+[2026-02-25T14:36:08+01:00] No eligible tasks found.
+[2026-02-25T14:36:08+01:00] === Cycle complete ===
+[2026-02-25T14:36:08+01:00] === Cycle complete ===
+[2026-02-25T14:46:08+01:00] === Starting daemon cycle ===
+[2026-02-25T14:46:08+01:00] === Starting daemon cycle ===
+[2026-02-25T14:46:08+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T14:46:08+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T14:46:08+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T14:46:08+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T14:46:08+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T14:46:08+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T14:46:08+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T14:46:08+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T14:46:08+01:00] No eligible tasks found.
+[2026-02-25T14:46:08+01:00] No eligible tasks found.
+[2026-02-25T14:46:08+01:00] === Cycle complete ===
+[2026-02-25T14:46:08+01:00] === Cycle complete ===
+[2026-02-25T14:56:08+01:00] === Starting daemon cycle ===
+[2026-02-25T14:56:08+01:00] === Starting daemon cycle ===
+[2026-02-25T14:56:09+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T14:56:09+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T14:56:09+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T14:56:09+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T14:56:09+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T14:56:09+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T14:56:09+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T14:56:09+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T14:56:09+01:00] No eligible tasks found.
+[2026-02-25T14:56:09+01:00] No eligible tasks found.
+[2026-02-25T14:56:09+01:00] === Cycle complete ===
+[2026-02-25T14:56:09+01:00] === Cycle complete ===
+[2026-02-25T15:06:09+01:00] === Starting daemon cycle ===
+[2026-02-25T15:06:09+01:00] === Starting daemon cycle ===
+[2026-02-25T15:06:09+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T15:06:09+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T15:06:09+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T15:06:09+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T15:06:09+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T15:06:09+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T15:06:09+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T15:06:09+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T15:06:09+01:00] No eligible tasks found.
+[2026-02-25T15:06:09+01:00] No eligible tasks found.
+[2026-02-25T15:06:09+01:00] === Cycle complete ===
+[2026-02-25T15:06:09+01:00] === Cycle complete ===
+[2026-02-25T15:16:10+01:00] === Starting daemon cycle ===
+[2026-02-25T15:16:10+01:00] === Starting daemon cycle ===
+[2026-02-25T15:16:10+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T15:16:10+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T15:16:10+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T15:16:10+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T15:16:10+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T15:16:10+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T15:16:10+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T15:16:10+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T15:16:10+01:00] No eligible tasks found.
+[2026-02-25T15:16:10+01:00] No eligible tasks found.
+[2026-02-25T15:16:10+01:00] === Cycle complete ===
+[2026-02-25T15:16:10+01:00] === Cycle complete ===
+[2026-02-25T15:26:10+01:00] === Starting daemon cycle ===
+[2026-02-25T15:26:10+01:00] === Starting daemon cycle ===
+[2026-02-25T15:26:11+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T15:26:11+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T15:26:11+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T15:26:11+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T15:26:11+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T15:26:11+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T15:26:11+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T15:26:11+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T15:26:11+01:00] No eligible tasks found.
+[2026-02-25T15:26:11+01:00] No eligible tasks found.
+[2026-02-25T15:26:11+01:00] === Cycle complete ===
+[2026-02-25T15:26:11+01:00] === Cycle complete ===
+[2026-02-25T15:36:11+01:00] === Starting daemon cycle ===
+[2026-02-25T15:36:11+01:00] === Starting daemon cycle ===
+[2026-02-25T15:36:11+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T15:36:11+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T15:36:11+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T15:36:11+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T15:36:11+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T15:36:11+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T15:36:11+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T15:36:11+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T15:36:11+01:00] No eligible tasks found.
+[2026-02-25T15:36:11+01:00] No eligible tasks found.
+[2026-02-25T15:36:11+01:00] === Cycle complete ===
+[2026-02-25T15:36:11+01:00] === Cycle complete ===
+[2026-02-25T15:46:11+01:00] === Starting daemon cycle ===
+[2026-02-25T15:46:11+01:00] === Starting daemon cycle ===
+[2026-02-25T15:46:12+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T15:46:12+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T15:46:12+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T15:46:12+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T15:46:12+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T15:46:12+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T15:46:12+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T15:46:12+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T15:46:12+01:00] No eligible tasks found.
+[2026-02-25T15:46:12+01:00] No eligible tasks found.
+[2026-02-25T15:46:12+01:00] === Cycle complete ===
+[2026-02-25T15:46:12+01:00] === Cycle complete ===
+[2026-02-25T15:56:12+01:00] === Starting daemon cycle ===
+[2026-02-25T15:56:12+01:00] === Starting daemon cycle ===
+[2026-02-25T15:56:12+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T15:56:12+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T15:56:12+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T15:56:12+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T15:56:12+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T15:56:12+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T15:56:12+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T15:56:12+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T15:56:12+01:00] No eligible tasks found.
+[2026-02-25T15:56:12+01:00] No eligible tasks found.
+[2026-02-25T15:56:12+01:00] === Cycle complete ===
+[2026-02-25T15:56:12+01:00] === Cycle complete ===
+[2026-02-25T16:06:13+01:00] === Starting daemon cycle ===
+[2026-02-25T16:06:13+01:00] === Starting daemon cycle ===
+[2026-02-25T16:06:13+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T16:06:13+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T16:06:13+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T16:06:13+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T16:06:13+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T16:06:13+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T16:06:13+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T16:06:13+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T16:06:13+01:00] No eligible tasks found.
+[2026-02-25T16:06:13+01:00] No eligible tasks found.
+[2026-02-25T16:06:13+01:00] === Cycle complete ===
+[2026-02-25T16:06:13+01:00] === Cycle complete ===
+[2026-02-25T16:16:13+01:00] === Starting daemon cycle ===
+[2026-02-25T16:16:13+01:00] === Starting daemon cycle ===
+[2026-02-25T16:16:14+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T16:16:14+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T16:16:14+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T16:16:14+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T16:16:14+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T16:16:14+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T16:16:14+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T16:16:14+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T16:16:14+01:00] No eligible tasks found.
+[2026-02-25T16:16:14+01:00] No eligible tasks found.
+[2026-02-25T16:16:14+01:00] === Cycle complete ===
+[2026-02-25T16:16:14+01:00] === Cycle complete ===
+[2026-02-25T16:26:14+01:00] === Starting daemon cycle ===
+[2026-02-25T16:26:14+01:00] === Starting daemon cycle ===
+[2026-02-25T16:26:14+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T16:26:14+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T16:26:14+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T16:26:14+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T16:26:14+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T16:26:14+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T16:26:14+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T16:26:14+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T16:26:14+01:00] No eligible tasks found.
+[2026-02-25T16:26:14+01:00] No eligible tasks found.
+[2026-02-25T16:26:14+01:00] === Cycle complete ===
+[2026-02-25T16:26:14+01:00] === Cycle complete ===
+[2026-02-25T16:36:14+01:00] === Starting daemon cycle ===
+[2026-02-25T16:36:14+01:00] === Starting daemon cycle ===
+[2026-02-25T16:36:15+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T16:36:15+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T16:36:15+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T16:36:15+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T16:36:15+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T16:36:15+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T16:36:15+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T16:36:15+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T16:36:15+01:00] No eligible tasks found.
+[2026-02-25T16:36:15+01:00] No eligible tasks found.
+[2026-02-25T16:36:15+01:00] === Cycle complete ===
+[2026-02-25T16:36:15+01:00] === Cycle complete ===
+[2026-02-25T16:46:15+01:00] === Starting daemon cycle ===
+[2026-02-25T16:46:15+01:00] === Starting daemon cycle ===
+[2026-02-25T16:46:15+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T16:46:15+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T16:46:15+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T16:46:15+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T16:46:15+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T16:46:15+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T16:46:15+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T16:46:15+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T16:46:16+01:00] No eligible tasks found.
+[2026-02-25T16:46:16+01:00] No eligible tasks found.
+[2026-02-25T16:46:16+01:00] === Cycle complete ===
+[2026-02-25T16:46:16+01:00] === Cycle complete ===
+[2026-02-25T16:56:16+01:00] === Starting daemon cycle ===
+[2026-02-25T16:56:16+01:00] === Starting daemon cycle ===
+[2026-02-25T16:56:16+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T16:56:16+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T16:56:16+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T16:56:16+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T16:56:16+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T16:56:16+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T16:56:16+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T16:56:16+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T16:56:16+01:00] No eligible tasks found.
+[2026-02-25T16:56:16+01:00] No eligible tasks found.
+[2026-02-25T16:56:16+01:00] === Cycle complete ===
+[2026-02-25T16:56:16+01:00] === Cycle complete ===
+[2026-02-25T17:06:16+01:00] === Starting daemon cycle ===
+[2026-02-25T17:06:16+01:00] === Starting daemon cycle ===
+[2026-02-25T17:06:17+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T17:06:17+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T17:06:17+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T17:06:17+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T17:06:17+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T17:06:17+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T17:06:17+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T17:06:17+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T17:06:17+01:00] No eligible tasks found.
+[2026-02-25T17:06:17+01:00] No eligible tasks found.
+[2026-02-25T17:06:17+01:00] === Cycle complete ===
+[2026-02-25T17:06:17+01:00] === Cycle complete ===
+[2026-02-25T17:16:17+01:00] === Starting daemon cycle ===
+[2026-02-25T17:16:17+01:00] === Starting daemon cycle ===
+[2026-02-25T17:16:17+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T17:16:17+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T17:16:17+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T17:16:17+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T17:16:17+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T17:16:17+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T17:16:17+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T17:16:17+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T17:16:17+01:00] No eligible tasks found.
+[2026-02-25T17:16:17+01:00] No eligible tasks found.
+[2026-02-25T17:16:17+01:00] === Cycle complete ===
+[2026-02-25T17:16:17+01:00] === Cycle complete ===
+[2026-02-25T17:26:18+01:00] === Starting daemon cycle ===
+[2026-02-25T17:26:18+01:00] === Starting daemon cycle ===
+[2026-02-25T17:26:18+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T17:26:18+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T17:26:18+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T17:26:18+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T17:26:18+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T17:26:18+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T17:26:18+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T17:26:18+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T17:26:18+01:00] No eligible tasks found.
+[2026-02-25T17:26:18+01:00] No eligible tasks found.
+[2026-02-25T17:26:18+01:00] === Cycle complete ===
+[2026-02-25T17:26:18+01:00] === Cycle complete ===
+[2026-02-25T17:36:18+01:00] === Starting daemon cycle ===
+[2026-02-25T17:36:18+01:00] === Starting daemon cycle ===
+[2026-02-25T17:36:18+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T17:36:18+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T17:36:19+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T17:36:19+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T17:36:19+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T17:36:19+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T17:36:19+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T17:36:19+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T17:36:19+01:00] No eligible tasks found.
+[2026-02-25T17:36:19+01:00] No eligible tasks found.
+[2026-02-25T17:36:19+01:00] === Cycle complete ===
+[2026-02-25T17:36:19+01:00] === Cycle complete ===
+[2026-02-25T17:46:19+01:00] === Starting daemon cycle ===
+[2026-02-25T17:46:19+01:00] === Starting daemon cycle ===
+[2026-02-25T17:46:19+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T17:46:19+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T17:46:19+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T17:46:19+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T17:46:19+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T17:46:19+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T17:46:19+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T17:46:19+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T17:46:19+01:00] No eligible tasks found.
+[2026-02-25T17:46:19+01:00] No eligible tasks found.
+[2026-02-25T17:46:19+01:00] === Cycle complete ===
+[2026-02-25T17:46:19+01:00] === Cycle complete ===
+[2026-02-25T17:56:19+01:00] === Starting daemon cycle ===
+[2026-02-25T17:56:19+01:00] === Starting daemon cycle ===
+[2026-02-25T17:56:20+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T17:56:20+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T17:56:20+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T17:56:20+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T17:56:20+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T17:56:20+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T17:56:20+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T17:56:20+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T17:56:20+01:00] No eligible tasks found.
+[2026-02-25T17:56:20+01:00] No eligible tasks found.
+[2026-02-25T17:56:20+01:00] === Cycle complete ===
+[2026-02-25T17:56:20+01:00] === Cycle complete ===
+[2026-02-25T18:06:20+01:00] === Starting daemon cycle ===
+[2026-02-25T18:06:20+01:00] === Starting daemon cycle ===
+[2026-02-25T18:06:20+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T18:06:20+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T18:06:20+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T18:06:20+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T18:06:20+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T18:06:20+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T18:06:20+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T18:06:20+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T18:06:20+01:00] No eligible tasks found.
+[2026-02-25T18:06:20+01:00] No eligible tasks found.
+[2026-02-25T18:06:20+01:00] === Cycle complete ===
+[2026-02-25T18:06:20+01:00] === Cycle complete ===
+[2026-02-25T18:16:21+01:00] === Starting daemon cycle ===
+[2026-02-25T18:16:21+01:00] === Starting daemon cycle ===
+[2026-02-25T18:16:21+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T18:16:21+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T18:16:21+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T18:16:21+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T18:16:21+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T18:16:21+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T18:16:21+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T18:16:21+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T18:16:21+01:00] No eligible tasks found.
+[2026-02-25T18:16:21+01:00] No eligible tasks found.
+[2026-02-25T18:16:21+01:00] === Cycle complete ===
+[2026-02-25T18:16:21+01:00] === Cycle complete ===
+[2026-02-25T18:26:21+01:00] === Starting daemon cycle ===
+[2026-02-25T18:26:21+01:00] === Starting daemon cycle ===
+[2026-02-25T18:26:21+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T18:26:21+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T18:26:22+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T18:26:22+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T18:26:22+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T18:26:22+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T18:26:22+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T18:26:22+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T18:26:22+01:00] No eligible tasks found.
+[2026-02-25T18:26:22+01:00] No eligible tasks found.
+[2026-02-25T18:26:22+01:00] === Cycle complete ===
+[2026-02-25T18:26:22+01:00] === Cycle complete ===
+[2026-02-25T18:36:22+01:00] === Starting daemon cycle ===
+[2026-02-25T18:36:22+01:00] === Starting daemon cycle ===
+[2026-02-25T18:36:22+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T18:36:22+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T18:36:22+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T18:36:22+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T18:36:22+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T18:36:22+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T18:36:22+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T18:36:22+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T18:36:22+01:00] No eligible tasks found.
+[2026-02-25T18:36:22+01:00] No eligible tasks found.
+[2026-02-25T18:36:22+01:00] === Cycle complete ===
+[2026-02-25T18:36:22+01:00] === Cycle complete ===
+[2026-02-25T18:46:22+01:00] === Starting daemon cycle ===
+[2026-02-25T18:46:22+01:00] === Starting daemon cycle ===
+[2026-02-25T18:46:23+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T18:46:23+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T18:46:23+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T18:46:23+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T18:46:23+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T18:46:23+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T18:46:23+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T18:46:23+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T18:46:23+01:00] No eligible tasks found.
+[2026-02-25T18:46:23+01:00] No eligible tasks found.
+[2026-02-25T18:46:23+01:00] === Cycle complete ===
+[2026-02-25T18:46:23+01:00] === Cycle complete ===
+[2026-02-25T18:56:23+01:00] === Starting daemon cycle ===
+[2026-02-25T18:56:23+01:00] === Starting daemon cycle ===
+[2026-02-25T18:56:23+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T18:56:23+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T18:56:23+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T18:56:23+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T18:56:23+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T18:56:23+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T18:56:23+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T18:56:23+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T18:56:24+01:00] No eligible tasks found.
+[2026-02-25T18:56:24+01:00] No eligible tasks found.
+[2026-02-25T18:56:24+01:00] === Cycle complete ===
+[2026-02-25T18:56:24+01:00] === Cycle complete ===
+[2026-02-25T19:06:24+01:00] === Starting daemon cycle ===
+[2026-02-25T19:06:24+01:00] === Starting daemon cycle ===
+[2026-02-25T19:06:24+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T19:06:24+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T19:06:24+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T19:06:24+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T19:06:24+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T19:06:24+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T19:06:24+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T19:06:24+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T19:06:24+01:00] No eligible tasks found.
+[2026-02-25T19:06:24+01:00] No eligible tasks found.
+[2026-02-25T19:06:24+01:00] === Cycle complete ===
+[2026-02-25T19:06:24+01:00] === Cycle complete ===
+[2026-02-25T19:16:24+01:00] === Starting daemon cycle ===
+[2026-02-25T19:16:24+01:00] === Starting daemon cycle ===
+[2026-02-25T19:16:25+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T19:16:25+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T19:16:25+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T19:16:25+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T19:16:25+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T19:16:25+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T19:16:25+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T19:16:25+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T19:16:25+01:00] No eligible tasks found.
+[2026-02-25T19:16:25+01:00] No eligible tasks found.
+[2026-02-25T19:16:25+01:00] === Cycle complete ===
+[2026-02-25T19:16:25+01:00] === Cycle complete ===
+[2026-02-25T19:26:25+01:00] === Starting daemon cycle ===
+[2026-02-25T19:26:25+01:00] === Starting daemon cycle ===
+[2026-02-25T19:26:25+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T19:26:25+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T19:26:25+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T19:26:25+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T19:26:25+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T19:26:25+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T19:26:25+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T19:26:25+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T19:26:25+01:00] No eligible tasks found.
+[2026-02-25T19:26:25+01:00] No eligible tasks found.
+[2026-02-25T19:26:25+01:00] === Cycle complete ===
+[2026-02-25T19:26:25+01:00] === Cycle complete ===
+[2026-02-25T19:36:25+01:00] === Starting daemon cycle ===
+[2026-02-25T19:36:25+01:00] === Starting daemon cycle ===
+[2026-02-25T19:36:26+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T19:36:26+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T19:36:26+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T19:36:26+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T19:36:26+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T19:36:26+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T19:36:26+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T19:36:26+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T19:36:26+01:00] No eligible tasks found.
+[2026-02-25T19:36:26+01:00] No eligible tasks found.
+[2026-02-25T19:36:26+01:00] === Cycle complete ===
+[2026-02-25T19:36:26+01:00] === Cycle complete ===
+[2026-02-25T19:46:26+01:00] === Starting daemon cycle ===
+[2026-02-25T19:46:26+01:00] === Starting daemon cycle ===
+[2026-02-25T19:46:26+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T19:46:26+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T19:46:26+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T19:46:26+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T19:46:26+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T19:46:26+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T19:46:26+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T19:46:26+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T19:46:27+01:00] No eligible tasks found.
+[2026-02-25T19:46:27+01:00] No eligible tasks found.
+[2026-02-25T19:46:27+01:00] === Cycle complete ===
+[2026-02-25T19:46:27+01:00] === Cycle complete ===
+[2026-02-25T19:56:27+01:00] === Starting daemon cycle ===
+[2026-02-25T19:56:27+01:00] === Starting daemon cycle ===
+[2026-02-25T19:56:27+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T19:56:27+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T19:56:27+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T19:56:27+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T19:56:27+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T19:56:27+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T19:56:27+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T19:56:27+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T19:56:27+01:00] No eligible tasks found.
+[2026-02-25T19:56:27+01:00] No eligible tasks found.
+[2026-02-25T19:56:27+01:00] === Cycle complete ===
+[2026-02-25T19:56:27+01:00] === Cycle complete ===
+[2026-02-25T20:06:27+01:00] === Starting daemon cycle ===
+[2026-02-25T20:06:27+01:00] === Starting daemon cycle ===
+[2026-02-25T20:06:27+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T20:06:27+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T20:07:28+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T20:07:28+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T20:07:28+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T20:07:28+01:00] Skipping improvement-1771978250-5 (status: ai_processing)
+[2026-02-25T20:07:28+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T20:07:28+01:00] Skipping improvement-1771978250-6 (status: ai_processing)
+[2026-02-25T20:07:28+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T20:07:28+01:00] Skipping improvement-1771978250-8 (status: needs_ai_attention)
+[2026-02-25T20:07:28+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T20:07:28+01:00] Skipping improvement-1771978250-9 (status: needs_ai_attention)
+[2026-02-25T20:07:28+01:00] No eligible tasks found.
+[2026-02-25T20:07:28+01:00] No eligible tasks found.
+[2026-02-25T20:07:28+01:00] === Cycle complete ===
+[2026-02-25T20:07:28+01:00] === Cycle complete ===
+[2026-02-25T20:17:28+01:00] === Starting daemon cycle ===
+[2026-02-25T20:17:28+01:00] === Starting daemon cycle ===
+[2026-02-25T20:17:28+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T20:17:28+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T20:18:29+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T20:18:29+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T20:18:29+01:00] Found eligible task: improvement-1771978250-5 (status: pending, attempts: 0)
+[2026-02-25T20:18:29+01:00] Found eligible task: improvement-1771978250-5 (status: pending, attempts: 0)
+[2026-02-25T20:18:29+01:00] Flagging for AI: improvement-1771978250-5
+[2026-02-25T20:18:29+01:00] Flagging for AI: improvement-1771978250-5
+[2026-02-25T20:18:29+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T20:18:29+01:00] Task flagged. AI will process on next heartbeat.
+[2026-02-25T20:18:29+01:00] === Cycle complete ===
+[2026-02-25T20:18:29+01:00] === Cycle complete ===
+[2026-02-25T20:28:29+01:00] === Starting daemon cycle ===
+[2026-02-25T20:28:29+01:00] === Starting daemon cycle ===
+[2026-02-25T20:28:29+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T20:28:29+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T20:29:29+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T20:29:29+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T20:29:30+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T20:29:30+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T20:29:30+01:00] No eligible tasks found.
+[2026-02-25T20:29:30+01:00] No eligible tasks found.
+[2026-02-25T20:29:30+01:00] === Cycle complete ===
+[2026-02-25T20:29:30+01:00] === Cycle complete ===
+[2026-02-25T20:39:30+01:00] === Starting daemon cycle ===
+[2026-02-25T20:39:30+01:00] === Starting daemon cycle ===
+[2026-02-25T20:39:30+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T20:39:30+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T20:40:30+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T20:40:30+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T20:40:31+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T20:40:31+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T20:40:31+01:00] No eligible tasks found.
+[2026-02-25T20:40:31+01:00] No eligible tasks found.
+[2026-02-25T20:40:31+01:00] === Cycle complete ===
+[2026-02-25T20:40:31+01:00] === Cycle complete ===
+[2026-02-25T20:50:31+01:00] === Starting daemon cycle ===
+[2026-02-25T20:50:31+01:00] === Starting daemon cycle ===
+[2026-02-25T20:50:31+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T20:50:31+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T20:51:31+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T20:51:31+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T20:51:32+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T20:51:32+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T20:51:32+01:00] No eligible tasks found.
+[2026-02-25T20:51:32+01:00] No eligible tasks found.
+[2026-02-25T20:51:32+01:00] === Cycle complete ===
+[2026-02-25T20:51:32+01:00] === Cycle complete ===
+[2026-02-25T21:01:32+01:00] === Starting daemon cycle ===
+[2026-02-25T21:01:32+01:00] === Starting daemon cycle ===
+[2026-02-25T21:01:32+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T21:01:32+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T21:02:32+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T21:02:32+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T21:02:33+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T21:02:33+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T21:02:33+01:00] No eligible tasks found.
+[2026-02-25T21:02:33+01:00] No eligible tasks found.
+[2026-02-25T21:02:33+01:00] === Cycle complete ===
+[2026-02-25T21:02:33+01:00] === Cycle complete ===
+[2026-02-25T21:12:33+01:00] === Starting daemon cycle ===
+[2026-02-25T21:12:33+01:00] === Starting daemon cycle ===
+[2026-02-25T21:12:33+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T21:12:33+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T21:13:33+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T21:13:33+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T21:13:34+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T21:13:34+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T21:13:34+01:00] No eligible tasks found.
+[2026-02-25T21:13:34+01:00] No eligible tasks found.
+[2026-02-25T21:13:34+01:00] === Cycle complete ===
+[2026-02-25T21:13:34+01:00] === Cycle complete ===
+[2026-02-25T21:23:34+01:00] === Starting daemon cycle ===
+[2026-02-25T21:23:34+01:00] === Starting daemon cycle ===
+[2026-02-25T21:23:34+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T21:23:34+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T21:24:34+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T21:24:34+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T21:24:35+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T21:24:35+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T21:24:35+01:00] No eligible tasks found.
+[2026-02-25T21:24:35+01:00] No eligible tasks found.
+[2026-02-25T21:24:35+01:00] === Cycle complete ===
+[2026-02-25T21:24:35+01:00] === Cycle complete ===
+[2026-02-25T21:34:35+01:00] === Starting daemon cycle ===
+[2026-02-25T21:34:35+01:00] === Starting daemon cycle ===
+[2026-02-25T21:34:35+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T21:34:35+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T21:35:35+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T21:35:35+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T21:35:36+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T21:35:36+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T21:35:36+01:00] No eligible tasks found.
+[2026-02-25T21:35:36+01:00] No eligible tasks found.
+[2026-02-25T21:35:36+01:00] === Cycle complete ===
+[2026-02-25T21:35:36+01:00] === Cycle complete ===
+[2026-02-25T21:45:36+01:00] === Starting daemon cycle ===
+[2026-02-25T21:45:36+01:00] === Starting daemon cycle ===
+[2026-02-25T21:45:36+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T21:45:36+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T21:46:36+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T21:46:36+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T21:46:37+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T21:46:37+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T21:46:37+01:00] No eligible tasks found.
+[2026-02-25T21:46:37+01:00] No eligible tasks found.
+[2026-02-25T21:46:37+01:00] === Cycle complete ===
+[2026-02-25T21:46:37+01:00] === Cycle complete ===
+[2026-02-25T21:56:37+01:00] === Starting daemon cycle ===
+[2026-02-25T21:56:37+01:00] === Starting daemon cycle ===
+[2026-02-25T21:56:37+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T21:56:37+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T21:57:37+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T21:57:37+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T21:57:38+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T21:57:38+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T21:57:38+01:00] No eligible tasks found.
+[2026-02-25T21:57:38+01:00] No eligible tasks found.
+[2026-02-25T21:57:38+01:00] === Cycle complete ===
+[2026-02-25T21:57:38+01:00] === Cycle complete ===
+[2026-02-25T22:07:38+01:00] === Starting daemon cycle ===
+[2026-02-25T22:07:38+01:00] === Starting daemon cycle ===
+[2026-02-25T22:07:38+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T22:07:38+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T22:08:38+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T22:08:38+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T22:08:39+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T22:08:39+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T22:08:39+01:00] No eligible tasks found.
+[2026-02-25T22:08:39+01:00] No eligible tasks found.
+[2026-02-25T22:08:39+01:00] === Cycle complete ===
+[2026-02-25T22:08:39+01:00] === Cycle complete ===
+[2026-02-25T22:18:39+01:00] === Starting daemon cycle ===
+[2026-02-25T22:18:39+01:00] === Starting daemon cycle ===
+[2026-02-25T22:18:39+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T22:18:39+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T22:19:39+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T22:19:39+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T22:19:40+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T22:19:40+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T22:19:40+01:00] No eligible tasks found.
+[2026-02-25T22:19:40+01:00] No eligible tasks found.
+[2026-02-25T22:19:40+01:00] === Cycle complete ===
+[2026-02-25T22:19:40+01:00] === Cycle complete ===
+[2026-02-25T22:29:40+01:00] === Starting daemon cycle ===
+[2026-02-25T22:29:40+01:00] === Starting daemon cycle ===
+[2026-02-25T22:29:40+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T22:29:40+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T22:30:40+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T22:30:40+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T22:30:41+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T22:30:41+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T22:30:41+01:00] No eligible tasks found.
+[2026-02-25T22:30:41+01:00] No eligible tasks found.
+[2026-02-25T22:30:41+01:00] === Cycle complete ===
+[2026-02-25T22:30:41+01:00] === Cycle complete ===
+[2026-02-25T22:40:41+01:00] === Starting daemon cycle ===
+[2026-02-25T22:40:41+01:00] === Starting daemon cycle ===
+[2026-02-25T22:40:41+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T22:40:41+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T22:41:41+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T22:41:41+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T22:41:42+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T22:41:42+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T22:41:42+01:00] No eligible tasks found.
+[2026-02-25T22:41:42+01:00] No eligible tasks found.
+[2026-02-25T22:41:42+01:00] === Cycle complete ===
+[2026-02-25T22:41:42+01:00] === Cycle complete ===
+[2026-02-25T22:51:42+01:00] === Starting daemon cycle ===
+[2026-02-25T22:51:42+01:00] === Starting daemon cycle ===
+[2026-02-25T22:51:42+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T22:51:42+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T22:52:42+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T22:52:42+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T22:52:43+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T22:52:43+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T22:52:43+01:00] No eligible tasks found.
+[2026-02-25T22:52:43+01:00] No eligible tasks found.
+[2026-02-25T22:52:43+01:00] === Cycle complete ===
+[2026-02-25T22:52:43+01:00] === Cycle complete ===
+[2026-02-25T23:02:43+01:00] === Starting daemon cycle ===
+[2026-02-25T23:02:43+01:00] === Starting daemon cycle ===
+[2026-02-25T23:02:43+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T23:02:43+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T23:03:43+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T23:03:43+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T23:03:44+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T23:03:44+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T23:03:44+01:00] No eligible tasks found.
+[2026-02-25T23:03:44+01:00] No eligible tasks found.
+[2026-02-25T23:03:44+01:00] === Cycle complete ===
+[2026-02-25T23:03:44+01:00] === Cycle complete ===
+[2026-02-25T23:13:44+01:00] === Starting daemon cycle ===
+[2026-02-25T23:13:44+01:00] === Starting daemon cycle ===
+[2026-02-25T23:13:44+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T23:13:44+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T23:14:44+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T23:14:44+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T23:14:45+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T23:14:45+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T23:14:45+01:00] No eligible tasks found.
+[2026-02-25T23:14:45+01:00] No eligible tasks found.
+[2026-02-25T23:14:45+01:00] === Cycle complete ===
+[2026-02-25T23:14:45+01:00] === Cycle complete ===
+[2026-02-25T23:24:45+01:00] === Starting daemon cycle ===
+[2026-02-25T23:24:45+01:00] === Starting daemon cycle ===
+[2026-02-25T23:24:45+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T23:24:45+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T23:25:45+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T23:25:45+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T23:25:46+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T23:25:46+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T23:25:46+01:00] No eligible tasks found.
+[2026-02-25T23:25:46+01:00] No eligible tasks found.
+[2026-02-25T23:25:46+01:00] === Cycle complete ===
+[2026-02-25T23:25:46+01:00] === Cycle complete ===
+[2026-02-25T23:35:46+01:00] === Starting daemon cycle ===
+[2026-02-25T23:35:46+01:00] === Starting daemon cycle ===
+[2026-02-25T23:35:46+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T23:35:46+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T23:36:46+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T23:36:46+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T23:36:47+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T23:36:47+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T23:36:47+01:00] No eligible tasks found.
+[2026-02-25T23:36:47+01:00] No eligible tasks found.
+[2026-02-25T23:36:47+01:00] === Cycle complete ===
+[2026-02-25T23:36:47+01:00] === Cycle complete ===
+[2026-02-25T23:46:47+01:00] === Starting daemon cycle ===
+[2026-02-25T23:46:47+01:00] === Starting daemon cycle ===
+[2026-02-25T23:46:47+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T23:46:47+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T23:47:47+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T23:47:47+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T23:47:48+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T23:47:48+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T23:47:48+01:00] No eligible tasks found.
+[2026-02-25T23:47:48+01:00] No eligible tasks found.
+[2026-02-25T23:47:48+01:00] === Cycle complete ===
+[2026-02-25T23:47:48+01:00] === Cycle complete ===
+[2026-02-25T23:57:48+01:00] === Starting daemon cycle ===
+[2026-02-25T23:57:48+01:00] === Starting daemon cycle ===
+[2026-02-25T23:57:48+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T23:57:48+01:00] AI heartbeat in progress, waiting...
+[2026-02-25T23:58:48+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-25T23:58:48+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-25T23:58:48+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T23:58:48+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-25T23:58:49+01:00] No eligible tasks found.
+[2026-02-25T23:58:49+01:00] No eligible tasks found.
+[2026-02-25T23:58:49+01:00] === Cycle complete ===
+[2026-02-25T23:58:49+01:00] === Cycle complete ===
+[2026-02-26T00:08:49+01:00] === Starting daemon cycle ===
+[2026-02-26T00:08:49+01:00] === Starting daemon cycle ===
+[2026-02-26T00:08:49+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T00:08:49+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T00:09:49+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-26T00:09:49+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-26T00:09:50+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T00:09:50+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T00:09:50+01:00] No eligible tasks found.
+[2026-02-26T00:09:50+01:00] No eligible tasks found.
+[2026-02-26T00:09:50+01:00] === Cycle complete ===
+[2026-02-26T00:09:50+01:00] === Cycle complete ===
+[2026-02-26T00:19:50+01:00] === Starting daemon cycle ===
+[2026-02-26T00:19:50+01:00] === Starting daemon cycle ===
+[2026-02-26T00:19:50+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T00:19:50+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T00:20:50+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-26T00:20:50+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-26T00:20:51+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T00:20:51+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T00:20:51+01:00] No eligible tasks found.
+[2026-02-26T00:20:51+01:00] No eligible tasks found.
+[2026-02-26T00:20:51+01:00] === Cycle complete ===
+[2026-02-26T00:20:51+01:00] === Cycle complete ===
+[2026-02-26T00:30:51+01:00] === Starting daemon cycle ===
+[2026-02-26T00:30:51+01:00] === Starting daemon cycle ===
+[2026-02-26T00:30:51+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T00:30:51+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T00:31:51+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-26T00:31:51+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-26T00:31:52+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T00:31:52+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T00:31:52+01:00] No eligible tasks found.
+[2026-02-26T00:31:52+01:00] No eligible tasks found.
+[2026-02-26T00:31:52+01:00] === Cycle complete ===
+[2026-02-26T00:31:52+01:00] === Cycle complete ===
+[2026-02-26T00:41:52+01:00] === Starting daemon cycle ===
+[2026-02-26T00:41:52+01:00] === Starting daemon cycle ===
+[2026-02-26T00:41:52+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T00:41:52+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T00:42:52+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-26T00:42:52+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-26T00:42:52+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T00:42:52+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T00:42:53+01:00] No eligible tasks found.
+[2026-02-26T00:42:53+01:00] No eligible tasks found.
+[2026-02-26T00:42:53+01:00] === Cycle complete ===
+[2026-02-26T00:42:53+01:00] === Cycle complete ===
+[2026-02-26T00:52:53+01:00] === Starting daemon cycle ===
+[2026-02-26T00:52:53+01:00] === Starting daemon cycle ===
+[2026-02-26T00:52:53+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T00:52:53+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T00:53:53+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-26T00:53:53+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-26T00:53:54+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T00:53:54+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T00:53:54+01:00] No eligible tasks found.
+[2026-02-26T00:53:54+01:00] No eligible tasks found.
+[2026-02-26T00:53:54+01:00] === Cycle complete ===
+[2026-02-26T00:53:54+01:00] === Cycle complete ===
+[2026-02-26T00:56:34+01:00] Stop signal received, shutting down...
+[2026-02-26T00:56:35+01:00] Daemon stopped
+[2026-02-26T00:56:36+01:00] Daemon starting (PID: 330670)...
+[2026-02-26T00:56:36+01:00] === Starting daemon cycle ===
+[2026-02-26T00:56:36+01:00] === Starting daemon cycle ===
+[2026-02-26T00:56:36+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T00:56:36+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T00:56:38+01:00] Daemon started with PID: 330703
+[2026-02-26T00:57:37+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-26T00:57:37+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-26T00:57:37+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T00:57:37+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T00:57:37+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T00:57:37+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T00:57:37+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T00:57:37+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T00:57:37+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T00:57:37+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T00:57:37+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T00:57:37+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T00:57:37+01:00] No eligible tasks found.
+[2026-02-26T00:57:37+01:00] No eligible tasks found.
+[2026-02-26T00:57:37+01:00] === Cycle complete ===
+[2026-02-26T00:57:37+01:00] === Cycle complete ===
+[2026-02-26T01:02:37+01:00] === Starting daemon cycle ===
+[2026-02-26T01:02:37+01:00] === Starting daemon cycle ===
+[2026-02-26T01:02:37+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T01:02:37+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T01:03:38+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-26T01:03:38+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-26T01:03:38+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T01:03:38+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T01:03:38+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T01:03:38+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T01:03:38+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T01:03:38+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T01:03:38+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T01:03:38+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T01:03:38+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T01:03:38+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T01:03:38+01:00] No eligible tasks found.
+[2026-02-26T01:03:38+01:00] No eligible tasks found.
+[2026-02-26T01:03:38+01:00] === Cycle complete ===
+[2026-02-26T01:03:38+01:00] === Cycle complete ===
+[2026-02-26T01:08:39+01:00] === Starting daemon cycle ===
+[2026-02-26T01:08:39+01:00] === Starting daemon cycle ===
+[2026-02-26T01:08:39+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T01:08:39+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T01:09:39+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-26T01:09:39+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-26T01:09:39+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T01:09:39+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T01:09:39+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T01:09:39+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T01:09:39+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T01:09:39+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T01:09:39+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T01:09:39+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T01:09:39+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T01:09:39+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T01:09:39+01:00] No eligible tasks found.
+[2026-02-26T01:09:39+01:00] No eligible tasks found.
+[2026-02-26T01:09:39+01:00] === Cycle complete ===
+[2026-02-26T01:09:39+01:00] === Cycle complete ===
+[2026-02-26T01:14:40+01:00] === Starting daemon cycle ===
+[2026-02-26T01:14:40+01:00] === Starting daemon cycle ===
+[2026-02-26T01:14:40+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T01:14:40+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T01:15:40+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-26T01:15:40+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-26T01:15:40+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T01:15:40+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T01:15:40+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T01:15:40+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T01:15:40+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T01:15:40+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T01:15:40+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T01:15:40+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T01:15:40+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T01:15:40+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T01:15:41+01:00] No eligible tasks found.
+[2026-02-26T01:15:41+01:00] No eligible tasks found.
+[2026-02-26T01:15:41+01:00] === Cycle complete ===
+[2026-02-26T01:15:41+01:00] === Cycle complete ===
+[2026-02-26T01:20:41+01:00] === Starting daemon cycle ===
+[2026-02-26T01:20:41+01:00] === Starting daemon cycle ===
+[2026-02-26T01:20:41+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T01:20:41+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T01:21:41+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-26T01:21:41+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-26T01:21:41+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T01:21:41+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T01:21:41+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T01:21:41+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T01:21:41+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T01:21:41+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T01:21:41+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T01:21:41+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T01:21:41+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T01:21:41+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T01:21:41+01:00] No eligible tasks found.
+[2026-02-26T01:21:41+01:00] No eligible tasks found.
+[2026-02-26T01:21:41+01:00] === Cycle complete ===
+[2026-02-26T01:21:41+01:00] === Cycle complete ===
+[2026-02-26T01:26:42+01:00] === Starting daemon cycle ===
+[2026-02-26T01:26:42+01:00] === Starting daemon cycle ===
+[2026-02-26T01:26:42+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T01:26:42+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T01:27:42+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-26T01:27:42+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-26T01:27:42+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T01:27:42+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T01:27:42+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T01:27:42+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T01:27:42+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T01:27:42+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T01:27:43+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T01:27:43+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T01:27:43+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T01:27:43+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T01:27:43+01:00] No eligible tasks found.
+[2026-02-26T01:27:43+01:00] No eligible tasks found.
+[2026-02-26T01:27:43+01:00] === Cycle complete ===
+[2026-02-26T01:27:43+01:00] === Cycle complete ===
+[2026-02-26T01:32:43+01:00] === Starting daemon cycle ===
+[2026-02-26T01:32:43+01:00] === Starting daemon cycle ===
+[2026-02-26T01:32:43+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T01:32:43+01:00] AI heartbeat in progress, waiting...
+[2026-02-26T01:33:43+01:00] Timeout waiting for heartbeat, breaking stale lock
+[2026-02-26T01:33:43+01:00] Timeout waiting for heartbeat, breaking stale lock
+LOCK_FORCE_RELEASED
+[2026-02-26T01:33:43+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T01:33:43+01:00] Skipping improvement-1771978250-5 (status: needs_ai_attention)
+[2026-02-26T01:33:44+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T01:33:44+01:00] Skipping security-encrypt-credentials (status: needs_ai_attention)
+[2026-02-26T01:33:44+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T01:33:44+01:00] Skipping security-fix-auth-web-ui (status: needs_ai_attention)
+[2026-02-26T01:33:44+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T01:33:44+01:00] Skipping security-fix-lock-race-condition (status: needs_ai_attention)
+[2026-02-26T01:33:44+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T01:33:44+01:00] Skipping security-input-validation (status: needs_ai_attention)
+[2026-02-26T01:33:44+01:00] No eligible tasks found.
+[2026-02-26T01:33:44+01:00] No eligible tasks found.
+[2026-02-26T01:33:44+01:00] === Cycle complete ===
+[2026-02-26T01:33:44+01:00] === Cycle complete ===
+[2026-02-26T01:33:54+01:00] Stop signal received, shutting down...
+[2026-02-26T03:10:12+01:00] DAEMON STARTED: Interval=7min (420s) - NEVER CHANGES
+[2026-02-26T03:10:12+01:00] HEARTBEAT CHECK: interval=7min timestamp=2026-02-26T03:10:12+01:00
+[2026-02-26T03:10:12+01:00] FLAGGED TASK: improvement-1771978250-5 (AI will decide what to do)
+[2026-02-26T03:10:12+01:00] CHECK COMPLETE: Found 1 task(s)
+[2026-02-26T03:11:54+01:00] DAEMON STARTED: Interval=7min (420s) - NEVER CHANGES
+[2026-02-26T03:11:54+01:00] HEARTBEAT CHECK: interval=7min timestamp=2026-02-26T03:11:54+01:00
+[2026-02-26T03:11:55+01:00] FLAGGED TASK: improvement-1771978250-5 (AI will decide what to do)
+[2026-02-26T03:11:55+01:00] CHECK COMPLETE: Found 1 task(s)
+[2026-02-26T03:12:06+01:00] DAEMON STARTED: Interval=7min (420s) - NEVER CHANGES
+[2026-02-26T03:12:06+01:00] HEARTBEAT CHECK: interval=7min timestamp=2026-02-26T03:12:06+01:00
+[2026-02-26T03:12:06+01:00] FLAGGED TASK: improvement-1771978250-5 (AI will decide what to do)
+[2026-02-26T03:12:06+01:00] CHECK COMPLETE: Found 1 task(s)

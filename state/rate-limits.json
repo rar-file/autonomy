@@ -1,0 +1,10 @@
+{
+  "requests": [
+    {
+      "token": "web-ui",
+      "timestamp": "1772008852",
+      "endpoint": "test-endpoint",
+      "cost": 1
+    }
+  ]
+}
