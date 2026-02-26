@@ -950,7 +950,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
     <script>
         let allTasks = [];
         let lastHeartbeat = Date.now();
-        let heartbeatInterval = 10 * 60 * 1000; // 10 minutes
+        let heartbeatInterval = 5 * 60 * 1000; // 5 minutes
         let heartbeatHistory = [];
         
         function showPage(pageId, navItem) {
@@ -1183,9 +1183,6 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         }
         
         // Heartbeat Timer
-        let lastHeartbeat = Date.now();
-        let heartbeatInterval = 5 * 60 * 1000; // 5 minutes default
-        
         async function updateHeartbeatTimer() {
             try {
                 const res = await fetch('/api/heartbeat');
