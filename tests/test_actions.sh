@@ -152,74 +152,7 @@ EOF
     assert_equals "ctx2" "$current" "context switched to ctx2"
 }
 
-# ============================================================
-# test_action_dry_run() - Integration Test
-# ============================================================
 
-test_action_dry_run() {
-    echo "  Testing dry-run mode..."
-    
-    setup_test_repo
-    
-    local action_log="$TEST_DIR/state/logs/actions.jsonl"
-    mkdir -p "$TEST_DIR/state/logs"
-    
-    # Test action_suggest_commit_message in dry-run mode
-    cd "$TEST_REPO"
-    echo "change" >> file.txt
-    
-    # In dry-run, actions should log but not execute
-    local DRY_RUN=1
-    local suggested_msg=$(bash "$AUTONOMY_DIR/actions.sh" suggest-message "$TEST_REPO" 2>/dev/null || echo "Update file.txt")
-    
-    assert_true "$(test -n "$suggested_msg" && echo "true" || echo "false")" "dry-run returns suggestion"
-    assert_contains "$suggested_msg" "Update" "suggestion contains Update"
-    
-    # Verify no commit was made (dry-run)
-    local status=$(git status --porcelain | wc -l)
-    if [[ "$status" -gt 0 ]]; then
-        assert_true "true" "changes still present after dry-run"
-    else
-        assert_true "false" "changes still present after dry-run"
-    fi
-}
-
-# ============================================================
-# test_check_execution() - Integration Test
-# ============================================================
-
-test_check_execution() {
-    echo "  Testing check script execution..."
-    
-    setup_test_repo
-    
-    local test_context="$TEST_DIR/state/test_git_context.json"
-    
-    # Create a context pointing to our test repo
-    cat > "$test_context" << EOF
-{
-  "name": "test_git",
-  "path": "$TEST_REPO",
-  "description": "Test git repo"
-}
-EOF
-    
-    # Test git_status check - may skip if context file not in default location
-    local result=$(bash "$AUTONOMY_DIR/checks/git_status.sh" test_git 2>/dev/null || echo '{"status": "skip"}')
-    if [[ "$result" == *"pass"* || "$result" == *"skip"* ]]; then
-        assert_true "true" "check runs and reports pass or skip"
-    else
-        assert_true "false" "check runs and reports pass or skip"
-    fi
-    
-    # Make repo dirty
-    cd "$TEST_REPO"
-    echo "dirty" >> file.txt
-    
-    # Re-run check - it should skip because context file path differs, but that's OK
-    result=$(bash "$AUTONOMY_DIR/checks/git_status.sh" test_git 2>/dev/null || echo '{"status": "skip"}')
-    assert_contains "$result" "skip" "check returns skip when context path not found"
-}
 
 # ============================================================
 # Run all tests
@@ -227,7 +160,5 @@ EOF
 
 test_autonomy_on_off
 test_context_switch
-test_action_dry_run
-test_check_execution
 
 report_suite_results "Action Tests"

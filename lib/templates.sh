@@ -2,7 +2,7 @@
 # Task Templates System
 # Create tasks from predefined templates
 
-AUTONOMY_DIR="${AUTONOMY_DIR:-/root/.openclaw/workspace/skills/autonomy}"
+AUTONOMY_DIR="${AUTONOMY_DIR:-${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills/autonomy}"
 TEMPLATES_DIR="$AUTONOMY_DIR/templates"
 TASKS_DIR="$AUTONOMY_DIR/tasks"
 

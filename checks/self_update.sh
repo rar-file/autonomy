@@ -4,7 +4,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 AUTONOMY_DIR="$SCRIPT_DIR/.."
-WORKSPACE="/root/.openclaw/workspace"
+WORKSPACE="${OPENCLAW_HOME:-$HOME/.openclaw}/workspace"
 REPO="rar-file/autonomy"
 INSTALL_DIR="$WORKSPACE/skills/autonomy"
 VERSION_FILE="$AUTONOMY_DIR/.version"

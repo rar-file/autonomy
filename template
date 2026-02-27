@@ -2,5 +2,5 @@
 # Task Templates CLI wrapper
 # Usage: autonomy template {list|create|show|save|new}
 
-AUTONOMY_DIR="${AUTONOMY_DIR:-/root/.openclaw/workspace/skills/autonomy}"
+AUTONOMY_DIR="${AUTONOMY_DIR:-${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills/autonomy}"
 bash "$AUTONOMY_DIR/lib/templates.sh" "$@"

@@ -2,5 +2,5 @@
 # Task Dependencies CLI wrapper
 # Usage: autonomy deps {add|remove|check|list|ready|graph|setup}
 
-AUTONOMY_DIR="${AUTONOMY_DIR:-/root/.openclaw/workspace/skills/autonomy}"
+AUTONOMY_DIR="${AUTONOMY_DIR:-${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills/autonomy}"
 bash "$AUTONOMY_DIR/lib/dependencies.sh" "$@"

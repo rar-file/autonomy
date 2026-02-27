@@ -22,7 +22,7 @@ tests/
 
 ### Run all tests:
 ```bash
-cd /root/.openclaw/workspace/skills/autonomy/tests
+cd "${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills/autonomy/tests"
 bash run_tests.sh
 ```
 

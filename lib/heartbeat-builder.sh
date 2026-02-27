@@ -118,6 +118,26 @@ build() {
         budget_line=$(bash "$AUTONOMY_DIR/lib/token-budget.sh" summary 2>/dev/null)
     fi
 
+    # Get persistent memory
+    local memory_summary=""
+    if [[ -f "$AUTONOMY_DIR/lib/memory.sh" ]]; then
+        memory_summary=$(bash "$AUTONOMY_DIR/lib/memory.sh" summary 2>/dev/null)
+    fi
+
+    # Get sub-agent status
+    local agents_summary=""
+    if [[ -f "$AUTONOMY_DIR/lib/sub-agents.sh" ]]; then
+        agents_summary=$(bash "$AUTONOMY_DIR/lib/sub-agents.sh" summary 2>/dev/null)
+    fi
+
+    # Get AI engine status
+    local ai_configured="false"
+    if [[ -f "$AUTONOMY_DIR/lib/ai-engine.sh" ]]; then
+        local ai_status_json
+        ai_status_json=$(bash "$AUTONOMY_DIR/lib/ai-engine.sh" status 2>/dev/null)
+        ai_configured=$(echo "$ai_status_json" | jq -r '.configured // false' 2>/dev/null)
+    fi
+
     # Hard limits
     local max_tasks max_edits max_searches max_iterations daily_budget
     max_tasks=$(get_config '.agentic_config.hard_limits.max_concurrent_tasks // 5')
@@ -223,6 +243,46 @@ $budget_line
 
 BUDGET_EOF
 
+    # Persistent memory
+    if [[ -n "$memory_summary" && "$memory_summary" != "No persistent memories yet." ]]; then
+        cat >> "$HEARTBEAT_FILE" << MEMORY_EOF
+## Persistent Memory
+
+$memory_summary
+
+To store new knowledge: \`bash $AUTONOMY_DIR/lib/memory.sh store <category> "content"\`
+Categories: facts, decisions, patterns, blockers, preferences
+
+MEMORY_EOF
+    fi
+
+    # Sub-agents
+    cat >> "$HEARTBEAT_FILE" << AGENTS_EOF
+## Sub-Agents
+
+$agents_summary
+
+To spawn a sub-agent: \`bash $AUTONOMY_DIR/lib/sub-agents.sh spawn "$current_task" "sub-task-name" "description"\`
+
+AGENTS_EOF
+
+    # AI capabilities
+    if [[ "$ai_configured" == "true" ]]; then
+        cat >> "$HEARTBEAT_FILE" << AI_EOF
+## AI Capabilities (Active)
+
+You have access to these AI-powered tools:
+- **Terminal:** \`bash $AUTONOMY_DIR/lib/ai-engine.sh terminal "command"\` — Run shell commands
+- **Git Commit:** \`bash $AUTONOMY_DIR/lib/ai-engine.sh commit\` — AI-generated commit message
+- **Evidence:** \`bash $AUTONOMY_DIR/lib/ai-engine.sh evidence "$current_task" "test command"\`
+- **Analysis:** \`bash $AUTONOMY_DIR/lib/ai-engine.sh analyze <task.json>\`
+- **Memory:** \`bash $AUTONOMY_DIR/lib/memory.sh store facts "learned something"\`
+
+Use these to verify work, gather evidence, and maintain context.
+
+AI_EOF
+    fi
+
     # Hard limits & rules
     cat >> "$HEARTBEAT_FILE" << RULES_EOF
 ---
@@ -242,20 +302,29 @@ BUDGET_EOF
 1. **Check** — Read this HEARTBEAT.md. What's assigned? What's the history?
 2. **Plan** — Break the task into subtasks if you haven't already.
 3. **Execute** — Work through one subtask at a time. Stay focused.
-4. **Verify** — Test your work. Does it actually run? Files exist?
-5. **Journal** — After finishing, log what you did:
+4. **Verify** — Test your work. Use \`ai-engine.sh terminal\` to run tests. Gather evidence.
+5. **Evidence** — After work, run verification and attach proof:
+   \`\`\`bash
+   bash $AUTONOMY_DIR/lib/ai-engine.sh evidence "$current_task" "test_command_1" "test_command_2"
+   \`\`\`
+6. **Journal** — After finishing, log what you did:
    \`\`\`bash
    bash $AUTONOMY_DIR/lib/journal.sh append "$current_task" "summary of what I did" "status" "next step"
    \`\`\`
-6. **Complete or Continue** — Mark the task done if finished, or let the next heartbeat pick up where you left off.
+7. **Memory** — Store any important discoveries or decisions:
+   \`\`\`bash
+   bash $AUTONOMY_DIR/lib/memory.sh store decisions "Chose X approach because Y"
+   \`\`\`
+8. **Complete or Continue** — Mark the task done if finished, or let the next heartbeat pick up where you left off.
 
 ## Anti-Hallucination Rules (CRITICAL)
 
-- **Verify files exist** — Actually check files you created are there.
-- **Test your work** — Run the code/tool. Does it work?
-- **Require evidence** — Don't say "it works" without proof.
+- **Verify files exist** — Use \`ai-engine.sh terminal "ls -la file"\` to check.
+- **Test your work** — Run the code/tool. Use terminal access to verify.
+- **Require evidence** — Use \`ai-engine.sh evidence\` to gather proof. Don't say "it works" without it.
 - **Check for existing solutions** — Don't rebuild what exists.
 - **Max $max_iterations attempts** — If stuck after $max_iterations tries, report failure.
+- **Store learnings** — Use \`memory.sh store patterns "what I learned"\` to remember.
 
 ## Completion
 

@@ -2,7 +2,7 @@
 # Heartbeat Activity Logger
 # Tracks all heartbeat activity for visibility
 
-AUTONOMY_DIR="${AUTONOMY_DIR:-/root/.openclaw/workspace/skills/autonomy}"
+AUTONOMY_DIR="${AUTONOMY_DIR:-${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills/autonomy}"
 LOG_FILE="$AUTONOMY_DIR/logs/heartbeat-activity.jsonl"
 STATE_FILE="$AUTONOMY_DIR/state/last-heartbeat.json"
 

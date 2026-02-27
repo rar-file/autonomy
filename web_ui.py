@@ -35,6 +35,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
     <title>rar-file/autonomy</title>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-0: #050508;
@@ -1248,10 +1249,12 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             
             <div class="nav-section">
                 <div class="nav-title">System</div>
+                <div class="nav-item" onclick="showPage('memory', this); loadMemory();"><i class="fas fa-brain"></i> Memory</div>
+                <div class="nav-item" onclick="showPage('terminal', this); loadTerminalHistory();"><i class="fas fa-terminal"></i> Terminal</div>
                 <div class="nav-item" onclick="showPage('schedules', this)"><i class="fas fa-clock"></i> Schedules</div>
                 <div class="nav-item" onclick="showPage('journal', this); loadJournalData();"><i class="fas fa-book"></i> Journal</div>
-                <div class="nav-item" onclick="window.open('/metrics', '_blank')"><i class="fas fa-chart-line"></i> Metrics</div>
-                <div class="nav-item" onclick="showPage('settings', this)"><i class="fas fa-cog"></i> Settings</div>
+                <div class="nav-item" onclick="showPage('metrics', this); loadMetricsData();"><i class="fas fa-chart-line"></i> Metrics</div>
+                <div class="nav-item" onclick="showPage('settings', this); loadSettings();"><i class="fas fa-cog"></i> Settings</div>
             </div>
         </aside>
         
@@ -1377,13 +1380,118 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             </div>
             
             <!-- Other pages -->
-            <div id="page-agents" class="page"><header class="header"><div class="header-title"><h2>Agents</h2></div></header><div class="card"><p style="text-align:center;padding:60px;color:#a0a0c0;"><i class="fas fa-robot" style="font-size:64px;margin-bottom:20px;opacity:0.3;"></i><br>No Active Agents</p></div></div>
+            <!-- Agents / Sub-Agents Page -->
+            <div id="page-agents" class="page">
+                <header class="header">
+                    <div class="header-title">
+                        <h2>Sub-Agents</h2>
+                        <p>Manage and monitor autonomous sub-agents</p>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <span id="agent-slots" style="font-size: 14px; color: #c0c0d8;">0/3 active</span>
+                        <button class="btn btn-secondary" onclick="loadSubAgents()"><i class="fas fa-sync"></i> Refresh</button>
+                    </div>
+                </header>
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #e94560;"><i class="fas fa-users-cog"></i> Active Agents</h3>
+                    <div id="agent-list">
+                        <p style="text-align: center; padding: 40px; color: #a0a0c0;">
+                            <i class="fas fa-robot" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3; display: block;"></i>
+                            No active sub-agents
+                        </p>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;"><i class="fas fa-plus-circle" style="color: #22c55e;"></i> Spawn Sub-Agent</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                        <div>
+                            <label style="font-size: 12px; color: #a0a0c0; display: block; margin-bottom: 4px;">Name</label>
+                            <input id="spawn-name" placeholder="agent-name" style="width: 100%; padding: 10px; background: var(--bg-1); border: 1px solid rgba(233,69,96,0.15); border-radius: 12px; color: #fff; font-size: 14px;">
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; color: #a0a0c0; display: block; margin-bottom: 4px;">Priority</label>
+                            <select id="spawn-priority" style="width: 100%; padding: 10px; background: var(--bg-1); border: 1px solid rgba(233,69,96,0.15); border-radius: 12px; color: #fff; font-size: 14px;">
+                                <option value="normal">Normal</option><option value="high">High</option><option value="low">Low</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 12px;">
+                        <label style="font-size: 12px; color: #a0a0c0; display: block; margin-bottom: 4px;">Description</label>
+                        <input id="spawn-desc" placeholder="What should this agent do?" style="width: 100%; padding: 10px; background: var(--bg-1); border: 1px solid rgba(233,69,96,0.15); border-radius: 12px; color: #fff; font-size: 14px;">
+                    </div>
+                    <button class="btn btn-primary" onclick="spawnSubAgent()" style="width: 100%;"><i class="fas fa-rocket"></i> Spawn Agent</button>
+                    <div id="spawn-result" style="margin-top: 8px; font-size: 12px; color: #a0a0c0; display: none;"></div>
+                </div>
+            </div>
+            <!-- Memory Page -->
+            <div id="page-memory" class="page">
+                <header class="header">
+                    <div class="header-title">
+                        <h2>Memory</h2>
+                        <p>Persistent AI memory — facts, decisions, patterns</p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="loadMemory()"><i class="fas fa-sync"></i> Refresh</button>
+                </header>
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #e94560;"><i class="fas fa-brain"></i> Stored Memories</h3>
+                    <div id="memory-content" style="max-height: 500px; overflow-y: auto;">
+                        <p style="text-align: center; padding: 40px; color: #a0a0c0;">
+                            <i class="fas fa-brain" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3; display: block;"></i>
+                            No memories stored yet
+                        </p>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;"><i class="fas fa-plus-circle" style="color: #22c55e;"></i> Store Memory</h3>
+                    <div style="display: flex; gap: 12px; align-items: flex-end;">
+                        <div>
+                            <label style="font-size: 12px; color: #a0a0c0; display: block; margin-bottom: 4px;">Category</label>
+                            <select id="mem-cat" style="padding: 10px 14px; background: var(--bg-1); border: 1px solid rgba(233,69,96,0.15); border-radius: 12px; color: #fff; font-size: 14px;">
+                                <option value="facts">Fact</option><option value="decisions">Decision</option><option value="patterns">Pattern</option><option value="blockers">Blocker</option><option value="preferences">Preference</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="font-size: 12px; color: #a0a0c0; display: block; margin-bottom: 4px;">Content</label>
+                            <input id="mem-input" placeholder="Store a memory..." style="width: 100%; padding: 10px 14px; background: var(--bg-1); border: 1px solid rgba(233,69,96,0.15); border-radius: 12px; color: #fff; font-size: 14px;" onkeydown="if(event.key==='Enter')storeMemory()">
+                        </div>
+                        <button class="btn btn-primary" onclick="storeMemory()"><i class="fas fa-plus"></i> Store</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Page -->
+            <div id="page-terminal" class="page">
+                <header class="header">
+                    <div class="header-title">
+                        <h2>Terminal</h2>
+                        <p>Execute commands on the system</p>
+                    </div>
+                </header>
+                <div class="card" style="margin-bottom: 20px;">
+                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px; color: #e94560;"><i class="fas fa-terminal"></i> Command</h3>
+                    <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                        <input id="term-input" placeholder="Run a command..." style="flex: 1; padding: 10px 14px; background: var(--bg-1); border: 1px solid rgba(233,69,96,0.15); border-radius: 12px; color: #fff; font-family: 'JetBrains Mono', monospace; font-size: 14px;" onkeydown="if(event.key==='Enter')runTerminal()">
+                        <button class="btn btn-primary" onclick="runTerminal()"><i class="fas fa-play"></i> Run</button>
+                    </div>
+                    <div id="term-output" style="max-height: 350px; overflow-y: auto; background: var(--bg-0); border-radius: 12px; padding: 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; display: none; border: 1px solid rgba(233,69,96,0.08);"></div>
+                </div>
+                <div class="card">
+                    <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;"><i class="fas fa-history" style="color: #f59e0b;"></i> Command History</h3>
+                    <div id="term-history" style="max-height: 300px; overflow-y: auto;">
+                        <p style="text-align: center; padding: 20px; color: #a0a0c0;">No recent commands</p>
+                    </div>
+                </div>
+            </div>
+
             <div id="page-schedules" class="page"><header class="header"><div class="header-title"><h2>Schedules</h2></div></header><div class="card"><p style="text-align:center;padding:40px;">Every 10 Minutes - Check for improvements</p></div></div>
-            <div id="page-settings" class="page"><header class="header"><div class="header-title"><h2>Settings</h2></div></header>
+            <div id="page-settings" class="page"><header class="header"><div class="header-title"><h2>Settings</h2><p>Configure your autonomy system</p></div></header>
                 <div class="card" style="margin-bottom:16px;">
                     <h3 style="margin-bottom:12px;">Quick Actions</h3>
-                    <button class="btn btn-primary" onclick="workstationOn()" style="margin-right:10px;">Activate</button>
-                    <button class="btn btn-secondary" onclick="workstationOff()" style="margin-right:10px;">Deactivate</button>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="workstationOn()"><i class="fas fa-power-off"></i> Activate</button>
+                        <button class="btn btn-secondary" onclick="workstationOff()"><i class="fas fa-stop"></i> Deactivate</button>
+                        <button class="btn btn-secondary" onclick="aiGitCommit()"><i class="fas fa-code-branch"></i> AI Commit</button>
+                    </div>
                 </div>
                 <div class="card" style="margin-bottom:16px;">
                     <h3 style="margin-bottom:12px;"><i class="fas fa-rocket" style="color:var(--accent);"></i> Autonomy GO</h3>
@@ -1392,6 +1500,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                     <button class="btn btn-primary" onclick="autonomyGo()" style="width:100%;"><i class="fas fa-rocket"></i> GO</button>
                     <div id="go-result" style="margin-top:8px; font-size:12px; color:var(--text-muted); display:none;"></div>
                 </div>
+
                 <div class="card">
                     <h3 style="margin-bottom:12px;"><i class="fas fa-coins" style="color:#ffc107;"></i> Token Budget</h3>
                     <div id="token-budget-panel" style="color:var(--text-muted);">Loading...</div>
@@ -1414,35 +1523,65 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                     <div id="completions-feed" style="color:var(--text-muted); font-size:13px;">No completions yet.</div>
                 </div>
             </div>
+
+            <!-- Metrics Page -->
+            <div id="page-metrics" class="page">
+                <header class="header">
+                    <div class="header-title">
+                        <h2>Metrics</h2>
+                        <p>System performance and task analytics</p>
+                    </div>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                        <span id="metrics-daemon-status" class="task-status" style="font-size: 12px;">Checking...</span>
+                        <button class="btn btn-secondary" onclick="loadMetricsData()"><i class="fas fa-sync"></i> Refresh</button>
+                    </div>
+                </header>
+                <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+                    <div class="stat-card"><div class="stat-value" id="m-total">-</div><div class="stat-label">Total Tasks</div></div>
+                    <div class="stat-card"><div class="stat-value" id="m-completed" style="color: #22c55e;">-</div><div class="stat-label">Completed</div></div>
+                    <div class="stat-card"><div class="stat-value" id="m-pending">-</div><div class="stat-label">Pending</div></div>
+                    <div class="stat-card"><div class="stat-value" id="m-tokens" style="color: #f59e0b;">-</div><div class="stat-label">Tokens Today</div></div>
+                </div>
+                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                    <div class="card">
+                        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;"><i class="fas fa-chart-pie" style="color: var(--accent);"></i> Task Distribution</h3>
+                        <div style="position: relative; height: 280px;"><canvas id="metricsChart"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;"><i class="fas fa-history" style="color: #f59e0b;"></i> Recent Activity</h3>
+                        <div id="metrics-activity" style="max-height: 300px; overflow-y: auto;"><p style="color: #a0a0c0;">Loading...</p></div>
+                    </div>
+                </div>
+            </div>
         </main>
         
         <!-- Mobile Bottom Navigation -->
         <nav class="mobile-nav">
             <div class="mobile-nav-item active" onclick="showPage('dashboard', this); window.scrollTo({top: 0, behavior: 'smooth'});">
                 <i class="fas fa-chart-pie"></i>
-                <span>Dashboard</span>
+                <span>Home</span>
             </div>
             <div class="mobile-nav-item" onclick="showPage('tasks', this); window.scrollTo({top: 0, behavior: 'smooth'});">
                 <i class="fas fa-tasks"></i>
                 <span>Tasks</span>
             </div>
-            <div class="mobile-nav-item" onclick="showPage('agents', this); window.scrollTo({top: 0, behavior: 'smooth'});">
+            <div class="mobile-nav-item" onclick="showPage('agents', this); loadSubAgents(); window.scrollTo({top: 0, behavior: 'smooth'});">
                 <i class="fas fa-microchip"></i>
                 <span>Agents</span>
             </div>
-            <div class="mobile-nav-item" onclick="showPage('schedules', this); window.scrollTo({top: 0, behavior: 'smooth'});">
-                <i class="fas fa-clock"></i>
-                <span>Schedules</span>
+            <div class="mobile-nav-item" onclick="showPage('memory', this); loadMemory(); window.scrollTo({top: 0, behavior: 'smooth'});">
+                <i class="fas fa-brain"></i>
+                <span>Memory</span>
             </div>
-            <div class="mobile-nav-item" onclick="showPage('journal', this); loadJournalData(); window.scrollTo({top: 0, behavior: 'smooth'});">
-                <i class="fas fa-book"></i>
-                <span>Journal</span>
+            <div class="mobile-nav-item" onclick="showPage('terminal', this); loadTerminalHistory(); window.scrollTo({top: 0, behavior: 'smooth'});">
+                <i class="fas fa-terminal"></i>
+                <span>Terminal</span>
             </div>
-            <div class="mobile-nav-item" onclick="window.location.href='/metrics'">
+            <div class="mobile-nav-item" onclick="showPage('metrics', this); loadMetricsData(); window.scrollTo({top: 0, behavior: 'smooth'});">
                 <i class="fas fa-chart-line"></i>
                 <span>Metrics</span>
             </div>
-            <div class="mobile-nav-item" onclick="showPage('settings', this); window.scrollTo({top: 0, behavior: 'smooth'});">
+            <div class="mobile-nav-item" onclick="showPage('settings', this); loadSettings(); window.scrollTo({top: 0, behavior: 'smooth'});">
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </div>
@@ -2157,6 +2296,205 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             }
         }
 
+        // ── Memory Functions ──────────────────────────
+        async function loadMemory() {
+            try {
+                const res = await fetch('/api/memory');
+                const d = await res.json();
+                const el = document.getElementById('memory-content');
+                const categories = ['facts','decisions','patterns','blockers','preferences'];
+                const icons = {facts:'fa-lightbulb',decisions:'fa-gavel',patterns:'fa-puzzle-piece',blockers:'fa-exclamation-triangle',preferences:'fa-star'};
+                const colors = {facts:'#3b82f6',decisions:'#22c55e',patterns:'#f59e0b',blockers:'#e94560',preferences:'#ff6b8a'};
+                let html = '';
+                let total = 0;
+                for (const cat of categories) {
+                    const items = d[cat] || [];
+                    total += items.length;
+                    if (items.length === 0) continue;
+                    html += '<div style="margin-bottom: 16px;">';
+                    html += '<div style="font-size: 13px; font-weight: 600; color: ' + colors[cat] + '; margin-bottom: 6px;"><i class="fas ' + icons[cat] + '"></i> ' + cat.charAt(0).toUpperCase() + cat.slice(1) + ' (' + items.length + ')</div>';
+                    items.slice(-8).forEach(function(m) {
+                        html += '<div style="font-size: 13px; color: #c0c0d8; padding: 4px 0 4px 16px; border-left: 2px solid ' + colors[cat] + '33;">• ' + escapeHtml(m.content) + '</div>';
+                    });
+                    html += '</div>';
+                }
+                if (total === 0) html = '<p style="text-align: center; padding: 40px; color: #a0a0c0;"><i class="fas fa-brain" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3; display: block;"></i>No memories stored yet</p>';
+                el.innerHTML = html;
+            } catch(e) { console.log('Memory load failed'); }
+        }
+
+        async function storeMemory() {
+            const cat = document.getElementById('mem-cat').value;
+            const input = document.getElementById('mem-input');
+            const content = input.value.trim();
+            if (!content) return;
+            try {
+                await fetch('/api/memory/store', {method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({category: cat, content: content, source: 'web_ui'})});
+                input.value = '';
+                loadMemory();
+            } catch(e) { console.error('Memory store failed'); }
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(str));
+            return div.innerHTML;
+        }
+
+        // ── Sub-Agents Functions ────────────────────
+        async function loadSubAgents() {
+            try {
+                const res = await fetch('/api/sub-agents');
+                const d = await res.json();
+                document.getElementById('agent-slots').textContent = (d.active_agents || 0) + '/' + (d.max_agents || 3) + ' active';
+                document.getElementById('stat-agents').textContent = d.active_agents || 0;
+                const el = document.getElementById('agent-list');
+                const agents = d.agents || [];
+                if (agents.length === 0) {
+                    el.innerHTML = '<p style="text-align: center; padding: 40px; color: #a0a0c0;"><i class="fas fa-robot" style="font-size: 48px; margin-bottom: 16px; opacity: 0.3; display: block;"></i>No active sub-agents</p>';
+                    return;
+                }
+                el.innerHTML = '<div class="task-list">' + agents.map(function(a) {
+                    const statusColor = a.status === 'active' ? '#22c55e' : '#f59e0b';
+                    return '<div class="task-item"><div class="task-header"><span class="task-name">' + escapeHtml(a.name) + '</span><span class="task-status" style="background: ' + statusColor + '20; color: ' + statusColor + '; border: 1px solid ' + statusColor + '40;">' + a.status + '</span></div><div class="task-desc">Parent: ' + escapeHtml(a.parent_task || 'manual') + '</div></div>';
+                }).join('') + '</div>';
+            } catch(e) { console.log('Sub-agents load failed'); }
+        }
+
+        async function spawnSubAgent() {
+            const name = document.getElementById('spawn-name').value.trim();
+            const desc = document.getElementById('spawn-desc').value.trim();
+            const priority = document.getElementById('spawn-priority').value;
+            const resultEl = document.getElementById('spawn-result');
+            if (!name || !desc) { alert('Name and description required'); return; }
+            resultEl.style.display = 'block';
+            resultEl.textContent = 'Spawning...';
+            resultEl.style.color = '#a0a0c0';
+            try {
+                const res = await fetch('/api/sub-agents/spawn', {method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({parent: 'manual', name: name, description: desc, priority: priority})});
+                const d = await res.json();
+                resultEl.textContent = d.success ? '✓ ' + (d.message || 'Agent spawned!') : '✗ ' + (d.error || 'Failed');
+                resultEl.style.color = d.success ? '#22c55e' : '#e94560';
+                if (d.success) { document.getElementById('spawn-name').value = ''; document.getElementById('spawn-desc').value = ''; loadSubAgents(); }
+            } catch(e) { resultEl.textContent = '✗ Network error'; resultEl.style.color = '#e94560'; }
+        }
+
+        // ── Terminal Functions ───────────────────────
+        async function runTerminal() {
+            const input = document.getElementById('term-input');
+            const out = document.getElementById('term-output');
+            const cmd = input.value.trim();
+            if (!cmd) return;
+            out.style.display = 'block';
+            out.textContent = '$ ' + cmd + '\\nRunning...';
+            out.style.color = '#a0a0c0';
+            try {
+                const res = await fetch('/api/terminal/run', {method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({command: cmd, timeout: 30})});
+                const d = await res.json();
+                out.style.color = d.success ? '#22c55e' : '#e94560';
+                out.textContent = '$ ' + cmd + '\\n' + (d.output || d.error || '(no output)') + '\\n[exit: ' + (d.exit_code !== undefined ? d.exit_code : '?') + ']';
+                input.value = '';
+                loadTerminalHistory();
+            } catch(e) { out.style.color = '#e94560'; out.textContent = 'Network error'; }
+        }
+
+        async function loadTerminalHistory() {
+            try {
+                const res = await fetch('/api/terminal/history');
+                const entries = await res.json();
+                const el = document.getElementById('term-history');
+                if (!entries.length) { el.innerHTML = '<p style="text-align: center; padding: 20px; color: #a0a0c0;">No recent commands</p>'; return; }
+                el.innerHTML = entries.slice().reverse().slice(0, 15).map(function(entry) {
+                    var ok = entry.exit_code === 0;
+                    var time = entry.timestamp ? new Date(entry.timestamp).toLocaleTimeString([], {hour: "2-digit", minute: "2-digit"}) : "";
+                    var cmd = escapeHtml((entry.command || "").substring(0, 60));
+                    var color = ok ? "#22c55e" : "#e94560";
+                    return "<div class='task-item' style='cursor:pointer;padding:12px' data-cmd='" + escapeHtml(entry.command || "") + "'>" +
+                        "<div class='task-header'><span class='task-name' style='font-family:JetBrains Mono,monospace;font-size:14px;color:" + color + "'>$ " + cmd + "</span><span style='font-size:12px;color:#a0a0c0'>" + time + "</span></div></div>";
+                }).join("");
+                el.querySelectorAll('[data-cmd]').forEach(function(div) {
+                    div.addEventListener('click', function() {
+                        document.getElementById('term-input').value = this.getAttribute('data-cmd');
+                    });
+                });
+            } catch(e) {}
+        }
+
+        // ── Settings Functions ──────────────────────
+        async function loadSettings() { /* AI config managed by OpenClaw */ }
+        async function saveSettings() { /* AI config managed by OpenClaw */ }
+
+        async function aiGitCommit() {
+            const msg = prompt('Commit message (leave blank for AI-generated):') || '';
+            try {
+                const res = await fetch('/api/ai/commit', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({message: msg})});
+                const d = await res.json();
+                alert(d.output || d.error || 'Done');
+            } catch(e) { alert('Commit failed'); }
+        }
+
+        // ── Metrics Functions ───────────────────────
+        let metricsChart = null;
+
+        async function loadMetricsData() {
+            try {
+                const res = await fetch('/api/metrics');
+                const data = await res.json();
+                document.getElementById('m-total').textContent = data.tasks.total;
+                document.getElementById('m-completed').textContent = data.tasks.completed;
+                document.getElementById('m-pending').textContent = data.tasks.pending;
+                document.getElementById('m-tokens').textContent = data.token_usage.toLocaleString();
+
+                var statusEl = document.getElementById('metrics-daemon-status');
+                if (data.daemon_running) {
+                    statusEl.textContent = 'Daemon Running';
+                    statusEl.style.background = 'rgba(34,197,94,0.15)';
+                    statusEl.style.color = '#22c55e';
+                    statusEl.style.border = '1px solid rgba(34,197,94,0.2)';
+                } else {
+                    statusEl.textContent = 'Daemon Stopped';
+                    statusEl.style.background = 'rgba(233,69,96,0.15)';
+                    statusEl.style.color = '#e94560';
+                    statusEl.style.border = '1px solid rgba(233,69,96,0.2)';
+                }
+
+                var ctx = document.getElementById('metricsChart');
+                if (ctx) {
+                    if (metricsChart) metricsChart.destroy();
+                    metricsChart = new Chart(ctx.getContext('2d'), {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Pending', 'Completed', 'Processing', 'Needs Attention'],
+                            datasets: [{
+                                data: [data.tasks.pending, data.tasks.completed, data.tasks.ai_processing, data.tasks.needs_ai_attention],
+                                backgroundColor: ['#6b6b8a', '#00d9a3', '#e94560', '#ffc107'],
+                                borderWidth: 0
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: { legend: { position: 'bottom', labels: { color: '#ffffff', padding: 20 } } }
+                        }
+                    });
+                }
+
+                var actEl = document.getElementById('metrics-activity');
+                if (data.activity && data.activity.length > 0) {
+                    actEl.innerHTML = data.activity.slice().reverse().map(function(item) {
+                        var time = new Date(item.timestamp).toLocaleTimeString();
+                        var action = item.action || 'Unknown';
+                        return '<div style="padding:10px;border-bottom:1px solid rgba(233,69,96,0.08);display:flex;justify-content:space-between;font-size:14px"><span style="color:#d0d0e8">' + escapeHtml(action) + '</span><span style="color:#8080a0;font-family:JetBrains Mono,monospace;font-size:12px">' + time + '</span></div>';
+                    }).join('');
+                } else {
+                    actEl.innerHTML = '<p style="color:#a0a0c0;text-align:center;padding:20px">No recent activity</p>';
+                }
+            } catch(e) { console.error('Metrics load failed:', e); }
+        }
+
         initTheme();
         checkOnboarding();
         
@@ -2172,10 +2510,12 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         loadData();
         updateHeartbeatTimer();
         loadTokenBudget();
+        loadSubAgents();
         setInterval(loadData, 5000);
         setInterval(updateTimerDisplay, 1000);
         setInterval(updateHeartbeatTimer, 30000);
         setInterval(loadTokenBudget, 30000);
+        setInterval(loadSubAgents, 15000);
         
         // Swipe gesture support for mobile page navigation
         let touchStartX = 0;
@@ -2183,7 +2523,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         let touchEndX = 0;
         let touchEndY = 0;
         
-        const pages = ['dashboard', 'tasks', 'agents', 'schedules', 'journal', 'settings'];
+        const pages = ['dashboard', 'tasks', 'agents', 'memory', 'terminal', 'schedules', 'journal', 'metrics', 'settings'];
         
         function handleTouchStart(e) {
             touchStartX = e.changedTouches[0].screenX;
@@ -2699,6 +3039,16 @@ class Handler(BaseHTTPRequestHandler):
             self.serve_token_budget()
         elif self.path == "/api/workspace":
             self.serve_workspace_scan()
+        elif self.path == "/api/ai/status":
+            self.serve_ai_status()
+        elif self.path == "/api/memory":
+            self.serve_memory()
+        elif self.path == "/api/sub-agents":
+            self.serve_sub_agents()
+        elif self.path == "/api/terminal/history":
+            self.serve_terminal_history()
+        elif self.path == "/api/settings":
+            self.serve_settings()
         else:
             self.send_error(404)
       except Exception as e:
@@ -2731,6 +3081,16 @@ class Handler(BaseHTTPRequestHandler):
             self.control_daemon()
         elif self.path == "/api/go":
             self.handle_go()
+        elif self.path == "/api/settings":
+            self.save_settings()
+        elif self.path == "/api/terminal/run":
+            self.run_ai_terminal()
+        elif self.path == "/api/memory/store":
+            self.store_memory()
+        elif self.path == "/api/sub-agents/spawn":
+            self.spawn_sub_agent()
+        elif self.path == "/api/ai/commit":
+            self.ai_git_commit()
         else:
             self.send_error(404)
       except Exception as e:
@@ -3287,6 +3647,202 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             self.send_json({"error": str(e)}, 500)
 
+    def _config_interval(self):
+        """Read daemon interval from config.json — same keys as daemon.sh"""
+        try:
+            if os.path.exists(CONFIG_FILE):
+                with open(CONFIG_FILE, 'r') as f:
+                    cfg = json.load(f)
+                return (
+                    cfg.get("daemon", {}).get("interval_minutes")
+                    or cfg.get("global_config", {}).get("base_interval_minutes")
+                    or 5
+                )
+        except: pass
+        return 5
+
+    # ── AI / Settings / Terminal / Memory / Sub-agents ───
+
+    def serve_ai_status(self):
+        try:
+            result = subprocess.run(["bash", f"{AUTONOMY_DIR}/lib/ai-engine.sh", "status"],
+                                    capture_output=True, text=True, timeout=10)
+            self.send_json(json.loads(result.stdout.strip()) if result.returncode == 0 else {"configured": False})
+        except:
+            self.send_json({"configured": False})
+
+    def serve_settings(self):
+        try:
+            config = {}
+            if os.path.exists(CONFIG_FILE):
+                with open(CONFIG_FILE, 'r') as f:
+                    config = json.load(f)
+            ai = config.get("ai", {})
+            key = ai.get("api_key", "")
+            masked = ("*" * (len(key) - 4) + key[-4:]) if len(key) > 4 else ("*" * len(key) if key else "")
+            self.send_json({
+                "provider": ai.get("provider", "openai"),
+                "api_key_set": bool(key),
+                "api_key_masked": masked,
+                "api_url": ai.get("api_url", ""),
+                "model": ai.get("model", "gpt-4o-mini"),
+                "auto_commit": ai.get("auto_commit", False),
+                "auto_push": ai.get("auto_push", False),
+                "terminal_access": ai.get("terminal_access", True),
+                "max_terminal_timeout": ai.get("max_terminal_timeout", 30),
+                "interval_minutes": config.get("daemon", {}).get("interval_minutes", 5),
+                "daily_token_budget": config.get("agentic_config", {}).get("hard_limits", {}).get("daily_token_budget", 50000),
+                "max_sub_agents": config.get("global_config", {}).get("max_sub_agents", 3)
+            })
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
+
+    def save_settings(self):
+        try:
+            content_len = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(content_len)) if content_len > 0 else {}
+            config = {}
+            if os.path.exists(CONFIG_FILE):
+                with open(CONFIG_FILE, 'r') as f:
+                    config = json.load(f)
+            if "ai" not in config:
+                config["ai"] = {}
+            for key in ["provider", "api_key", "api_url", "model", "auto_commit", "auto_push", "terminal_access", "max_terminal_timeout"]:
+                if key in body:
+                    config["ai"][key] = body[key]
+            if "interval_minutes" in body:
+                if "daemon" not in config:
+                    config["daemon"] = {}
+                config["daemon"]["interval_minutes"] = int(body["interval_minutes"])
+            if "daily_token_budget" in body:
+                if "agentic_config" not in config:
+                    config["agentic_config"] = {"hard_limits": {}}
+                config["agentic_config"].setdefault("hard_limits", {})["daily_token_budget"] = int(body["daily_token_budget"])
+            if "max_sub_agents" in body:
+                config.setdefault("global_config", {})["max_sub_agents"] = int(body["max_sub_agents"])
+            with open(CONFIG_FILE, 'w') as f:
+                json.dump(config, f, indent=2)
+            self.send_json({"success": True, "message": "Settings saved"})
+        except Exception as e:
+            self.send_json({"success": False, "error": str(e)}, 500)
+
+    def run_ai_terminal(self):
+        try:
+            content_len = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(content_len)) if content_len > 0 else {}
+            command = body.get("command", "")
+            timeout_sec = min(body.get("timeout", 30), 60)
+            if not command:
+                self.send_json({"error": "No command provided"}, 400)
+                return
+            result = subprocess.run(
+                ["bash", f"{AUTONOMY_DIR}/lib/ai-engine.sh", "terminal", command, str(timeout_sec)],
+                capture_output=True, text=True, timeout=timeout_sec + 5
+            )
+            self.send_json({
+                "success": result.returncode == 0,
+                "output": result.stdout[-4000:] if result.stdout else "",
+                "exit_code": result.returncode,
+                "command": command
+            })
+        except subprocess.TimeoutExpired:
+            self.send_json({"success": False, "error": "Command timed out", "command": body.get("command", "")})
+        except Exception as e:
+            self.send_json({"success": False, "error": str(e)}, 500)
+
+    def serve_terminal_history(self):
+        try:
+            history_file = f"{AUTONOMY_DIR}/state/terminal_history.jsonl"
+            entries = []
+            if os.path.exists(history_file):
+                with open(history_file, 'r') as f:
+                    for line in f.readlines()[-20:]:
+                        try: entries.append(json.loads(line.strip()))
+                        except: pass
+            self.send_json(entries)
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
+
+    def serve_memory(self):
+        try:
+            result = subprocess.run(["bash", f"{AUTONOMY_DIR}/lib/memory.sh", "show"],
+                                    capture_output=True, text=True, timeout=10)
+            if result.returncode == 0 and result.stdout.strip():
+                self.send_json(json.loads(result.stdout.strip()))
+            else:
+                self.send_json({"facts": [], "decisions": [], "patterns": [], "blockers": [], "preferences": []})
+        except:
+            self.send_json({"facts": [], "decisions": [], "patterns": [], "blockers": [], "preferences": []})
+
+    def store_memory(self):
+        try:
+            content_len = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(content_len)) if content_len > 0 else {}
+            category = body.get("category", "facts")
+            content = body.get("content", "")
+            source = body.get("source", "web_ui")
+            if not content:
+                self.send_json({"error": "No content provided"}, 400)
+                return
+            result = subprocess.run(
+                ["bash", f"{AUTONOMY_DIR}/lib/memory.sh", "store", category, content, source],
+                capture_output=True, text=True, timeout=10
+            )
+            self.send_json({"success": result.returncode == 0, "message": result.stdout.strip()})
+        except Exception as e:
+            self.send_json({"success": False, "error": str(e)}, 500)
+
+    def serve_sub_agents(self):
+        try:
+            result = subprocess.run(["bash", f"{AUTONOMY_DIR}/lib/sub-agents.sh", "status"],
+                                    capture_output=True, text=True, timeout=10)
+            if result.returncode == 0 and result.stdout.strip():
+                status = json.loads(result.stdout.strip())
+            else:
+                status = {"active_agents": 0, "max_agents": 3, "available_slots": 3, "total_spawned": 0, "total_completed": 0}
+            list_result = subprocess.run(["bash", f"{AUTONOMY_DIR}/lib/sub-agents.sh", "list", "active"],
+                                         capture_output=True, text=True, timeout=10)
+            agents = []
+            if list_result.returncode == 0 and list_result.stdout.strip():
+                try: agents = json.loads(list_result.stdout.strip())
+                except: pass
+            status["agents"] = agents
+            self.send_json(status)
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
+
+    def spawn_sub_agent(self):
+        try:
+            content_len = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(content_len)) if content_len > 0 else {}
+            parent = body.get("parent", "manual")
+            name = body.get("name", "")
+            desc = body.get("description", "")
+            priority = body.get("priority", "normal")
+            if not name or not desc:
+                self.send_json({"error": "name and description required"}, 400)
+                return
+            result = subprocess.run(
+                ["bash", f"{AUTONOMY_DIR}/lib/sub-agents.sh", "spawn", parent, name, desc, priority],
+                capture_output=True, text=True, timeout=10
+            )
+            self.send_json({"success": result.returncode == 0, "message": result.stdout.strip()})
+        except Exception as e:
+            self.send_json({"success": False, "error": str(e)}, 500)
+
+    def ai_git_commit(self):
+        try:
+            content_len = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(content_len)) if content_len > 0 else {}
+            message = body.get("message", "")
+            args = ["bash", f"{AUTONOMY_DIR}/lib/ai-engine.sh", "commit"]
+            if message:
+                args.append(message)
+            result = subprocess.run(args, capture_output=True, text=True, timeout=30)
+            self.send_json({"success": result.returncode == 0, "output": result.stdout.strip()})
+        except Exception as e:
+            self.send_json({"success": False, "error": str(e)}, 500)
+
     def handle_go(self):
         """Handle autonomy go from web UI"""
         try:
@@ -3327,31 +3883,22 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"success": False, "error": str(e)}, 500)
 
     def serve_service_worker(self):
-        """Serve Service Worker for PWA offline support"""
+        """Serve Service Worker for PWA offline support — v3 network-first"""
         sw_js = '''
-const CACHE_NAME = 'autonomy-v1';
-const urlsToCache = [
-    '/',
-    '/manifest.json'
-];
+const CACHE_NAME = 'autonomy-v3';
+const urlsToCache = ['/', '/manifest.json'];
 
 self.addEventListener('install', event => {
-    event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then(cache => cache.addAll(urlsToCache))
-    );
+    self.skipWaiting();
+    event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+});
+
+self.addEventListener('activate', event => {
+    event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))));
 });
 
 self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                if (response) {
-                    return response;
-                }
-                return fetch(event.request);
-            })
-    );
+    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
 });
 '''
         self.send_response(200)

@@ -2,5 +2,5 @@
 # Database CLI wrapper
 # Usage: autonomy db {init|save|get|status|sync-to-db|sync-from-db|setup}
 
-AUTONOMY_DIR="${AUTONOMY_DIR:-/root/.openclaw/workspace/skills/autonomy}"
+AUTONOMY_DIR="${AUTONOMY_DIR:-${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills/autonomy}"
 bash "$AUTONOMY_DIR/lib/db.sh" "$@"
