@@ -1,0 +1,327 @@
+#!/bin/bash
+# Health Monitor — Automated health checks with notifications
+# Runs periodically and alerts on issues
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AUTONOMY_DIR="$(dirname "$SCRIPT_DIR")"
+STATE_DIR="$AUTONOMY_DIR/state"
+LOGS_DIR="$AUTONOMY_DIR/logs"
+
+mkdir -p "$STATE_DIR" "$LOGS_DIR"
+
+HEALTH_LOG="$LOGS_DIR/health-monitor.jsonl"
+ALERT_STATE="$STATE_DIR/alert-state.json"
+
+# ── Configuration ───────────────────────────────────────────
+
+CHECK_INTERVAL="${1:-900}"  # 15 minutes default
+CPU_THRESHOLD="${2:-80}"    # CPU % alert threshold
+MEM_THRESHOLD="${3:-85}"    # Memory % alert threshold
+DISK_THRESHOLD="${4:-90}"   # Disk % alert threshold
+
+# ── Health Checks ───────────────────────────────────────────
+
+check_cpu() {
+    local usage
+    usage=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1 | cut -d',' -f1)
+    usage=${usage:-0}
+    
+    if (( $(echo "$usage > $CPU_THRESHOLD" | bc -l) )); then
+        echo "{\"check\": \"cpu\", \"status\": \"alert\", \"value\": $usage, \"threshold\": $CPU_THRESHOLD, \"message\": \"CPU usage at ${usage}%\"}"
+    else
+        echo "{\"check\": \"cpu\", \"status\": \"ok\", \"value\": $usage}"
+    fi
+}
+
+check_memory() {
+    local usage
+    usage=$(free | awk '/^Mem:/ {printf "%.0f", $3/$2 * 100}')
+    usage=${usage:-0}
+    
+    if [[ "$usage" -gt "$MEM_THRESHOLD" ]]; then
+        echo "{\"check\": \"memory\", \"status\": \"alert\", \"value\": $usage, \"threshold\": $MEM_THRESHOLD, \"message\": \"Memory usage at ${usage}%\"}"
+    else
+        echo "{\"check\": \"memory\", \"status\": \"ok\", \"value\": $usage}"
+    fi
+}
+
+check_disk() {
+    local usage
+    usage=$(df / | awk 'NR==2 {print $5}' | tr -d '%')
+    usage=${usage:-0}
+    
+    if [[ "$usage" -gt "$DISK_THRESHOLD" ]]; then
+        echo "{\"check\": \"disk\", \"status\": \"alert\", \"value\": $usage, \"threshold\": $DISK_THRESHOLD, \"message\": \"Disk usage at ${usage}%\"}"
+    else
+        echo "{\"check\": \"disk\", \"status\": \"ok\", \"value\": $usage}"
+    fi
+}
+
+check_daemon() {
+    if [[ -f "$AUTONOMY_DIR/state/daemon.pid" ]]; then
+        local pid
+        pid=$(cat "$AUTONOMY_DIR/state/daemon.pid")
+        if kill -0 "$pid" 2>/dev/null; then
+            echo "{\"check\": \"daemon\", \"status\": \"ok\", \"message\": \"Daemon running (PID: $pid)\"}"
+        else
+            echo "{\"check\": \"daemon\", \"status\": \"alert\", \"message\": \"Daemon not running (stale PID file)\"}"
+        fi
+    else
+        echo "{\"check\": \"daemon\", \"status\": \"alert\", \"message\": \"No daemon PID file found\"}"
+    fi
+}
+
+check_web_ui() {
+    if curl -s http://localhost:8767/api/status >/dev/null 2>&1; then
+        echo "{\"check\": \"web_ui\", \"status\": \"ok\", \"message\": \"Web UI responding\"}"
+    else
+        echo "{\"check\": \"web_ui\", \"status\": \"alert\", \"message\": \"Web UI not responding\"}"
+    fi
+}
+
+check_load() {
+    local load
+    load=$(cat /proc/loadavg | awk '{print $1}')
+    local cores
+    cores=$(nproc)
+    local pct
+    pct=$(echo "scale=0; ($load / $cores) * 100" | bc)
+    
+    if [[ "$pct" -gt 150 ]]; then
+        echo "{\"check\": \"load\", \"status\": \"alert\", \"value\": $load, \"cores\": $cores, \"message\": \"High load average: $load on $cores cores\"}"
+    else
+        echo "{\"check\": \"load\", \"status\": \"ok\", \"value\": $load}"
+    fi
+}
+
+# ── Alert Management ────────────────────────────────────────
+
+init_alert_state() {
+    [[ -f "$ALERT_STATE" ]] || echo "[]" > "$ALERT_STATE"
+}
+
+was_alert_sent() {
+    local check="$1"
+    local window="${2:-3600}"  # 1 hour default
+    
+    local now
+    now=$(date +%s)
+    
+    jq -e "any(.[]; .check == \"$check\" and (($now - .timestamp) < $window))" "$ALERT_STATE" >/dev/null 2>&1
+}
+
+record_alert() {
+    local check="$1"
+    local message="$2"
+    
+    local now
+    now=$(date +%s)
+    
+    local new_alert
+    new_alert=$(jq -n --arg check "$check" --arg message "$message" --argjson timestamp "$now" '{check: $check, message: $message, timestamp: $timestamp}')
+    
+    local current
+    current=$(cat "$ALERT_STATE")
+    echo "$current" | jq ". + [$new_alert]" > "$ALERT_STATE"
+}
+
+send_notification() {
+    local check="$1"
+    local message="$2"
+    
+    # Log the alert
+    echo "{\"timestamp\": \"$(date -Iseconds)\", \"type\": \"alert\", \"check\": \"$check\", \"message\": \"$message\"}" >> "$HEALTH_LOG"
+    
+    # Console notification
+    echo ""
+    echo "╔══════════════════════════════════════════════════════════╗"
+    echo "║  ⚠️  HEALTH ALERT                                         ║"
+    echo "╠══════════════════════════════════════════════════════════╣"
+    printf "║  %-54s ║\n" "$check"
+    printf "║  %-54s ║\n" "$message"
+    echo "╚══════════════════════════════════════════════════════════╝"
+    echo ""
+    
+    # Try to notify via autonomy notify if available
+    if [[ -f "$AUTONOMY_DIR/lib/notify.sh" ]]; then
+        bash "$AUTONOMY_DIR/lib/notify.sh" alert "$check" "$message" 2>/dev/null || true
+    fi
+    
+    # Try Discord if available
+    if [[ -f "$AUTONOMY_DIR/integrations/discord.sh" ]]; then
+        bash "$AUTONOMY_DIR/integrations/discord.sh" send "⚠️ Health Alert: $check - $message" 2>/dev/null || true
+    fi
+}
+
+# ── Main Monitoring Loop ────────────────────────────────────
+
+run_health_check() {
+    init_alert_state
+    
+    local alerts=0
+    local timestamp
+    timestamp=$(date -Iseconds)
+    
+    echo "[{\"timestamp\": \"$timestamp\", \"type\": \"health_check_start\"}]" >> "$HEALTH_LOG"
+    
+    # Run all checks
+    local results=()
+    results+=("$(check_cpu)")
+    results+=("$(check_memory)")
+    results+=("$(check_disk)")
+    results+=("$(check_daemon)")
+    results+=("$(check_web_ui)")
+    results+=("$(check_load)")
+    
+    # Process results
+    for result in "${results[@]}"; do
+        echo "$result" >> "$HEALTH_LOG"
+        
+        local status
+        status=$(echo "$result" | jq -r '.status')
+        
+        if [[ "$status" == "alert" ]]; then
+            local check message
+            check=$(echo "$result" | jq -r '.check')
+            message=$(echo "$result" | jq -r '.message')
+            
+            # Only send notification if we haven't sent one recently
+            if ! was_alert_sent "$check"; then
+                send_notification "$check" "$message"
+                record_alert "$check" "$message"
+                ((alerts++))
+            fi
+        fi
+    done
+    
+    echo "{\"timestamp\": \"$(date -Iseconds)\", \"type\": \"health_check_complete\", \"alerts\": $alerts}" >> "$HEALTH_LOG"
+    
+    return $alerts
+}
+
+# ── Daemon Mode ─────────────────────────────────────────────
+
+monitor_daemon_start() {
+    local pid_file="$STATE_DIR/health-monitor.pid"
+    
+    # Check if already running
+    if [[ -f "$pid_file" ]]; then
+        local old_pid
+        old_pid=$(cat "$pid_file")
+        if kill -0 "$old_pid" 2>/dev/null; then
+            echo "Health monitor already running (PID: $old_pid)"
+            return 1
+        fi
+    fi
+    
+    # Start daemon
+    (
+        while true; do
+            run_health_check
+            sleep "$CHECK_INTERVAL"
+        done
+    ) &
+    
+    echo $! > "$pid_file"
+    echo "✓ Health monitor started (PID: $!, interval: ${CHECK_INTERVAL}s)"
+}
+
+monitor_daemon_stop() {
+    local pid_file="$STATE_DIR/health-monitor.pid"
+    
+    if [[ -f "$pid_file" ]]; then
+        local pid
+        pid=$(cat "$pid_file")
+        kill "$pid" 2>/dev/null && echo "✓ Health monitor stopped" || echo "Monitor not running"
+        rm -f "$pid_file"
+    else
+        echo "No health monitor running"
+    fi
+}
+
+monitor_daemon_status() {
+    local pid_file="$STATE_DIR/health-monitor.pid"
+    
+    if [[ -f "$pid_file" ]]; then
+        local pid
+        pid=$(cat "$pid_file")
+        if kill -0 "$pid" 2>/dev/null; then
+            echo "Health monitor: RUNNING (PID: $pid)"
+        else
+            echo "Health monitor: STOPPED (stale PID file)"
+            rm -f "$pid_file"
+        fi
+    else
+        echo "Health monitor: STOPPED"
+    fi
+}
+
+# ── Report Generation ───────────────────────────────────────
+
+generate_report() {
+    echo "Health Monitor Report"
+    echo "===================="
+    echo ""
+    echo "Generated: $(date -Iseconds)"
+    echo ""
+    
+    # Recent alerts
+    echo "Recent Alerts (last 24h):"
+    if [[ -f "$HEALTH_LOG" ]]; then
+        local alerts
+        alerts=$(jq -s 'map(select(.type == "alert" and (now - (.timestamp | fromdateiso8601)) < 86400))' "$HEALTH_LOG" 2>/dev/null)
+        
+        if [[ "$alerts" == "[]" ]] || [[ -z "$alerts" ]]; then
+            echo "  No alerts in last 24 hours"
+        else
+            echo "$alerts" | jq -r '.[] | "  [\(.timestamp)] \(.check): \(.message)"'
+        fi
+    else
+        echo "  No health log available"
+    fi
+    
+    echo ""
+    echo "Current Status:"
+    run_health_check | jq -r 'select(.status) | "  \(.check): \(.status)"'
+}
+
+# ── Command Router ──────────────────────────────────────────
+
+case "${1:-check}" in
+    check)
+        run_health_check
+        ;;
+    daemon|start)
+        monitor_daemon_start
+        ;;
+    stop)
+        monitor_daemon_stop
+        ;;
+    status)
+        monitor_daemon_status
+        ;;
+    report)
+        generate_report
+        ;;
+    config)
+        echo "Health Monitor Configuration:"
+        echo "  Check interval: ${CHECK_INTERVAL}s ($(echo "scale=1; $CHECK_INTERVAL/60" | bc) minutes)"
+        echo "  CPU threshold: ${CPU_THRESHOLD}%"
+        echo "  Memory threshold: ${MEM_THRESHOLD}%"
+        echo "  Disk threshold: ${DISK_THRESHOLD}%"
+        echo ""
+        echo "Usage: $0 daemon [interval] [cpu_thresh] [mem_thresh] [disk_thresh]"
+        ;;
+    *)
+        echo "Health Monitor — Automated health checks with notifications"
+        echo "Usage: $0 <command>"
+        echo ""
+        echo "Commands:"
+        echo "  check              — Run single health check"
+        echo "  daemon (start)     — Start monitoring daemon"
+        echo "  stop               — Stop monitoring daemon"
+        echo "  status             — Check daemon status"
+        echo "  report             — Generate health report"
+        echo "  config             — Show configuration"
+        ;;
+esac

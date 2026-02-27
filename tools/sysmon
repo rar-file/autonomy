@@ -1,0 +1,280 @@
+#!/bin/bash
+# System Monitor Dashboard — Real-time resource visualization
+# A clean terminal interface for system monitoring
+
+REFRESH_INTERVAL="${1:-2}"
+HISTORY_SIZE="${2:-60}"
+
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+GRAY='\033[0;90m'
+NC='\033[0m'
+
+# History arrays for sparklines
+declare -a CPU_HISTORY
+declare -a MEM_HISTORY
+
+# ── Helper Functions ────────────────────────────────────────
+
+draw_bar() {
+    local value="$1"
+    local max="${2:-100}"
+    local width="${3:-30}"
+    local color="${4:-$GREEN}"
+    
+    local filled=$((value * width / max))
+    local empty=$((width - filled))
+    
+    printf "${color}"
+    printf "%0.s█" $(seq 1 $filled)
+    printf "${GRAY}"
+    printf "%0.s░" $(seq 1 $empty)
+    printf "${NC}"
+}
+
+format_bytes() {
+    local bytes="$1"
+    if [[ $bytes -gt 1099511627776 ]]; then
+        printf "%.1fT" $(echo "scale=1; $bytes/1099511627776" | bc)
+    elif [[ $bytes -gt 1073741824 ]]; then
+        printf "%.1fG" $(echo "scale=1; $bytes/1073741824" | bc)
+    elif [[ $bytes -gt 1048576 ]]; then
+        printf "%.1fM" $(echo "scale=1; $bytes/1048576" | bc)
+    elif [[ $bytes -gt 1024 ]]; then
+        printf "%.1fK" $(echo "scale=1; $bytes/1024" | bc)
+    else
+        printf "%dB" $bytes
+    fi
+}
+
+sparkline() {
+    local -n arr="$1"
+    local blocks=("▁" "▂" "▃" "▄" "▅" "▆" "▇" "█")
+    
+    local max=0
+    for val in "${arr[@]}"; do
+        (( $(echo "$val > $max" | bc -l) )) && max=$val
+    done
+    
+    [[ $max -eq 0 ]] && max=1
+    
+    for val in "${arr[@]}"; do
+        local idx=$(echo "scale=0; ($val / $max) * 7" | bc)
+        printf "%s" "${blocks[$idx]}"
+    done
+}
+
+# ── Data Collection ─────────────────────────────────────────
+
+get_cpu_usage() {
+    top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1 | cut -d',' -f1
+}
+
+get_memory_info() {
+    free -b | awk '/^Mem:/ {print $2, $3, $7}'
+}
+
+get_disk_info() {
+    df -h / | awk 'NR==2 {print $2, $3, $4, $5}'
+}
+
+get_load_average() {
+    cat /proc/loadavg | awk '{print $1, $2, $3}'
+}
+
+get_top_processes() {
+    ps aux --sort=-%cpu | head -11 | tail -10
+}
+
+get_network_stats() {
+    cat /proc/net/dev | tail -n +3 | awk '{rx+=$2; tx+=$10} END {print rx, tx}'
+}
+
+get_uptime() {
+    uptime -p 2>/dev/null | sed 's/up //' || uptime | awk -F',' '{print $1}' | sed 's/.*up //'
+}
+
+# ── Display Functions ───────────────────────────────────────
+
+clear_screen() {
+    printf '\033[2J\033[H'
+}
+
+draw_header() {
+    printf "${WHITE}"
+    printf "╔══════════════════════════════════════════════════════════════════════════╗\n"
+    printf "║                    SYSTEM MONITOR DASHBOARD                              ║\n"
+    printf "╚══════════════════════════════════════════════════════════════════════════╝${NC}\n"
+    printf "\n"
+}
+
+draw_cpu_section() {
+    local cpu="$1"
+    printf "${CYAN}┌─ CPU Usage ────────────────────────────────────────────────────────────┐${NC}\n"
+    printf "│  Current: %5.1f%%  " "$cpu"
+    draw_bar "$cpu" 100 40
+    printf "  %5.1f%%\n" "$cpu"
+    printf "│  History: "
+    sparkline CPU_HISTORY
+    printf "\n"
+    printf "${CYAN}└────────────────────────────────────────────────────────────────────────┘${NC}\n"
+}
+
+draw_memory_section() {
+    local total="$1"
+    local used="$2"
+    local free="$3"
+    local pct=$(echo "scale=1; $used * 100 / $total" | bc)
+    
+    printf "${CYAN}┌─ Memory ───────────────────────────────────────────────────────────────┐${NC}\n"
+    printf "│  Total: %s  Used: %s  Free: %s\n" "$(format_bytes $total)" "$(format_bytes $used)" "$(format_bytes $free)"
+    printf "│  Usage: %5.1f%%  " "$pct"
+    draw_bar "$pct" 100 40
+    printf "  %5.1f%%\n" "$pct"
+    printf "│  History: "
+    sparkline MEM_HISTORY
+    printf "\n"
+    printf "${CYAN}└────────────────────────────────────────────────────────────────────────┘${NC}\n"
+}
+
+draw_disk_section() {
+    local size="$1"
+    local used="$2"
+    local avail="$3"
+    local pct="$4"
+    local pct_num=$(echo "$pct" | tr -d '%')
+    
+    printf "${CYAN}┌─ Disk (/) ─────────────────────────────────────────────────────────────┐${NC}\n"
+    printf "│  Size: %s  Used: %s  Avail: %s\n" "$size" "$used" "$avail"
+    printf "│  Usage: %5s   " "$pct"
+    draw_bar "$pct_num" 100 40
+    printf "  %5s\n" "$pct"
+    printf "${CYAN}└────────────────────────────────────────────────────────────────────────┘${NC}\n"
+}
+
+draw_load_section() {
+    local load1="$1"
+    local load5="$2"
+    local load15="$3"
+    local cores=$(nproc)
+    
+    printf "${CYAN}┌─ Load Average ─────────────────────────────────────────────────────────┐${NC}\n"
+    printf "│  1min: %5.2f  5min: %5.2f  15min: %5.2f  (Cores: %d)\n" "$load1" "$load5" "$load15" "$cores"
+    
+    # Load bar (normalized to cores)
+    local load_pct=$(echo "scale=1; $load1 * 100 / $cores" | bc)
+    printf "│  Load:  %5.1f%%  " "$load_pct"
+    draw_bar "$load_pct" 200 40
+    printf "  %5.1f%%\n" "$load_pct"
+    printf "${CYAN}└────────────────────────────────────────────────────────────────────────┘${NC}\n"
+}
+
+draw_processes_section() {
+    printf "${CYAN}┌─ Top Processes (by CPU) ───────────────────────────────────────────────┐${NC}\n"
+    printf "│  ${GRAY}%-8s %-6s %-5s %-5s %-8s %-20s${NC}\n" "USER" "PID" "%CPU" "%MEM" "TIME" "COMMAND"
+    
+    while IFS= read -r line; do
+        local user pid cpu mem time cmd
+        user=$(echo "$line" | awk '{print $1}')
+        pid=$(echo "$line" | awk '{print $2}')
+        cpu=$(echo "$line" | awk '{print $3}')
+        mem=$(echo "$line" | awk '{print $4}')
+        time=$(echo "$line" | awk '{print $10}')
+        cmd=$(echo "$line" | awk '{print $11}' | cut -d'/' -f1)
+        
+        # Color based on CPU usage
+        local color="$NC"
+        if (( $(echo "$cpu > 50" | bc -l) )); then
+            color="$RED"
+        elif (( $(echo "$cpu > 20" | bc -l) )); then
+            color="$YELLOW"
+        fi
+        
+        printf "│  ${color}%-8s %-6s %-5s %-5s %-8s %-20s${NC}\n" "$user" "$pid" "$cpu" "$mem" "$time" "$cmd"
+    done <<< "$1"
+    
+    printf "${CYAN}└────────────────────────────────────────────────────────────────────────┘${NC}\n"
+}
+
+draw_footer() {
+    local uptime="$1"
+    printf "\n"
+    printf "${GRAY}Uptime: %s  |  Refresh: %ss  |  Press 'q' to quit${NC}\n" "$uptime" "$REFRESH_INTERVAL"
+}
+
+# ── Main Loop ───────────────────────────────────────────────
+
+main() {
+    # Check for bc
+    if ! command -v bc >/dev/null 2>&1; then
+        echo "Installing bc for calculations..."
+        apt-get update &>/dev/null && apt-get install -y bc &>/dev/null
+    fi
+    
+    # Setup terminal
+    stty -icanon -echo 2>/dev/null || true
+    
+    # Hide cursor
+    printf '\033[?25l'
+    
+    # Cleanup on exit
+    trap 'printf "\033[?25h"; stty sane 2>/dev/null || true; clear; exit 0' INT TERM EXIT
+    
+    while true; do
+        # Collect data
+        local cpu=$(get_cpu_usage)
+        read -r mem_total mem_used mem_free <<< "$(get_memory_info)"
+        read -r disk_size disk_used disk_avail disk_pct <<< "$(get_disk_info)"
+        read -r load1 load5 load15 <<< "$(get_load_average)"
+        local processes=$(get_top_processes)
+        local uptime=$(get_uptime)
+        
+        # Update history
+        CPU_HISTORY+=($cpu)
+        MEM_HISTORY+=($(echo "scale=0; $mem_used * 100 / $mem_total" | bc))
+        
+        # Trim history
+        [[ ${#CPU_HISTORY[@]} -gt $HISTORY_SIZE ]] && CPU_HISTORY=("${CPU_HISTORY[@]:1}")
+        [[ ${#MEM_HISTORY[@]} -gt $HISTORY_SIZE ]] && MEM_HISTORY=("${MEM_HISTORY[@]:1}")
+        
+        # Draw
+        clear_screen
+        draw_header
+        draw_cpu_section "$cpu"
+        echo ""
+        draw_memory_section "$mem_total" "$mem_used" "$mem_free"
+        echo ""
+        draw_disk_section "$disk_size" "$disk_used" "$disk_avail" "$disk_pct"
+        echo ""
+        draw_load_section "$load1" "$load5" "$load15"
+        echo ""
+        draw_processes_section "$processes"
+        draw_footer "$uptime"
+        
+        # Check for quit
+        local key=""
+        read -t "$REFRESH_INTERVAL" -n 1 key 2>/dev/null || true
+        [[ "$key" == "q" ]] && break
+    done
+}
+
+# Show help if requested
+case "${1:-}" in
+    -h|--help|help)
+        echo "System Monitor Dashboard"
+        echo "Usage: $0 [refresh_interval_seconds] [history_size]"
+        echo ""
+        echo "Examples:"
+        echo "  $0              # Default: 2 second refresh, 60 point history"
+        echo "  $0 5            # 5 second refresh"
+        echo "  $0 1 120        # 1 second refresh, 120 point history"
+        exit 0
+        ;;
+esac
+
+main "$@"

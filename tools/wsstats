@@ -1,0 +1,57 @@
+#!/bin/bash
+# Quick Project Stats — Show workspace statistics at a glance
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WORKSPACE="${1:-/root/.openclaw/workspace}"
+
+# Colors
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+GRAY='\033[0;90m'
+NC='\033[0m'
+
+printf "${BLUE}═══ Workspace Statistics ═══${NC}\n\n"
+
+# File counts
+printf "${CYAN}Files:${NC}\n"
+find "$WORKSPACE" -type f 2>/dev/null | wc -l | xargs printf "  Total files: %d\n"
+find "$WORKSPACE" -name "*.md" 2>/dev/null | wc -l | xargs printf "  Markdown:    %d\n"
+find "$WORKSPACE" -name "*.sh" 2>/dev/null | wc -l | xargs printf "  Shell:       %d\n"
+find "$WORKSPACE" -name "*.json" 2>/dev/null | wc -l | xargs printf "  JSON:        %d\n"
+find "$WORKSPACE" -name "*.py" 2>/dev/null | wc -l | xargs printf "  Python:      %d\n"
+
+# Git info
+if [[ -d "$WORKSPACE/.git" ]]; then
+    printf "\n${CYAN}Git:${NC}\n"
+    printf "  Branch: %s\n" "$(cd "$WORKSPACE" && git branch --show-current 2>/dev/null)"
+    printf "  Commits: %s\n" "$(cd "$WORKSPACE" && git rev-list --count HEAD 2>/dev/null)"
+    printf "  Last commit: %s\n" "$(cd "$WORKSPACE" && git log -1 --format=%cd --date=relative 2>/dev/null)"
+    
+    local modified=$(cd "$WORKSPACE" && git status --short 2>/dev/null | wc -l)
+    if [[ $modified -gt 0 ]]; then
+        printf "  ${GREEN}Modified files: %d${NC}\n" "$modified"
+    fi
+fi
+
+# Disk usage
+printf "\n${CYAN}Size:${NC}\n"
+du -sh "$WORKSPACE" 2>/dev/null | cut -f1 | xargs printf "  Total: %s\n"
+
+# Autonomy stats
+if [[ -d "$WORKSPACE/skills/autonomy" ]]; then
+    printf "\n${CYAN}Autonomy:${NC}\n"
+    ls "$WORKSPACE/skills/autonomy/tasks/"/*.json 2>/dev/null | wc -l | xargs printf "  Active tasks: %d\n"
+    ls "$WORKSPACE/skills/autonomy/tools/" 2>/dev/null | wc -l | xargs printf "  Custom tools: %d\n"
+    
+    if [[ -f "$WORKSPACE/skills/autonomy/config.json" ]]; then
+        local status=$(jq -r '.workstation.active' "$WORKSPACE/skills/autonomy/config.json" 2>/dev/null)
+        if [[ "$status" == "true" ]]; then
+            printf "  Status: ${GREEN}ACTIVE${NC}\n"
+        else
+            printf "  Status: ${GRAY}inactive${NC}\n"
+        fi
+    fi
+fi
+
+printf "\n"

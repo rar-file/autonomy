@@ -3907,6 +3907,68 @@ self.addEventListener('fetch', event => {
         self.end_headers()
         self.wfile.write(sw_js.encode())
 
+    def serve_system_stats(self):
+        """Serve real-time system statistics"""
+        try:
+            import subprocess
+            
+            # CPU usage
+            cpu = subprocess.run(["top", "-bn1"], capture_output=True, text=True, timeout=2)
+            cpu_line = [l for l in cpu.stdout.split('\n') if 'Cpu(s)' in l]
+            cpu_pct = float(cpu_line[0].split('%')[0].split()[-1]) if cpu_line else 0
+            
+            # Memory
+            mem = subprocess.run(["free", "-m"], capture_output=True, text=True, timeout=2)
+            mem_lines = mem.stdout.split('\n')
+            if len(mem_lines) > 1:
+                mem_parts = mem_lines[1].split()
+                mem_total = int(mem_parts[1])
+                mem_used = int(mem_parts[2])
+                mem_pct = (mem_used / mem_total * 100) if mem_total > 0 else 0
+            else:
+                mem_total = mem_used = mem_pct = 0
+            
+            # Disk
+            disk = subprocess.run(["df", "-h", "/"], capture_output=True, text=True, timeout=2)
+            disk_line = disk.stdout.split('\n')[1]
+            disk_parts = disk_line.split()
+            disk_size = disk_parts[1]
+            disk_used = disk_parts[2]
+            disk_pct = int(disk_parts[4].rstrip('%'))
+            
+            # Load
+            with open('/proc/loadavg', 'r') as f:
+                load = f.read().split()[0]
+            
+            self.send_json({
+                "cpu": {"usage": cpu_pct},
+                "memory": {"total": mem_total, "used": mem_used, "percent": mem_pct},
+                "disk": {"size": disk_size, "used": disk_used, "percent": disk_pct},
+                "load": load,
+                "timestamp": datetime.now().isoformat()
+            })
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
+
+    def serve_capabilities(self):
+        """Serve available capabilities list"""
+        try:
+            caps = {
+                "vm": [
+                    "process_list", "process_tree", "top_cpu", "top_memory",
+                    "service_list", "service_status", "cpu", "memory", "disk",
+                    "docker_ps", "docker_stats", "network_connections"
+                ],
+                "watcher": ["add", "remove", "list", "check", "daemon_start"],
+                "diagnostic": ["health", "repair", "system"],
+                "execute": ["retry", "async", "parallel", "timeout"],
+                "log": ["query", "tail", "stats", "errors"],
+                "plugin": ["list", "load", "create", "discover"]
+            }
+            self.send_json(caps)
+        except Exception as e:
+            self.send_json({"error": str(e)}, 500)
+
 if __name__ == "__main__":
     port = int(os.environ.get("AUTONOMY_WEB_PORT", 8767))
     server = ThreadingHTTPServer(("0.0.0.0", port), Handler)

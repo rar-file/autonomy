@@ -1,0 +1,122 @@
+#!/bin/bash
+# Git Quick Actions — Streamlined git operations
+
+set -e
+
+ACTION="${1:-status}"
+shift || true
+
+case "$ACTION" in
+    status|st)
+        git status -sb
+        ;;
+    
+    commit|ci)
+        MESSAGE="${1:-"Update $(date +%Y-%m-%d_%H:%M)"}"
+        git add -A
+        git commit -m "$MESSAGE"
+        echo "✓ Committed: $MESSAGE"
+        ;;
+    
+    amend)
+        git commit --amend --no-edit
+        echo "✓ Amended last commit"
+        ;;
+    
+    push)
+        git push "$@"
+        echo "✓ Pushed"
+        ;;
+    
+    pull)
+        git pull --rebase "$@"
+        echo "✓ Pulled"
+        ;;
+    
+    sync)
+        git pull --rebase && git push
+        echo "✓ Synced"
+        ;;
+    
+    undo)
+        git reset --soft HEAD~1
+        echo "✓ Undid last commit (staged)"
+        ;;
+    
+    discard)
+        git checkout -- .
+        git clean -fd
+        echo "✓ Discarded all changes"
+        ;;
+    
+    log)
+        git log --oneline --graph --decorate -20 "$@"
+        ;;
+    
+    branch|br)
+        git branch -vv
+        ;;
+    
+    new-branch|nb)
+        NAME="$1"
+        [[ -z "$NAME" ]] && { echo "Usage: gitq new-branch <name>"; exit 1; }
+        git checkout -b "$NAME"
+        echo "✓ Created branch: $NAME"
+        ;;
+    
+    switch|sw)
+        NAME="$1"
+        [[ -z "$NAME" ]] && { echo "Usage: gitq switch <branch>"; exit 1; }
+        git checkout "$NAME"
+        echo "✓ Switched to: $NAME"
+        ;;
+    
+    stash)
+        git stash push -m "$(date +%Y-%m-%d_%H:%M)"
+        echo "✓ Stashed"
+        ;;
+    
+    unstash|pop)
+        git stash pop
+        echo "✓ Unstashed"
+        ;;
+    
+    diff|d)
+        git diff --stat
+        ;;
+    
+    size)
+        git count-objects -vH
+        ;;
+    
+    cleanup)
+        git remote prune origin
+        git branch --merged | grep -v "\*" | xargs -r git branch -d
+        git gc --aggressive --prune=now
+        echo "✓ Cleaned up"
+        ;;
+    
+    *)
+        echo "Git Quick Actions"
+        echo "Usage: gitq <action> [args]"
+        echo ""
+        echo "Actions:"
+        echo "  status (st)          — Short status"
+        echo "  commit (ci) [msg]    — Add all and commit"
+        echo "  amend                — Amend last commit"
+        echo "  push                 — Push current branch"
+        echo "  pull                 — Pull with rebase"
+        echo "  sync                 — Pull then push"
+        echo "  undo                 — Undo last commit (keep changes)"
+        echo "  discard              — Discard all changes"
+        echo "  log                  — Pretty log"
+        echo "  branch (br)          — List branches"
+        echo "  new-branch (nb) <n>  — Create and switch to branch"
+        echo "  switch (sw) <n>      — Switch branch"
+        echo "  stash                — Stash changes"
+        echo "  unstash (pop)        — Pop stash"
+        echo "  diff (d)             — Diff stat"
+        echo "  size                 — Repo size"
+        echo "  cleanup              — Clean up repo"
+        ;;
+esac

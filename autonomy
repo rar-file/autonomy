@@ -2,7 +2,15 @@
 # Agentic Autonomy Core
 # The AI decides. This is just the interface.
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Resolve script path (handle symlinks)
+SCRIPT_SOURCE="${BASH_SOURCE[0]}"
+while [[ -L "$SCRIPT_SOURCE" ]]; do
+    SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_SOURCE")" && pwd)"
+    SCRIPT_SOURCE="$(readlink "$SCRIPT_SOURCE")"
+    [[ "$SCRIPT_SOURCE" != /* ]] && SCRIPT_SOURCE="$SCRIPT_DIR/$SCRIPT_SOURCE"
+done
+SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_SOURCE")" && pwd)"
+
 AUTONOMY_DIR="$SCRIPT_DIR"
 WORKSPACE="$(dirname "$(dirname "$AUTONOMY_DIR")")"
 CONFIG="$AUTONOMY_DIR/config.json"
@@ -283,11 +291,19 @@ cmd_task() {
             shift
             local name="$1"
             local description="${2:-No description}"
+            local priority="${3:-normal}"
             
             if [[ -z "$name" ]]; then
-                echo "Usage: autonomy task create <name> [description]"
+                echo "Usage: autonomy task create <name> [description] [priority]"
+                echo "Priority: critical, high, normal (default), low"
                 return 1
             fi
+            
+            # Validate priority
+            case "$priority" in
+                critical|high|normal|low) ;;
+                *) priority="normal" ;;
+            esac
             
             # Check limits
             if ! check_limits "tasks"; then
@@ -300,7 +316,7 @@ cmd_task() {
   "name": "$name",
   "description": "$description",
   "status": "pending",
-  "priority": "normal",
+  "priority": "$priority",
   "created": "$(date -Iseconds)",
   "assignee": "self",
   "subtasks": [],
@@ -312,8 +328,8 @@ cmd_task() {
 }
 EOF
             
-            echo -e "${GREEN}✓${NC} Task created: $name"
-            log_activity "task_created" "{\"name\": \"$name\"}"
+            echo -e "${GREEN}✓${NC} Task created: $name (priority: $priority)"
+            log_activity "task_created" "{\"name\": \"$name\", \"priority\": \"$priority\"}"
             ;;
             
         complete)
@@ -389,7 +405,8 @@ EOF
             ;;
             
         *)
-            echo "Usage: autonomy task {list|create <name> [desc]|complete <name>}"
+            echo "Usage: autonomy task {list|create <name> [desc] [priority]|complete <name>}"
+            echo "Priority levels: critical, high, normal (default), low"
             ;;
     esac
 }
@@ -461,7 +478,13 @@ cmd_schedule() {
             fi
             
             local tmp_file="${CONFIG}.tmp"
-            jq '.workstation.schedules += [{"interval": "'$interval'", "task": "'$task'", "last_run": null, "created": "'$(date -Iseconds)'"}]' "$CONFIG" > "$tmp_file" && mv "$tmp_file" "$CONFIG"
+            local timestamp
+            timestamp=$(date -Iseconds)
+            jq --arg interval "$interval" \
+               --arg task "$task" \
+               --arg created "$timestamp" \
+               '.workstation.schedules += [{"interval": $interval, "task": $task, "last_run": null, "created": $created}]' \
+               "$CONFIG" > "$tmp_file" && mv "$tmp_file" "$CONFIG"
             
             echo -e "${GREEN}✓${NC} Scheduled: $task every $interval"
             log_activity "schedule_added" "{\"interval\": \"$interval\", \"task\": \"$task\"}"
@@ -999,6 +1022,21 @@ MONITORING:
   heartbeat stats          Show heartbeat statistics
   check-updates            Check for available updates
 
+CAPABILITIES (New):
+  vm <command> [args]      VM integration (processes, services, docker, etc.)
+                           Commands: process_list, service_status, docker_ps,
+                           cpu, memory, disk, network_connections, etc.
+  watcher <cmd> [args]     File watching and auto-trigger
+                           Commands: add, remove, list, check, daemon_start
+  diagnostic <cmd> [args]  Self-diagnostics and repair
+                           Commands: health, repair, system
+  execute <cmd> [args]     Enhanced task execution
+                           Commands: retry, async, parallel, timeout
+  log <cmd> [args]         Intelligent logging
+                           Commands: query, tail, stats, errors, rotate
+  plugin <cmd> [args]      Plugin system
+                           Commands: list, load, create, discover
+
 UTILITIES:
   wizard                   Interactive configuration wizard
   alias list               List command aliases
@@ -1118,6 +1156,30 @@ case "${1:-status}" in
     heartbeat)
         shift
         "$AUTONOMY_DIR/heartbeat" "$@"
+        ;;
+    vm)
+        shift
+        "$AUTONOMY_DIR/capabilities/vm-integration.sh" "$@"
+        ;;
+    watcher)
+        shift
+        "$AUTONOMY_DIR/capabilities/file-watcher.sh" "$@"
+        ;;
+    diagnostic|diag)
+        shift
+        "$AUTONOMY_DIR/capabilities/diagnostics.sh" "$@"
+        ;;
+    execute|exec)
+        shift
+        "$AUTONOMY_DIR/capabilities/task-executor.sh" "$@"
+        ;;
+    log|logs)
+        shift
+        "$AUTONOMY_DIR/capabilities/intelligent-logger.sh" "$@"
+        ;;
+    plugin|plugins)
+        shift
+        "$AUTONOMY_DIR/capabilities/plugin-system.sh" "$@"
         ;;
     version|-v|--version)
         echo "Autonomy v$(get_config '.version // "2.0.0"')"

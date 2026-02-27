@@ -1,0 +1,237 @@
+#!/bin/bash
+# Backup Automation System — Smart backups with rotation
+
+BACKUP_BASE="${AUTONOMY_BACKUP_DIR:-/root/.openclaw/backups}"
+CONFIG_FILE="${AUTONOMY_DIR:-/root/.openclaw/workspace/skills/autonomy}/config/backup-config.json"
+RETENTION_DAYS="${1:-30}"
+
+# Ensure backup directory exists
+mkdir -p "$BACKUP_BASE"
+
+# Default backup config
+init_config() {
+    local config_dir="$(dirname "$CONFIG_FILE")"
+    mkdir -p "$config_dir"
+    
+    [[ -f "$CONFIG_FILE" ]] && return 0
+    
+    cat > "$CONFIG_FILE" << 'EOF'
+{
+  "backup_paths": [
+    "/root/.openclaw/workspace",
+    "/root/.openclaw/openclaw.json"
+  ],
+  "exclude_patterns": [
+    "*.tmp",
+    "*.log",
+    ".git/objects",
+    "node_modules",
+    "__pycache__"
+  ],
+  "compression": "gzip",
+  "encrypt": false,
+  "retention_days": 30
+}
+EOF
+}
+
+# Create backup
+backup_create() {
+    init_config
+    
+    local timestamp=$(date +%Y%m%d_%H%M%S)
+    local backup_dir="$BACKUP_BASE/$timestamp"
+    local manifest="$backup_dir/MANIFEST"
+    
+    mkdir -p "$backup_dir"
+    
+    echo "Backup started at $(date -Iseconds)" > "$manifest"
+    echo "=====================================" >> "$manifest"
+    
+    # Read paths from config
+    local paths
+    paths=$(jq -r '.backup_paths[]' "$CONFIG_FILE" 2>/dev/null)
+    
+    for path in $paths; do
+        [[ -e "$path" ]] || continue
+        
+        local basename=$(basename "$path")
+        local dest="$backup_dir/$basename"
+        
+        echo "Backing up: $path" >&2
+        
+        if [[ -d "$path" ]]; then
+            # Directory backup with exclusions
+            local excludes=$(jq -r '.exclude_patterns[]' "$CONFIG_FILE" | sed 's/^/--exclude=/' | tr '\n' ' ')
+            eval rsync -av $excludes "$path/" "$dest/" >/dev/null 2>&1 || cp -r "$path" "$dest"
+        else
+            # File backup
+            cp "$path" "$dest"
+        fi
+        
+        echo "  $path -> $basename" >> "$manifest"
+    done
+    
+    # Compress backup
+    local compression=$(jq -r '.compression // "gzip"' "$CONFIG_FILE")
+    if [[ "$compression" == "gzip" ]]; then
+        # Write final manifest entries before compression
+        echo "" >> "$manifest"
+        echo "Total size: $(du -sh "$backup_dir" 2>/dev/null | cut -f1)" >> "$manifest"
+        echo "Completed at $(date -Iseconds)" >> "$manifest"
+        
+        tar czf "$backup_dir.tar.gz" -C "$BACKUP_BASE" "$timestamp"
+        rm -rf "$backup_dir"
+        echo "✓ Backup created: $backup_dir.tar.gz"
+    else
+        echo "" >> "$manifest"
+        echo "Total size: $(du -sh "$backup_dir" 2>/dev/null | cut -f1)" >> "$manifest"
+        echo "Completed at $(date -Iseconds)" >> "$manifest"
+        echo "✓ Backup created: $backup_dir/"
+    fi
+}
+
+# List backups
+backup_list() {
+    echo "Available Backups:"
+    echo "=================="
+    
+    for backup in "$BACKUP_BASE"/2*; do
+        [[ -e "$backup" ]] || continue
+        
+        local name=$(basename "$backup")
+        local size=$(du -sh "$backup" 2>/dev/null | cut -f1)
+        local date="${name:0:8} ${name:9:2}:${name:11:2}:${name:13:2}"
+        
+        printf "  %s  %8s  %s\n" "$date" "$size" "$name"
+    done
+}
+
+# Restore backup
+backup_restore() {
+    local backup_name="$1"
+    local target="${2:-/tmp/restore-$(date +%s)}"
+    
+    [[ -z "$backup_name" ]] && { echo "Usage: backup restore <backup_name> [target_dir]"; exit 1; }
+    
+    local backup_path="$BACKUP_BASE/$backup_name"
+    
+    if [[ -f "$backup_path.tar.gz" ]]; then
+        mkdir -p "$target"
+        tar xzf "$backup_path.tar.gz" -C "$target"
+        echo "✓ Restored to: $target/"
+    elif [[ -d "$backup_path" ]]; then
+        cp -r "$backup_path" "$target"
+        echo "✓ Restored to: $target/"
+    else
+        echo "Backup not found: $backup_name"
+        exit 1
+    fi
+}
+
+# Clean old backups
+backup_cleanup() {
+    local days="${1:-$RETENTION_DAYS}"
+    
+    echo "Cleaning backups older than $days days..."
+    
+    local count=0
+    while IFS= read -r backup; do
+        [[ -z "$backup" ]] && continue
+        rm -rf "$backup"
+        echo "  Removed: $(basename "$backup")"
+        ((count++))
+    done <<< "$(find "$BACKUP_BASE" -maxdepth 1 -name "2*" -type d -mtime +$days 2>/dev/null)"
+    
+    while IFS= read -r backup; do
+        [[ -z "$backup" ]] && continue
+        rm -f "$backup"
+        echo "  Removed: $(basename "$backup")"
+        ((count++))
+    done <<< "$(find "$BACKUP_BASE" -maxdepth 1 -name "2*.tar.gz" -type f -mtime +$days 2>/dev/null)"
+    
+    echo "✓ Cleaned up $count old backups"
+}
+
+# Show backup stats
+backup_stats() {
+    echo "Backup Statistics:"
+    echo "=================="
+    
+    local total_backups=$(find "$BACKUP_BASE" -maxdepth 1 -name "2*" | wc -l)
+    local total_size=$(du -sh "$BACKUP_BASE" 2>/dev/null | cut -f1)
+    local oldest=$(find "$BACKUP_BASE" -maxdepth 1 -name "2*" -printf '%T+ %p\n' 2>/dev/null | sort | head -1 | cut -d' ' -f2 | xargs basename 2>/dev/null)
+    local newest=$(find "$BACKUP_BASE" -maxdepth 1 -name "2*" -printf '%T+ %p\n' 2>/dev/null | sort -r | head -1 | cut -d' ' -f2 | xargs basename 2>/dev/null)
+    
+    printf "  Total backups: %d\n" "$total_backups"
+    printf "  Total size:    %s\n" "$total_size"
+    printf "  Oldest:        %s\n" "${oldest:-none}"
+    printf "  Newest:        %s\n" "${newest:-none}"
+    printf "  Location:      %s\n" "$BACKUP_BASE"
+}
+
+# Add path to backup config
+backup_add_path() {
+    local path="$1"
+    [[ -z "$path" ]] && { echo "Usage: backup add-path <path>"; exit 1; }
+    [[ -e "$path" ]] || { echo "Path does not exist: $path"; exit 1; }
+    
+    local tmp=$(mktemp)
+    jq --arg path "$path" '.backup_paths += [$path]' "$CONFIG_FILE" > "$tmp" && mv "$tmp" "$CONFIG_FILE"
+    echo "✓ Added to backup: $path"
+}
+
+# Edit config
+backup_config() {
+    ${EDITOR:-nano} "$CONFIG_FILE"
+}
+
+# Command router
+case "${1:-}" in
+    create)
+        backup_create
+        ;;
+    list|ls)
+        backup_list
+        ;;
+    restore)
+        shift
+        backup_restore "$@"
+        ;;
+    cleanup|clean)
+        shift
+        backup_cleanup "$@"
+        ;;
+    stats)
+        backup_stats
+        ;;
+    add-path)
+        shift
+        backup_add_path "$@"
+        ;;
+    config)
+        backup_config
+        ;;
+    auto)
+        # Automated backup with cleanup
+        backup_create
+        backup_cleanup
+        ;;
+    *)
+        echo "Backup Automation System"
+        echo "Usage: backup <command> [args]"
+        echo ""
+        echo "Commands:"
+        echo "  create              — Create new backup"
+        echo "  list (ls)           — List all backups"
+        echo "  restore <name> [target] — Restore backup"
+        echo "  cleanup [days]      — Remove old backups (default: 30 days)"
+        echo "  stats               — Show backup statistics"
+        echo "  add-path <path>     — Add path to backup config"
+        echo "  config              — Edit backup configuration"
+        echo "  auto                — Create backup + cleanup old ones"
+        echo ""
+        echo "Environment:"
+        echo "  AUTONOMY_BACKUP_DIR — Backup location (default: ~/.openclaw/backups)"
+        ;;
+esac

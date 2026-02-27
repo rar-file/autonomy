@@ -24,7 +24,7 @@ get_config() {
 # ── Gather live context ─────────────────────────────────────
 
 get_current_task() {
-    # Priority: needs_ai_attention > ai_processing > first pending
+    # Priority: needs_ai_attention > ai_processing > highest priority pending
     local attention_file="$AUTONOMY_DIR/state/needs_attention.json"
     if [[ -f "$attention_file" ]]; then
         local name desc
@@ -36,10 +36,14 @@ get_current_task() {
         fi
     fi
 
-    # Check task files
+    # Check task files - prioritize by priority field (critical > high > normal > low)
+    local best_task=""
+    local best_desc=""
+    local best_priority=-1
+    
     for task_file in "$TASKS_DIR"/*.json; do
         [[ -f "$task_file" ]] || continue
-        local status completed name desc
+        local status completed name desc priority priority_value
         status=$(jq -r '.status // "pending"' "$task_file" 2>/dev/null)
         completed=$(jq -r '.completed // false' "$task_file" 2>/dev/null)
         [[ "$completed" == "true" ]] && continue
@@ -47,10 +51,31 @@ get_current_task() {
         if [[ "$status" == "needs_ai_attention" || "$status" == "ai_processing" || "$status" == "pending" ]]; then
             name=$(jq -r '.name // ""' "$task_file" 2>/dev/null)
             desc=$(jq -r '.description // ""' "$task_file" 2>/dev/null)
-            echo "$name|$desc"
-            return
+            priority=$(jq -r '.priority // "normal"' "$task_file" 2>/dev/null)
+            
+            # Convert priority to numeric value
+            case "$priority" in
+                critical) priority_value=100 ;;
+                high) priority_value=50 ;;
+                normal) priority_value=25 ;;
+                low) priority_value=10 ;;
+                *) priority_value=25 ;;
+            esac
+            
+            # Select highest priority task
+            if [[ $priority_value -gt $best_priority ]]; then
+                best_priority=$priority_value
+                best_task="$name"
+                best_desc="$desc"
+            fi
         fi
     done
+    
+    if [[ -n "$best_task" ]]; then
+        echo "$best_task|$best_desc"
+        return
+    fi
+    
     echo "|"
 }
 
@@ -282,6 +307,49 @@ Use these to verify work, gather evidence, and maintain context.
 
 AI_EOF
     fi
+
+    # New Capabilities
+    cat >> "$HEARTBEAT_FILE" << CAPABILITIES_EOF
+## System Capabilities
+
+### VM Integration (Full System Access)
+- Process management: \`autonomy vm process_list\`, \`autonomy vm top_cpu\`
+- Service control: \`autonomy vm service_list\`, \`autonomy vm service_status <svc>\`
+- Docker control: \`autonomy vm docker_ps\`, \`autonomy vm docker_logs <c>\`
+- Resources: \`autonomy vm cpu\`, \`autonomy vm memory\`, \`autonomy vm disk\`
+- Network: \`autonomy vm network_connections\`, \`autonomy vm ping <host>\`
+- Storage: \`autonomy vm storage_df\`, \`autonomy vm storage_du <path>\`
+
+### File Watching
+- Add watcher: \`autonomy watcher add <path> <action> [name]\`
+- List watchers: \`autonomy watcher list\`
+- Check changes: \`autonomy watcher check\`
+- Daemon: \`autonomy watcher daemon_start\`
+
+### Diagnostics
+- Health check: \`autonomy diagnostic health\`
+- Auto-repair: \`autonomy diagnostic repair\`
+- System info: \`autonomy diagnostic system\`
+
+### Enhanced Execution
+- With retry: \`autonomy execute retry "<cmd>" [max] [delay]\`
+- Async: \`autonomy execute async "<cmd>" [name]\`
+- Parallel: \`autonomy execute parallel "cmd1" "cmd2" ...\`
+- Timeout: \`autonomy execute timeout <secs> "<cmd>"\`
+
+### Intelligent Logging
+- Query logs: \`autonomy log query --level INFO --last 20\`
+- Tail: \`autonomy log tail [n]\`
+- Stats: \`autonomy log stats\`
+- Errors: \`autonomy log errors [n]\`
+
+### Plugins
+- List: \`autonomy plugin list\`
+- Load: \`autonomy plugin load <name>\`
+- Create: \`autonomy plugin create <name>\`
+- Discover: \`autonomy plugin discover\`
+
+CAPABILITIES_EOF
 
     # Hard limits & rules
     cat >> "$HEARTBEAT_FILE" << RULES_EOF
