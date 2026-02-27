@@ -316,30 +316,209 @@ cleanup() {
                 else . end)
             else . end
         ]' "$AGENTS_FILE" > "$tmp" 2>/dev/null && mv "$tmp" "$AGENTS_FILE"
+
+    # Also clean up stale parallel agent PIDs
+    _parallel_cleanup
     echo "Cleanup complete"
+}
+
+# ── Real Parallel Execution ─────────────────────────────────
+# Spawns actual background processes that run their own AI calls
+# Uses file-based IPC via state/parallel_agents/
+
+PARALLEL_DIR="$STATE_DIR/parallel_agents"
+mkdir -p "$PARALLEL_DIR"
+
+# spawn_parallel <parent_task> <agent_name> <description> [priority]
+# Creates a real background bash process with its own execution engine
+spawn_parallel() {
+    local parent="$1"
+    local name="$2"
+    local desc="$3"
+    local priority="${4:-normal}"
+
+    [[ -z "$parent" || -z "$name" || -z "$desc" ]] && {
+        echo "Usage: sub-agents.sh spawn_parallel <parent_task> <agent_name> <description> [priority]"
+        return 1
+    }
+
+    _ensure_state
+
+    # Check limit
+    local active max
+    active=$(_active_count)
+    max=$(_max_agents)
+    if [[ "$active" -ge "$max" ]]; then
+        echo "LIMIT_REACHED: $active/$max sub-agents active."
+        return 1
+    fi
+
+    # First spawn normally to register in state
+    spawn "$parent" "$name" "$desc" "$priority" || return 1
+
+    local agent_id
+    agent_id=$(jq -r --arg n "$name" '.agents[] | select(.name == $n) | .id' "$AGENTS_FILE" 2>/dev/null | tail -1)
+
+    # Create IPC directory for this agent
+    local ipc_dir="$PARALLEL_DIR/$agent_id"
+    mkdir -p "$ipc_dir"
+
+    # Write agent manifest
+    jq -n \
+        --arg id "$agent_id" \
+        --arg name "$name" \
+        --arg desc "$desc" \
+        --arg parent "$parent" \
+        --arg ts "$(date -Iseconds)" \
+        '{id: $id, name: $name, description: $desc, parent: $parent, started: $ts, status: "running", pid: null}' \
+        > "$ipc_dir/manifest.json"
+
+    # Create the worker script
+    cat > "$ipc_dir/worker.sh" << 'WORKER_EOF'
+#!/bin/bash
+# Parallel agent worker — runs independently
+AGENT_IPC_DIR="$1"
+AUTONOMY_DIR="$2"
+AGENT_NAME="$3"
+
+exec > "$AGENT_IPC_DIR/stdout.log" 2> "$AGENT_IPC_DIR/stderr.log"
+
+echo "Worker started at $(date -Iseconds)" > "$AGENT_IPC_DIR/status"
+
+# Mark started
+if [[ -f "$AUTONOMY_DIR/lib/sub-agents.sh" ]]; then
+    bash "$AUTONOMY_DIR/lib/sub-agents.sh" start "$AGENT_NAME" 2>/dev/null
+fi
+
+# Use execution engine if available
+TASK_FILE="$AUTONOMY_DIR/tasks/${AGENT_NAME}.json"
+if [[ -f "$TASK_FILE" && -f "$AUTONOMY_DIR/lib/execution-engine.sh" ]]; then
+    echo "executing" > "$AGENT_IPC_DIR/status"
+    bash "$AUTONOMY_DIR/lib/execution-engine.sh" execute "$AGENT_NAME" 2>&1
+    EXIT_CODE=$?
+else
+    # Fallback: use ai-engine to analyze
+    if [[ -f "$TASK_FILE" && -f "$AUTONOMY_DIR/lib/ai-engine.sh" ]]; then
+        echo "analyzing" > "$AGENT_IPC_DIR/status"
+        bash "$AUTONOMY_DIR/lib/ai-engine.sh" process "$TASK_FILE" 2>&1
+        EXIT_CODE=$?
+    else
+        echo "no_engine" > "$AGENT_IPC_DIR/status"
+        EXIT_CODE=1
+    fi
+fi
+
+# Report result
+if [[ $EXIT_CODE -eq 0 ]]; then
+    echo "completed" > "$AGENT_IPC_DIR/status"
+    bash "$AUTONOMY_DIR/lib/sub-agents.sh" complete "$AGENT_NAME" "Parallel execution completed successfully" 2>/dev/null
+else
+    echo "failed" > "$AGENT_IPC_DIR/status"
+    bash "$AUTONOMY_DIR/lib/sub-agents.sh" fail "$AGENT_NAME" "Parallel execution failed (exit $EXIT_CODE)" 2>/dev/null
+fi
+
+echo "Worker finished at $(date -Iseconds) with exit code $EXIT_CODE" >> "$AGENT_IPC_DIR/stdout.log"
+WORKER_EOF
+
+    chmod +x "$ipc_dir/worker.sh"
+
+    # Launch background worker
+    bash "$ipc_dir/worker.sh" "$ipc_dir" "$AUTONOMY_DIR" "$name" &
+    local worker_pid=$!
+
+    # Record PID
+    jq --argjson pid "$worker_pid" '.pid = $pid' "$ipc_dir/manifest.json" > "$ipc_dir/manifest.json.tmp" \
+        && mv "$ipc_dir/manifest.json.tmp" "$ipc_dir/manifest.json"
+
+    jq -n --arg ts "$(date -Iseconds)" --arg id "$agent_id" --arg name "$name" --argjson pid "$worker_pid" \
+        '{timestamp:$ts, action:"parallel_spawned", agent_id:$id, name:$name, pid:$pid}' >> "$AGENT_LOG" 2>/dev/null
+
+    echo "Parallel agent launched: $name (PID: $worker_pid, IPC: $ipc_dir)"
+}
+
+# Check status of parallel agents
+parallel_status() {
+    local results="[]"
+    for d in "$PARALLEL_DIR"/*/; do
+        [[ -d "$d" ]] || continue
+        local manifest="$d/manifest.json"
+        [[ -f "$manifest" ]] || continue
+
+        local agent_id agent_name pid status_text
+        agent_id=$(jq -r '.id' "$manifest")
+        agent_name=$(jq -r '.name' "$manifest")
+        pid=$(jq -r '.pid // 0' "$manifest")
+
+        if [[ -f "$d/status" ]]; then
+            status_text=$(cat "$d/status")
+        else
+            status_text="unknown"
+        fi
+
+        local running=false
+        if [[ "$pid" -gt 0 ]] && kill -0 "$pid" 2>/dev/null; then
+            running=true
+        fi
+
+        results=$(echo "$results" | jq \
+            --arg id "$agent_id" \
+            --arg name "$agent_name" \
+            --argjson pid "$pid" \
+            --arg status "$status_text" \
+            --argjson running "$running" \
+            '. + [{id: $id, name: $name, pid: $pid, status: $status, running: $running}]')
+    done
+    echo "$results" | jq .
+}
+
+# Cleanup dead parallel agent processes
+_parallel_cleanup() {
+    for d in "$PARALLEL_DIR"/*/; do
+        [[ -d "$d" ]] || continue
+        local manifest="$d/manifest.json"
+        [[ -f "$manifest" ]] || continue
+
+        local pid status_text
+        pid=$(jq -r '.pid // 0' "$manifest")
+        [[ -f "$d/status" ]] && status_text=$(cat "$d/status") || status_text="unknown"
+
+        # If process is dead and status isn't completed/failed, mark as failed
+        if [[ "$pid" -gt 0 ]] && ! kill -0 "$pid" 2>/dev/null; then
+            if [[ "$status_text" != "completed" && "$status_text" != "failed" ]]; then
+                echo "failed" > "$d/status"
+                local agent_name
+                agent_name=$(jq -r '.name' "$manifest")
+                fail_agent "$agent_name" "Worker process died unexpectedly" 2>/dev/null
+            fi
+        fi
+    done
 }
 
 # ── CLI ──────────────────────────────────────────────────────
 
 case "${1:-status}" in
-    spawn)     shift; spawn "$@" ;;
-    start)     shift; start_agent "$1" ;;
-    complete)  shift; complete_agent "$@" ;;
-    fail)      shift; fail_agent "$@" ;;
-    list)      shift; list_agents "${1:-active}" ;;
-    status)    status ;;
-    summary)   summary ;;
-    cleanup)   cleanup ;;
+    spawn)           shift; spawn "$@" ;;
+    spawn_parallel)  shift; spawn_parallel "$@" ;;
+    start)           shift; start_agent "$1" ;;
+    complete)        shift; complete_agent "$@" ;;
+    fail)            shift; fail_agent "$@" ;;
+    list)            shift; list_agents "${1:-active}" ;;
+    status)          status ;;
+    summary)         summary ;;
+    cleanup)         cleanup ;;
+    parallel_status) parallel_status ;;
     *)
-        echo "Usage: sub-agents.sh {spawn|start|complete|fail|list|status|summary|cleanup}"
+        echo "Usage: sub-agents.sh {spawn|spawn_parallel|start|complete|fail|list|status|summary|cleanup|parallel_status}"
         echo ""
-        echo "  spawn <parent> <name> <desc> [priority]  Create a sub-agent"
-        echo "  start <id|name>                           Mark agent as active"
-        echo "  complete <id|name> <result> [evidence...] Complete with result"
-        echo "  fail <id|name> <reason>                   Mark as failed"
-        echo "  list [active|all|completed]               List agents"
-        echo "  status                                    Sub-agent stats"
-        echo "  summary                                   One-liner for HEARTBEAT"
-        echo "  cleanup                                   Clean stale agents"
+        echo "  spawn <parent> <name> <desc> [priority]           Create a sub-agent (sequential)"
+        echo "  spawn_parallel <parent> <name> <desc> [priority]  Create a truly parallel sub-agent"
+        echo "  start <id|name>                                    Mark agent as active"
+        echo "  complete <id|name> <result> [evidence...]          Complete with result"
+        echo "  fail <id|name> <reason>                            Mark as failed"
+        echo "  list [active|all|completed]                        List agents"
+        echo "  status                                             Sub-agent stats"
+        echo "  summary                                            One-liner for HEARTBEAT"
+        echo "  cleanup                                            Clean stale agents"
+        echo "  parallel_status                                    Status of parallel workers"
         ;;
 esac

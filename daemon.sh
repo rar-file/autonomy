@@ -31,6 +31,17 @@ get_config() {
 }
 
 get_interval_seconds() {
+    # Use adaptive heartbeat if available
+    if [[ -f "$AUTONOMY_DIR/lib/adaptive-heartbeat.sh" ]]; then
+        local adaptive
+        adaptive=$(bash "$AUTONOMY_DIR/lib/adaptive-heartbeat.sh" interval 2>/dev/null)
+        if [[ "$adaptive" =~ ^[0-9]+$ && "$adaptive" -gt 0 ]]; then
+            echo "$adaptive"
+            return
+        fi
+    fi
+
+    # Fallback to fixed interval from config
     local mins
     mins=$(jq -r '.daemon.interval_minutes // .global_config.base_interval_minutes // 5' "$CONFIG_FILE" 2>/dev/null || echo 5)
     [[ "$mins" =~ ^[0-9]+$ ]] || mins=5
@@ -218,6 +229,16 @@ PIVOT_EOF
                 "Exceeded $max_attempts attempts. Shelved and created review task." > /dev/null 2>&1 || true
         fi
 
+        # Analyze failure with learning feedback loop
+        if [[ -f "$AUTONOMY_DIR/lib/failure-feedback.sh" ]]; then
+            bash "$AUTONOMY_DIR/lib/failure-feedback.sh" analyze "$name" >> "$LOG_FILE" 2>&1 || true
+        fi
+
+        # Signal adaptive heartbeat about failure
+        if [[ -f "$AUTONOMY_DIR/lib/adaptive-heartbeat.sh" ]]; then
+            bash "$AUTONOMY_DIR/lib/adaptive-heartbeat.sh" signal_failed >/dev/null 2>&1 || true
+        fi
+
         # Journal the failure
         if [[ -f "$AUTONOMY_DIR/lib/journal.sh" ]]; then
             bash "$AUTONOMY_DIR/lib/journal.sh" append "$name" \
@@ -351,6 +372,12 @@ run_cycle() {
     check_heartbeat_lock
     recover_stuck_tasks
     handle_failed_tasks
+
+    # Check event-driven triggers
+    if [[ -f "$AUTONOMY_DIR/lib/event-triggers.sh" ]]; then
+        bash "$AUTONOMY_DIR/lib/event-triggers.sh" check >/dev/null 2>&1 || true
+    fi
+
     flag_next_task
 
     # AI-powered task processing (if API key configured)
@@ -366,6 +393,12 @@ run_cycle() {
                 task_file="$AUTONOMY_DIR/tasks/${task_name}.json"
                 if [[ -n "$task_name" && -f "$task_file" ]]; then
                     log "AI engine processing: $task_name"
+
+                    # Pre-check against known failure patterns
+                    if [[ -f "$AUTONOMY_DIR/lib/failure-feedback.sh" ]]; then
+                        bash "$AUTONOMY_DIR/lib/failure-feedback.sh" check "$task_name" >> "$LOG_FILE" 2>&1 || true
+                    fi
+
                     bash "$AUTONOMY_DIR/lib/ai-engine.sh" process "$task_file" >> "$LOG_FILE" 2>&1 || true
                 fi
             fi
@@ -375,6 +408,27 @@ run_cycle() {
     # Cleanup stale sub-agents
     if [[ -f "$AUTONOMY_DIR/lib/sub-agents.sh" ]]; then
         bash "$AUTONOMY_DIR/lib/sub-agents.sh" cleanup >/dev/null 2>&1 || true
+    fi
+
+    # Auto-generate tasks when queue is empty
+    if [[ -f "$AUTONOMY_DIR/lib/task-generator.sh" ]]; then
+        bash "$AUTONOMY_DIR/lib/task-generator.sh" scan >/dev/null 2>&1 || true
+    fi
+
+    # Signal adaptive heartbeat about cycle activity
+    # Note: signal_completed is called by execution-engine on actual task completion.
+    # Here we only signal idle when nothing is active, so momentum decays naturally.
+    if [[ -f "$AUTONOMY_DIR/lib/adaptive-heartbeat.sh" ]]; then
+        local has_active=false
+        for f in "$TASKS_DIR"/*.json; do
+            [[ -f "$f" ]] || continue
+            local s
+            s=$(jq -r '.status // ""' "$f" 2>/dev/null)
+            [[ "$s" == "ai_processing" || "$s" == "in-progress" || "$s" == "needs_ai_attention" ]] && has_active=true && break
+        done
+        if [[ "$has_active" != "true" ]]; then
+            bash "$AUTONOMY_DIR/lib/adaptive-heartbeat.sh" signal_idle >/dev/null 2>&1 || true
+        fi
     fi
 
     rebuild_heartbeat

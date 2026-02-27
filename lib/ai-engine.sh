@@ -405,6 +405,30 @@ ai_process_task() {
             "AI analyzed task. Generated plan." "in-progress" "Execute plan" >/dev/null 2>&1
     fi
 
+    # Hand off to closed-loop execution engine if available
+    if [[ -f "$AUTONOMY_DIR/lib/execution-engine.sh" ]]; then
+        jq -n --arg ts "$(date -Iseconds)" --arg task "$task_name" \
+            '{status:"processing", task:$task, started_at:$ts, progress:45, message:"Executing plan via closed-loop engine..."}' \
+            > "$STATE_DIR/ai_activity.json"
+
+        bash "$AUTONOMY_DIR/lib/execution-engine.sh" execute "$task_name" 2>/dev/null
+        local engine_exit=$?
+
+        if [[ $engine_exit -eq 0 ]]; then
+            jq -n --arg ts "$(date -Iseconds)" --arg task "$task_name" \
+                '{status:"idle", task:$task, started_at:$ts, progress:100, message:"Task completed via execution engine"}' \
+                > "$STATE_DIR/ai_activity.json"
+            echo "Task $task_name completed via closed-loop execution engine."
+            return 0
+        else
+            jq -n --arg ts "$(date -Iseconds)" --arg task "$task_name" \
+                '{status:"idle", task:$task, started_at:$ts, progress:0, message:"Execution engine failed, task needs review"}' \
+                > "$STATE_DIR/ai_activity.json"
+            echo "Execution engine failed for $task_name. Manual review needed."
+            return 1
+        fi
+    fi
+
     echo "Task $task_name analyzed. Plan stored in task file."
     echo "$analysis"
 }

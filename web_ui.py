@@ -7,6 +7,7 @@ import signal
 import subprocess
 import sys
 import threading
+import html as html_module
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 from datetime import datetime, timedelta
@@ -668,6 +669,25 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
            MOBILE RESPONSIVE STYLES
            ============================================ */
         
+        /* Metrics chart grid - base styles (before media queries) */
+        .metrics-chart-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+        
+        .metrics-chart-grid .card {
+            min-width: 0;
+            overflow: hidden;
+        }
+        
+        .metrics-chart-wrap {
+            position: relative;
+            height: 280px;
+            max-width: 100%;
+            overflow: hidden;
+        }
+        
         /* Tablet breakpoint */
         @media (max-width: 1024px) {
             .app { grid-template-columns: 1fr; }
@@ -676,122 +696,145 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         
         /* Phone breakpoint - comprehensive mobile optimization */
         @media (max-width: 768px) {
+            /* Prevent horizontal overflow everywhere */
+            html, body {
+                overflow-x: hidden;
+                width: 100%;
+                max-width: 100vw;
+            }
+            
             /* Layout adjustments */
             body {
-                font-size: 16px; /* Prevent iOS zoom on input focus */
+                font-size: 15px; /* Prevent iOS zoom, balanced readability */
             }
             
             .app {
                 display: flex;
                 flex-direction: column;
                 min-height: 100vh;
-                padding-bottom: 80px; /* Space for bottom nav */
+                min-height: 100dvh; /* Dynamic viewport for mobile browsers */
+                padding-bottom: 72px; /* Space for bottom nav */
+                overflow-x: hidden;
+                width: 100%;
             }
             
             .main {
                 padding: 16px;
                 max-height: none;
                 overflow-y: visible;
+                overflow-x: hidden;
+                width: 100%;
+                box-sizing: border-box;
             }
             
             /* Header mobile optimization */
             .header {
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-                margin-bottom: 24px;
-                padding-bottom: 16px;
+                align-items: stretch;
+                gap: 12px;
+                margin-bottom: 20px;
+                padding-bottom: 12px;
             }
             
             .header-title h2 {
-                font-size: 24px;
+                font-size: 22px;
+                line-height: 1.2;
             }
             
             .header-title p {
                 font-size: 13px;
             }
             
-            /* Stats grid - single column on phone */
+            /* Stats grid - 2 columns on phone for balance */
             .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-                margin-bottom: 24px;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 20px;
             }
             
             .stat-card {
-                padding: 20px;
+                padding: 14px;
                 display: flex;
-                align-items: center;
-                justify-content: space-between;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
             }
             
             .stat-card::before {
                 left: 0;
-                width: 4px;
+                width: 3px;
                 height: 100%;
             }
             
             .stat-value {
-                font-size: 32px;
+                font-size: 24px;
                 margin-bottom: 0;
-                order: 2;
             }
             
             .stat-label {
-                font-size: 12px;
-                order: 1;
+                font-size: 11px;
             }
             
             /* Cards mobile optimization */
             .card {
-                padding: 16px;
-                margin-bottom: 16px;
+                padding: 14px;
+                margin-bottom: 14px;
+                border-radius: 12px;
             }
             
             .card h3 {
-                font-size: 16px;
-                margin-bottom: 16px;
+                font-size: 15px;
+                margin-bottom: 14px;
             }
             
             /* Task items mobile */
             .task-item {
-                padding: 16px;
+                padding: 14px;
             }
             
             .task-header {
-                flex-direction: column;
+                flex-direction: row;
+                flex-wrap: wrap;
+                align-items: center;
                 gap: 8px;
                 margin-bottom: 8px;
             }
             
             .task-name {
-                font-size: 15px;
+                font-size: 14px;
                 word-break: break-word;
+                flex: 1;
+                min-width: 0;
             }
             
             .task-status {
-                align-self: flex-start;
+                flex-shrink: 0;
                 font-size: 10px;
-                padding: 4px 10px;
+                padding: 3px 8px;
             }
             
             .task-desc {
                 font-size: 13px;
                 line-height: 1.5;
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
             }
             
             .task-meta {
                 flex-wrap: wrap;
-                gap: 12px;
+                gap: 10px;
                 font-size: 11px;
             }
             
             /* Button mobile sizing */
             .btn {
-                padding: 14px 20px;
-                font-size: 15px;
-                min-height: 48px; /* Touch-friendly */
+                padding: 12px 16px;
+                font-size: 14px;
+                min-height: 44px; /* Touch-friendly */
                 justify-content: center;
+                white-space: nowrap;
             }
             
             /* Header action buttons - wrap nicely */
@@ -799,85 +842,144 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 width: 100%;
             }
             
-            .header > div[style*="gap: 12px"] {
+            .header > div[style*="gap: 12px"],
+            .header > div[style*="gap: 8px"] {
                 display: flex;
                 flex-wrap: wrap;
                 gap: 8px;
                 width: 100%;
             }
             
-            .header > div[style*="gap: 12px"] .btn {
-                flex: 1;
-                min-width: 120px;
+            .header > div[style*="gap: 12px"] .btn,
+            .header > div[style*="gap: 8px"] .btn {
+                flex: 1 1 auto;
+                min-width: 100px;
+                max-width: calc(50% - 4px);
+                font-size: 13px;
+                padding: 10px 12px;
             }
             
             /* Heartbeat box mobile */
             .heartbeat-box {
-                padding: 10px 16px;
+                padding: 8px 14px;
                 width: 100%;
                 justify-content: center;
+                box-sizing: border-box;
             }
             
             .heartbeat-timer {
-                font-size: 20px;
+                font-size: 18px;
             }
             
             .system-status-box {
                 width: 100%;
                 justify-content: center;
                 padding: 8px 12px;
+                box-sizing: border-box;
             }
             
-            /* Modal mobile optimization */
+            /* Modal mobile optimization — sheet style, not full screen */
             .modal {
                 width: 100%;
                 max-width: 100%;
-                height: 100vh;
-                max-height: 100vh;
-                border-radius: 0;
+                height: 90vh;
+                height: 90dvh;
+                max-height: 90vh;
+                max-height: 90dvh;
+                border-radius: 16px 16px 0 0;
                 display: flex;
                 flex-direction: column;
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                top: auto;
+                transform: none;
+                animation: slideUp 0.3s ease;
+            }
+            
+            @keyframes slideUp {
+                from { transform: translateY(100%); }
+                to { transform: translateY(0); }
             }
             
             .modal-header {
                 padding: 16px 20px;
                 flex-shrink: 0;
+                position: relative;
+            }
+            
+            /* Drag handle for sheet-style modal */
+            .modal-header::before {
+                content: '';
+                display: block;
+                width: 36px;
+                height: 4px;
+                background: rgba(255,255,255,0.2);
+                border-radius: 2px;
+                margin: 0 auto 12px;
             }
             
             .modal-title {
-                font-size: 18px;
+                font-size: 17px;
                 word-break: break-word;
                 padding-right: 40px;
+                line-height: 1.3;
             }
             
             .modal-close {
                 position: absolute;
                 top: 16px;
                 right: 16px;
+                width: 36px;
+                height: 36px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                z-index: 10;
             }
             
             .modal-body {
-                padding: 20px;
+                padding: 16px 20px 24px;
                 flex: 1;
                 overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
                 max-height: none;
             }
             
             .modal-section {
-                margin-bottom: 20px;
+                margin-bottom: 18px;
+            }
+            
+            .modal-section-title {
+                font-size: 12px;
+            }
+            
+            .modal-description {
+                font-size: 14px;
+                line-height: 1.6;
             }
             
             .modal-meta-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
             }
             
             .modal-meta-item {
-                padding: 12px;
+                padding: 10px;
+            }
+            
+            .modal-meta-label {
+                font-size: 10px;
+            }
+            
+            .modal-meta-value {
+                font-size: 13px;
             }
             
             .modal-verification {
-                padding: 16px;
+                padding: 14px;
                 font-size: 13px;
             }
             
@@ -890,7 +992,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 right: 0;
                 background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
                 border-top: 1px solid rgba(233,69,96,0.2);
-                padding: 8px 4px 12px;
+                padding: 6px 8px 10px;
                 z-index: 100;
                 justify-content: space-around;
                 box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
@@ -900,20 +1002,25 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                gap: 4px;
-                padding: 8px 12px;
-                border-radius: 12px;
+                gap: 3px;
+                padding: 6px 4px;
+                border-radius: 10px;
                 cursor: pointer;
                 color: #8080a0;
-                font-size: 11px;
+                font-size: 10px;
                 font-weight: 500;
                 transition: all 0.2s;
                 flex: 1;
-                max-width: 80px;
+                min-width: 0;
+                max-width: none;
+                text-align: center;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
             
             .mobile-nav-item i {
-                font-size: 20px;
+                font-size: 18px;
                 color: #ff6b8a;
                 transition: all 0.2s;
             }
@@ -933,12 +1040,28 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 display: none;
             }
             
-            /* Onboarding modal mobile */
+            /* Onboarding - full page on mobile instead of modal */
+            .onboarding-overlay {
+                align-items: stretch;
+                justify-content: stretch;
+                background: var(--bg-0);
+                backdrop-filter: none;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            
             .onboarding-modal-content {
-                padding: 24px;
-                margin: 16px;
-                max-height: 85vh;
-                width: calc(100% - 32px);
+                padding: 24px 20px 40px;
+                margin: 0;
+                max-height: none;
+                width: 100%;
+                height: auto;
+                min-height: 100%;
+                border-radius: 0;
+                border: none;
+                box-shadow: none;
+                overflow-y: visible;
+                background: var(--bg-0);
             }
             
             .onboarding-modal-content h2 {
@@ -955,12 +1078,13 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             }
             
             .onboarding-step {
-                padding: 16px;
+                padding: 14px;
             }
             
             .onboarding-actions {
                 flex-direction: column;
                 gap: 8px;
+                padding-bottom: 20px;
             }
             
             .onboarding-actions .btn {
@@ -985,34 +1109,182 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 transform: scale(0.98);
                 opacity: 0.9;
             }
+            
+            /* Prevent select/textarea from being too wide */
+            input, textarea, select {
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            
+            /* Fix any inline-style divs that could overflow */
+            div[style] {
+                max-width: 100%;
+                box-sizing: border-box;
+            }
+            
+            /* Metrics page grid stacking on mobile */
+            #page-metrics {
+                overflow-x: hidden;
+            }
+            
+            #page-metrics .stats-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            
+            .metrics-chart-grid {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                gap: 16px !important;
+                overflow: hidden;
+            }
+            
+            .metrics-chart-wrap {
+                height: 220px !important;
+                max-width: 100% !important;
+                overflow: hidden !important;
+            }
+            
+            #page-metrics .card {
+                min-width: 0;
+                overflow: hidden;
+            }
+            
+            #page-metrics canvas {
+                max-width: 100% !important;
+                width: 100% !important;
+                height: auto !important;
+            }
         }
         
-        /* Extra small phones */
+        /* Extra small phones (< 380px like iPhone SE, Galaxy Fold) */
         @media (max-width: 380px) {
             .main {
-                padding: 12px;
+                padding: 10px;
             }
             
             .header-title h2 {
-                font-size: 20px;
-            }
-            
-            .stat-value {
-                font-size: 28px;
-            }
-            
-            .mobile-nav-item {
-                padding: 6px 8px;
-                font-size: 10px;
-            }
-            
-            .mobile-nav-item i {
                 font-size: 18px;
             }
             
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            
+            .stat-value {
+                font-size: 20px;
+            }
+            
+            .stat-label {
+                font-size: 10px;
+            }
+            
+            .stat-card {
+                padding: 10px;
+            }
+            
+            .mobile-nav {
+                padding: 4px 4px 8px;
+            }
+            
+            .mobile-nav-item {
+                padding: 4px 2px;
+                font-size: 9px;
+                gap: 2px;
+            }
+            
+            .mobile-nav-item i {
+                font-size: 16px;
+            }
+            
             .btn {
-                padding: 12px 16px;
-                font-size: 14px;
+                padding: 10px 12px;
+                font-size: 13px;
+                min-height: 40px;
+            }
+            
+            .card {
+                padding: 12px;
+            }
+            
+            .task-item {
+                padding: 12px;
+            }
+            
+            .task-name {
+                font-size: 13px;
+            }
+            
+            .task-desc {
+                font-size: 12px;
+            }
+            
+            .modal {
+                height: 92vh;
+                height: 92dvh;
+            }
+            
+            .modal-title {
+                font-size: 16px;
+            }
+            
+            .modal-body {
+                padding: 14px 16px 20px;
+            }
+            
+            .modal-meta-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .header > div[style*="gap: 12px"] .btn,
+            .header > div[style*="gap: 8px"] .btn {
+                min-width: 0;
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+            
+            /* Header buttons - wrap and shrink on mobile */
+            .header {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+            
+            .header > div[style] {
+                align-items: stretch !important;
+            }
+            
+            .header-actions {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 6px !important;
+                width: 100%;
+            }
+            
+            .header-actions .btn {
+                flex: 1 1 calc(50% - 6px);
+                min-width: 0;
+                font-size: 12px;
+                padding: 8px 10px;
+                white-space: nowrap;
+                justify-content: center;
+            }
+            
+            .header-actions .btn-label {
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        }
+        
+        /* Medium phones (381-480px) - slight adjustments */
+        @media (min-width: 381px) and (max-width: 480px) {
+            .stat-value {
+                font-size: 22px;
+            }
+            
+            .modal-meta-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
             }
         }
         
@@ -1031,7 +1303,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
         @supports (padding: max(0px)) {
             @media (max-width: 768px) {
                 .mobile-nav {
-                    padding-bottom: max(12px, env(safe-area-inset-bottom));
+                    padding-bottom: max(10px, env(safe-area-inset-bottom));
                 }
                 
                 .main {
@@ -1040,7 +1312,6 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 }
                 
                 .modal {
-                    padding-top: env(safe-area-inset-top);
                     padding-bottom: env(safe-area-inset-bottom);
                 }
             }
@@ -1053,7 +1324,7 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                 right: auto;
                 border-top: none;
                 border-bottom: 1px solid rgba(233,69,96,0.2);
-                padding: 4px;
+                padding: 4px 8px;
             }
             
             .app {
@@ -1062,6 +1333,8 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
             
             .modal {
                 height: 100vh;
+                height: 100dvh;
+                border-radius: 0;
             }
         }
         
@@ -1294,18 +1567,18 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                             <i class="fas fa-circle" style="color: #22c55e;"></i>
                             <span>System Healthy</span>
                         </div>
-                        <div style="display: flex; gap: 12px;">
+                        <div class="header-actions" style="display: flex; gap: 12px; flex-wrap: wrap;">
                             <button class="btn btn-secondary" onclick="showHeartbeatInfo()">
-                                <i class="fas fa-heartbeat"></i> Heartbeat Info
+                                <i class="fas fa-heartbeat"></i> <span class="btn-label">Heartbeat</span>
                             </button>
                             <button class="btn btn-secondary" onclick="loadData()">
-                                <i class="fas fa-sync"></i> Refresh
+                                <i class="fas fa-sync"></i> <span class="btn-label">Refresh</span>
                             </button>
                             <button class="btn btn-secondary" onclick="toggleTheme()" id="theme-toggle">
-                                <i class="fas fa-moon"></i> Theme
+                                <i class="fas fa-moon"></i> <span class="btn-label">Theme</span>
                             </button>
                             <button class="btn btn-primary" onclick="createTask()">
-                                <i class="fas fa-plus"></i> New Task
+                                <i class="fas fa-plus"></i> <span class="btn-label">New Task</span>
                             </button>
                         </div>
                     </div>
@@ -1542,10 +1815,10 @@ HTML_TEMPLATE = '''<!DOCTYPE html>
                     <div class="stat-card"><div class="stat-value" id="m-pending">-</div><div class="stat-label">Pending</div></div>
                     <div class="stat-card"><div class="stat-value" id="m-tokens" style="color: #f59e0b;">-</div><div class="stat-label">Tokens Today</div></div>
                 </div>
-                <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+                <div class="metrics-chart-grid">
                     <div class="card">
                         <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;"><i class="fas fa-chart-pie" style="color: var(--accent);"></i> Task Distribution</h3>
-                        <div style="position: relative; height: 280px;"><canvas id="metricsChart"></canvas></div>
+                        <div class="metrics-chart-wrap"><canvas id="metricsChart"></canvas></div>
                     </div>
                     <div class="card">
                         <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;"><i class="fas fa-history" style="color: #f59e0b;"></i> Recent Activity</h3>
@@ -2730,6 +3003,7 @@ METRICS_TEMPLATE = '''<!DOCTYPE html>
             body {
                 padding: 12px;
                 padding-bottom: 80px; /* Space for potential mobile nav */
+                overflow-x: hidden;
             }
             
             .header {
@@ -2769,13 +3043,20 @@ METRICS_TEMPLATE = '''<!DOCTYPE html>
             }
             
             .grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: 1fr 1fr;
                 gap: 12px;
                 margin-bottom: 20px;
             }
             
+            /* Chart grid (second .grid) should stack vertically */
+            .grid ~ .grid {
+                grid-template-columns: 1fr;
+            }
+            
             .card {
                 padding: 16px;
+                min-width: 0;
+                overflow: hidden;
             }
             
             .card h3 {
@@ -2793,11 +3074,24 @@ METRICS_TEMPLATE = '''<!DOCTYPE html>
             
             .chart-container {
                 height: 200px;
+                max-width: 100%;
+                overflow: hidden;
             }
             
-            /* Full width for chart and activity on mobile */
-            .grid > .card[style*="span 2"] {
-                grid-column: span 2 !important;
+            /* Full width for chart and activity - stack vertically */
+            .grid > .card[style*="span 2"],
+            .grid > .card[style*="span 1"] {
+                grid-column: span 1 !important;
+            }
+            
+            .grid > .card {
+                min-width: 0;
+                overflow: hidden;
+            }
+            
+            .grid canvas {
+                max-width: 100% !important;
+                width: 100% !important;
             }
             
             .activity-log {
@@ -2815,7 +3109,8 @@ METRICS_TEMPLATE = '''<!DOCTYPE html>
                 grid-template-columns: 1fr;
             }
             
-            .grid > .card[style*="span 2"] {
+            .grid > .card[style*="span 2"],
+            .grid > .card[style*="span 1"] {
                 grid-column: span 1 !important;
             }
             
@@ -3091,6 +3386,8 @@ class Handler(BaseHTTPRequestHandler):
             self.spawn_sub_agent()
         elif self.path == "/api/ai/commit":
             self.ai_git_commit()
+        elif self.path == "/api/webhook":
+            self.handle_webhook()
         else:
             self.send_error(404)
       except Exception as e:
@@ -3567,14 +3864,15 @@ class Handler(BaseHTTPRequestHandler):
                 color_map = {"completed": "#00d26a", "failed": "#e94560", "blocked": "#ffc107", "in-progress": "#00b4d8", "pivoted": "#ff6b8a"}
                 color = color_map.get(status, "#6b6b8a")
                 ts = e.get("timestamp", "")[:19].replace("T", " ")
-                task = e.get("task", "")
-                summary = e.get("summary", "")
-                next_step = e.get("next_step", "")
+                task = html_module.escape(e.get("task", ""))
+                summary = html_module.escape(e.get("summary", ""))
+                next_step = html_module.escape(e.get("next_step", ""))
+                status_display = html_module.escape(status.upper())
 
                 html_parts.append(f'''
                 <div style="border-left:3px solid {color}; padding:8px 12px; margin:8px 0; background:rgba(255,255,255,0.03); border-radius:0 8px 8px 0;">
                     <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                        <span style="font-weight:600; color:{color};">[{status.upper()}]</span>
+                        <span style="font-weight:600; color:{color};">[{status_display}]</span>
                         <span style="color:var(--text-muted); font-size:12px;">{ts}</span>
                     </div>
                     <div style="font-weight:500; margin-bottom:2px;">{task}</div>
@@ -3843,6 +4141,32 @@ class Handler(BaseHTTPRequestHandler):
         except Exception as e:
             self.send_json({"success": False, "error": str(e)}, 500)
 
+    def handle_webhook(self):
+        """Handle incoming webhook to fire event triggers"""
+        try:
+            content_len = int(self.headers.get("Content-Length", 0))
+            body = json.loads(self.rfile.read(content_len)) if content_len > 0 else {}
+            trigger_name = body.get("trigger", "")
+            event_data = body.get("data", "")
+            if not trigger_name:
+                self.send_json({"error": "trigger name required"}, 400)
+                return
+            trigger_script = os.path.join(AUTONOMY_DIR, "lib", "event-triggers.sh")
+            if not os.path.exists(trigger_script):
+                self.send_json({"error": "event-triggers.sh not found"}, 404)
+                return
+            result = subprocess.run(
+                ["bash", trigger_script, "fire", trigger_name, str(event_data)],
+                capture_output=True, text=True, timeout=15
+            )
+            self.send_json({
+                "success": result.returncode == 0,
+                "message": result.stdout.strip(),
+                "trigger": trigger_name
+            })
+        except Exception as e:
+            self.send_json({"success": False, "error": str(e)}, 500)
+
     def handle_go(self):
         """Handle autonomy go from web UI"""
         try:
@@ -3971,7 +4295,8 @@ self.addEventListener('fetch', event => {
 
 if __name__ == "__main__":
     port = int(os.environ.get("AUTONOMY_WEB_PORT", 8767))
-    server = ThreadingHTTPServer(("0.0.0.0", port), Handler)
+    bind_addr = os.environ.get("AUTONOMY_WEB_BIND", "127.0.0.1")
+    server = ThreadingHTTPServer((bind_addr, port), Handler)
 
     # Graceful shutdown on SIGTERM / SIGINT
     def _shutdown(signum, frame):
@@ -3981,7 +4306,7 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, _shutdown)
     signal.signal(signal.SIGINT, _shutdown)
 
-    print(f"rar-file/autonomy dashboard at http://localhost:{port}")
+    print(f"rar-file/autonomy dashboard at http://{bind_addr}:{port}")
     try:
         server.serve_forever()
     except Exception as e:

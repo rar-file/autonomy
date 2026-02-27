@@ -268,6 +268,23 @@ $budget_line
 
 BUDGET_EOF
 
+    # Cross-repository context
+    if [[ -f "$AUTONOMY_DIR/lib/repos.sh" ]]; then
+        local repo_line
+        repo_line=$(bash "$AUTONOMY_DIR/lib/repos.sh" oneliner 2>/dev/null)
+        if [[ -n "$repo_line" && "$repo_line" != *"no cross-repo"* ]]; then
+            cat >> "$HEARTBEAT_FILE" << REPO_EOF
+## Cross-Repository
+
+$repo_line
+
+To switch repos: \`bash $AUTONOMY_DIR/lib/repos.sh switch <name>\`
+To rotate: \`bash $AUTONOMY_DIR/lib/repos.sh rotate\`
+
+REPO_EOF
+        fi
+    fi
+
     # Persistent memory
     if [[ -n "$memory_summary" && "$memory_summary" != "No persistent memories yet." ]]; then
         cat >> "$HEARTBEAT_FILE" << MEMORY_EOF
@@ -288,8 +305,23 @@ MEMORY_EOF
 $agents_summary
 
 To spawn a sub-agent: \`bash $AUTONOMY_DIR/lib/sub-agents.sh spawn "$current_task" "sub-task-name" "description"\`
+To spawn a parallel sub-agent: \`bash $AUTONOMY_DIR/lib/sub-agents.sh spawn_parallel "$current_task" "sub-task-name" "description"\`
 
 AGENTS_EOF
+
+    # Prompt evolution performance
+    if [[ -f "$AUTONOMY_DIR/lib/prompt-evolution.sh" ]]; then
+        local perf_line
+        perf_line=$(bash "$AUTONOMY_DIR/lib/prompt-evolution.sh" oneliner 2>/dev/null)
+        if [[ -n "$perf_line" && "$perf_line" != *"0/100"* ]]; then
+            cat >> "$HEARTBEAT_FILE" << PERF_EOF
+## Performance Tracking
+
+$perf_line
+
+PERF_EOF
+        fi
+    fi
 
     # AI capabilities
     if [[ "$ai_configured" == "true" ]]; then
@@ -337,6 +369,15 @@ AI_EOF
 - Parallel: \`autonomy execute parallel "cmd1" "cmd2" ...\`
 - Timeout: \`autonomy execute timeout <secs> "<cmd>"\`
 
+### Verification-Driven Development
+- Ensure criteria: \`bash $AUTONOMY_DIR/lib/verification-driven.sh ensure <task_id>\`
+- Verify task: \`bash $AUTONOMY_DIR/lib/verification-driven.sh verify <task_id>\`
+- Fix subtasks: \`bash $AUTONOMY_DIR/lib/verification-driven.sh fix_subtasks <task_id>\`
+
+### Closed-Loop Execution
+- Execute task: \`bash $AUTONOMY_DIR/lib/execution-engine.sh execute <task_id>\`
+- Check status: \`bash $AUTONOMY_DIR/lib/execution-engine.sh status <task_id>\`
+
 ### Intelligent Logging
 - Query logs: \`autonomy log query --level INFO --last 20\`
 - Tail: \`autonomy log tail [n]\`
@@ -349,7 +390,33 @@ AI_EOF
 - Create: \`autonomy plugin create <name>\`
 - Discover: \`autonomy plugin discover\`
 
+### Skill Acquisition & Tool Creation
+- Learn skill: \`bash $AUTONOMY_DIR/lib/skill-acquisition.sh learn <name> <desc> <category>\`
+- Create tool: \`bash $AUTONOMY_DIR/lib/skill-acquisition.sh create_tool <name> <desc> <cmds...>\`
+- Create plugin: \`bash $AUTONOMY_DIR/lib/skill-acquisition.sh create_plugin <name> <desc> [funcs_json]\`
+- AI-generate tool: \`bash $AUTONOMY_DIR/lib/skill-acquisition.sh generate "<description>"\`
+- List skills: \`bash $AUTONOMY_DIR/lib/skill-acquisition.sh list\`
+- Status: \`bash $AUTONOMY_DIR/lib/skill-acquisition.sh status\`
+
 CAPABILITIES_EOF
+
+    # Skill acquisition stats — expose full skill data to AI
+    if [[ -f "$AUTONOMY_DIR/lib/skill-acquisition.sh" ]]; then
+        local skill_count
+        skill_count=$(jq '.skills | length' "$AUTONOMY_DIR/state/skills.json" 2>/dev/null || echo 0)
+        if [[ "$skill_count" -gt 0 ]]; then
+            local skill_summary
+            skill_summary=$(bash "$AUTONOMY_DIR/lib/skill-acquisition.sh" oneliner 2>/dev/null)
+            cat >> "$HEARTBEAT_FILE" << SKILL_EOF
+## Learned Skills & Capabilities
+$skill_summary
+
+Use \`bash $AUTONOMY_DIR/lib/skill-acquisition.sh generate "<description>"\` to create a new tool for any capability gap.
+Use \`bash $AUTONOMY_DIR/lib/skill-acquisition.sh list\` to see full skill inventory.
+
+SKILL_EOF
+        fi
+    fi
 
     # Hard limits & rules
     cat >> "$HEARTBEAT_FILE" << RULES_EOF
