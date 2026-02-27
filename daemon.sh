@@ -301,6 +301,30 @@ run_cycle() {
     log "=== Daemon cycle started ==="
     update_check_state
 
+    # ── Guard: skip if a heartbeat/task is already in progress ──
+    local hb_lock="$AUTONOMY_DIR/state/heartbeat.lock"
+    if [[ -f "$hb_lock" ]]; then
+        local lock_pid lock_ts now_ts elapsed
+        lock_pid=$(jq -r '.pid // 0' "$hb_lock" 2>/dev/null)
+        lock_ts=$(jq -r '.timestamp // 0' "$hb_lock" 2>/dev/null)
+        now_ts=$(date +%s)
+        elapsed=$((now_ts - lock_ts))
+
+        if kill -0 "$lock_pid" 2>/dev/null; then
+            if [[ $elapsed -lt ${LOCK_TIMEOUT_SECONDS:-900} ]]; then
+                log "Heartbeat still in progress (PID $lock_pid, ${elapsed}s elapsed) — skipping cycle"
+                update_stats
+                return 0
+            else
+                log "Heartbeat lock expired (PID $lock_pid, ${elapsed}s) — breaking stale lock"
+                rm -f "$hb_lock"
+            fi
+        else
+            log "Stale heartbeat lock (PID $lock_pid dead) — cleaning up"
+            rm -f "$hb_lock"
+        fi
+    fi
+
     # Only process when workstation is active
     local active
     active=$(jq -r '.workstation.active // false' "$CONFIG_FILE" 2>/dev/null)
@@ -328,6 +352,31 @@ run_cycle() {
     recover_stuck_tasks
     handle_failed_tasks
     flag_next_task
+
+    # AI-powered task processing (if API key configured)
+    if [[ -f "$AUTONOMY_DIR/lib/ai-engine.sh" ]]; then
+        local ai_status
+        ai_status=$(bash "$AUTONOMY_DIR/lib/ai-engine.sh" status 2>/dev/null)
+        if echo "$ai_status" | jq -e '.configured == true' >/dev/null 2>&1; then
+            # Find the flagged task and run AI analysis
+            local attention_file="$AUTONOMY_DIR/state/needs_attention.json"
+            if [[ -f "$attention_file" ]]; then
+                local task_name task_file
+                task_name=$(jq -r '.task_name // ""' "$attention_file" 2>/dev/null)
+                task_file="$AUTONOMY_DIR/tasks/${task_name}.json"
+                if [[ -n "$task_name" && -f "$task_file" ]]; then
+                    log "AI engine processing: $task_name"
+                    bash "$AUTONOMY_DIR/lib/ai-engine.sh" process "$task_file" >> "$LOG_FILE" 2>&1 || true
+                fi
+            fi
+        fi
+    fi
+
+    # Cleanup stale sub-agents
+    if [[ -f "$AUTONOMY_DIR/lib/sub-agents.sh" ]]; then
+        bash "$AUTONOMY_DIR/lib/sub-agents.sh" cleanup >/dev/null 2>&1 || true
+    fi
+
     rebuild_heartbeat
     ensure_webui
     update_stats

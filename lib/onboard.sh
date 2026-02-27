@@ -2,7 +2,7 @@
 # Onboarding Wizard for Autonomy
 # Multi-channel: CLI, Web, Chat
 
-AUTONOMY_DIR="${AUTONOMY_DIR:-/root/.openclaw/workspace/skills/autonomy}"
+AUTONOMY_DIR="${AUTONOMY_DIR:-${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills/autonomy}"
 CONFIG_FILE="$AUTONOMY_DIR/config.json"
 ONBOARDING_FILE="$AUTONOMY_DIR/state/onboarding.json"
 

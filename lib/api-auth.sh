@@ -2,7 +2,7 @@
 # API Rate Limiting and Token Authentication Library
 # Provides rate limiting and token-based authentication for API endpoints
 
-AUTONOMY_DIR="${AUTONOMY_DIR:-/root/.openclaw/workspace/skills/autonomy}"
+AUTONOMY_DIR="${AUTONOMY_DIR:-${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills/autonomy}"
 TOKENS_FILE="$AUTONOMY_DIR/state/api-tokens.json"
 RATE_LIMITS_FILE="$AUTONOMY_DIR/state/rate-limits.json"
 

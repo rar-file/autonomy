@@ -2,7 +2,7 @@
 # Database Backend Abstraction Layer
 # Supports SQLite (default) and PostgreSQL backends
 
-AUTONOMY_DIR="${AUTONOMY_DIR:-/root/.openclaw/workspace/skills/autonomy}"
+AUTONOMY_DIR="${AUTONOMY_DIR:-${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills/autonomy}"
 CONFIG_FILE="$AUTONOMY_DIR/config.json"
 DB_DIR="$AUTONOMY_DIR/data"
 SQLITE_DB="$DB_DIR/autonomy.db"

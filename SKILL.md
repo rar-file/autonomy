@@ -1,14 +1,42 @@
-# Agentic Autonomy - OpenClaw Plugin
+---
+name: autonomy
+description: >-
+  AI-driven self-improving autonomy system for OpenClaw agents.
+  Agentic decision making, sub-agent spawning, scheduled heartbeats,
+  continuous improvement, and a real-time web dashboard.
+version: 2.2.0
+user-invocable: true
+metadata:
+  openclaw:
+    skillKey: autonomy
+    emoji: "\U0001F916"
+    homepage: https://github.com/rar-file/autonomy
+    os:
+      - linux
+      - macos
+    requires:
+      bins:
+        - bash
+        - jq
+        - python3
+        - git
+      env:
+        - AUTONOMY_DIR
+      config: []
+    primaryEnv: AUTONOMY_DIR
+---
 
-**Version:** 2.1.0  
-**Type:** Agentic Self-Improvement System  
+# Agentic Autonomy — OpenClaw Plugin
+
+**Version:** 2.2.0
+**Type:** Agentic Self-Improvement System
 **Requires:** OpenClaw Gateway, bash, jq, python3
 
 ## Quick Install
 
 ```bash
 # Clone to your OpenClaw skills directory
-cd ~/.openclaw/workspace/skills
+cd "${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills"
 git clone https://github.com/rar-file/autonomy.git
 
 # Run install script
@@ -34,26 +62,26 @@ This plugin turns your OpenClaw agent into a **self-improving autonomous system*
 
 ## Key Features
 
-### 🧠 Agentic Decision Making
+### Agentic Decision Making
 The AI decides what to work on based on:
 - Pending tasks
 - Scheduled work
 - System state
 - User needs
 
-### 🔄 Continuous Improvement
+### Continuous Improvement
 - Runs every 20 minutes via heartbeat
 - Spawns sub-agents for parallel research
 - Updates web UI continuously
 - Adds new features automatically
 
-### 🛡️ Safety First
+### Safety First
 - Hard limits: 5 tasks, 3 agents, 50k tokens/day
 - Anti-hallucination: Must verify work before completion
 - Approval required for risky actions
 - Built-in token budget tracking
 
-### 🌐 Web Dashboard
+### Web Dashboard
 Beautiful web UI at `http://localhost:8767`:
 - Real-time status monitoring
 - Task management with complete/delete
@@ -95,6 +123,16 @@ autonomy status                      # View system status
 autonomy update check                # Check for updates
 ```
 
+## OpenClaw Integration
+
+This skill integrates deeply with OpenClaw's runtime:
+
+- **Gateway**: Heartbeat triggers arrive via the OpenClaw Gateway WebSocket
+- **Sessions**: Sub-agents can bridge to `sessions_send` / `sessions_spawn` for cross-session coordination when the OpenClaw CLI is available
+- **Centralized Config**: AI provider, model, and API keys are read from `~/.openclaw/openclaw.json` when not overridden locally
+- **OPENCLAW_HOME**: All paths respect the `OPENCLAW_HOME` environment variable (defaults to `~/.openclaw`)
+- **ClawHub**: This skill is structured for publishing to ClawHub (`clawhub.com`)
+
 ## Heartbeat Integration
 
 The plugin integrates with OpenClaw's heartbeat system:
@@ -108,10 +146,10 @@ The plugin integrates with OpenClaw's heartbeat system:
 
 ### Smart Updates (No Spam)
 
-- ✅ Work completed → Brief summary + proof
-- ✅ Phase transitioned → Single notification
-- ✅ Limit reached → Alert with details
-- ❌ Nothing to do → HEARTBEAT_OK (silent)
+- Work completed -> Brief summary + proof
+- Phase transitioned -> Single notification
+- Limit reached -> Alert with details
+- Nothing to do -> HEARTBEAT_OK (silent)
 
 ## Continuous Improvement Workflow
 
@@ -136,11 +174,11 @@ Once installed, the system automatically:
 
 ## Production Ready
 
-✅ Self-contained - no external dependencies beyond bash/jq/python3  
-✅ Self-updating - checks GitHub for new versions  
-✅ Self-monitoring - tracks token usage and limits  
-✅ Self-documenting - creates its own docs  
-✅ Safe - hard limits prevent runaway usage  
+- Self-contained — no external dependencies beyond bash/jq/python3
+- Self-updating — checks GitHub for new versions
+- Self-monitoring — tracks token usage and limits
+- Self-documenting — creates its own docs
+- Safe — hard limits prevent runaway usage
 
 ## Support
 

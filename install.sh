@@ -15,6 +15,17 @@ WORKSPACE_DIR="$(dirname "$AUTONOMY_DIR")"
 echo "📁 Installation Directory: $AUTONOMY_DIR"
 echo ""
 
+# Detect OpenClaw environment
+OPENCLAW_HOME="${OPENCLAW_HOME:-$HOME/.openclaw}"
+if [[ -f "$OPENCLAW_HOME/openclaw.json" ]]; then
+    echo "🔗 OpenClaw detected: $OPENCLAW_HOME"
+    echo "   AI config will be read from openclaw.json"
+else
+    echo "ℹ️  OpenClaw config not found at $OPENCLAW_HOME/openclaw.json"
+    echo "   You can set OPENCLAW_HOME or configure AI settings in config.json"
+fi
+echo ""
+
 # Check dependencies
 echo "🔍 Checking dependencies..."
 MISSING=()
@@ -60,7 +71,7 @@ if [ ! -f "$AUTONOMY_DIR/config.json" ]; then
     cat > "$AUTONOMY_DIR/config.json" << 'EOF'
 {
   "skill": "autonomy",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "name": "Agentic Autonomy",
   "description": "AI-driven self-improving autonomy for OpenClaw agents",
   "status": "active",
@@ -160,9 +171,13 @@ if [ -f "$WORKSPACE_DIR/HEARTBEAT.md" ]; then
     echo "📄 Found existing HEARTBEAT.md"
     echo "   The plugin will use this for heartbeat instructions."
 else
-    echo "⚠️  No HEARTBEAT.md found in workspace"
-    echo "   Copying template..."
-    cp "$AUTONOMY_DIR/HEARTBEAT.md.template" "$WORKSPACE_DIR/HEARTBEAT.md" 2>/dev/null || true
+    echo "📄 Generating HEARTBEAT.md..."
+    if [ -f "$AUTONOMY_DIR/lib/heartbeat-builder.sh" ]; then
+        bash "$AUTONOMY_DIR/lib/heartbeat-builder.sh" build 2>/dev/null || true
+        echo "   ✅ Dynamic HEARTBEAT.md generated"
+    else
+        echo "   ⚠️  heartbeat-builder not found — HEARTBEAT.md will be created on first daemon cycle"
+    fi
 fi
 echo ""
 

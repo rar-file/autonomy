@@ -2,7 +2,7 @@
 # Task Dependency Management System
 # Allows tasks to depend on other tasks completing first
 
-AUTONOMY_DIR="${AUTONOMY_DIR:-/root/.openclaw/workspace/skills/autonomy}"
+AUTONOMY_DIR="${AUTONOMY_DIR:-${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills/autonomy}"
 TASKS_DIR="$AUTONOMY_DIR/tasks"
 
 # Add a dependency to a task

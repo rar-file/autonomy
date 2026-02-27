@@ -49,7 +49,7 @@ _autonomy_complete() {
             ;;
         complete|delete|show)
             # Complete with task names
-            local tasks=$(ls ~/.openclaw/workspace/skills/autonomy/tasks/*.json 2>/dev/null | xargs -I {} basename {} .json)
+            local tasks=$(ls "${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills/autonomy/tasks/"*.json 2>/dev/null | xargs -I {} basename {} .json)
             COMPREPLY=( $(compgen -W "$tasks" -- "$cur") )
             return 0
             ;;
