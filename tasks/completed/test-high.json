@@ -1,0 +1,15 @@
+{
+  "name": "test-high",
+  "description": "Test high priority task",
+  "status": "completed",
+  "priority": "high",
+  "created": "2026-02-27T19:57:43+01:00",
+  "assignee": "self",
+  "subtasks": [],
+  "completed": true,
+  "attempts": 1,
+  "max_attempts": 3,
+  "verification": "Tested: Priority system working correctly",
+  "evidence": [],
+  "completed_at": "2026-02-27T19:57:49+01:00"
+}

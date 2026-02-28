@@ -1,0 +1,16 @@
+{
+  "backup_paths": [
+    "/root/.openclaw/workspace",
+    "/root/.openclaw/openclaw.json"
+  ],
+  "exclude_patterns": [
+    "*.tmp",
+    "*.log",
+    ".git/objects",
+    "node_modules",
+    "__pycache__"
+  ],
+  "compression": "gzip",
+  "encrypt": false,
+  "retention_days": 30
+}

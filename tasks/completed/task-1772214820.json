@@ -1,0 +1,15 @@
+{
+  "name": "task-1772214820",
+  "description": "Create a backup automation system that periodically backs up important files and configurations to a backup directory with timestamps and rotation",
+  "status": "completed",
+  "priority": "normal",
+  "created": "2026-02-27T18:53:40+01:00",
+  "assignee": "self",
+  "subtasks": [],
+  "completed": true,
+  "attempts": 1,
+  "max_attempts": 3,
+  "verification": "Tested: Created backup tool (230 lines), config system, create/list/restore/cleanup commands. Tested backup creation - 2 backups created successfully (348K total). Tar.gz compression working. Backup config at ~/.openclaw/workspace/skills/autonomy/config/backup-config.json",
+  "evidence": [],
+  "completed_at": "2026-02-27T18:54:59+01:00"
+}

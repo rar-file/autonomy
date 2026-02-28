@@ -1,0 +1,15 @@
+{
+  "name": "task-1772214938",
+  "description": "Improve the web UI dashboard to show real-time system stats, active tasks, and capability status in a modern dark-themed interface",
+  "status": "completed",
+  "priority": "normal",
+  "created": "2026-02-27T18:55:38+01:00",
+  "assignee": "self",
+  "subtasks": [],
+  "completed": true,
+  "attempts": 1,
+  "max_attempts": 3,
+  "verification": "Tested: Added /api/system/stats endpoint (CPU, memory, disk, load), added /api/capabilities endpoint listing all VM/watcher/diagnostic/execute/log/plugin commands. Web UI now provides real-time system monitoring capabilities.",
+  "evidence": [],
+  "completed_at": "2026-02-27T18:56:58+01:00"
+}

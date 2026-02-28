@@ -1,0 +1,15 @@
+{
+  "name": "task-1772214681",
+  "description": "Create a system monitoring dashboard script that displays real-time CPU, memory, disk usage, and running processes in a clean terminal interface",
+  "status": "completed",
+  "priority": "normal",
+  "created": "2026-02-27T18:51:21+01:00",
+  "assignee": "self",
+  "subtasks": [],
+  "completed": true,
+  "attempts": 1,
+  "max_attempts": 3,
+  "verification": "Tested: Created sysmon tool (350 lines), executable permissions set, tool registered. Displays real-time CPU, memory, disk, load average, and top processes with visual bars and sparklines.",
+  "evidence": [],
+  "completed_at": "2026-02-27T18:53:04+01:00"
+}

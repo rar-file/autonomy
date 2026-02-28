@@ -1,0 +1,16 @@
+{
+  "name": "test-task",
+  "description": "test description",
+  "status": "completed",
+  "priority": "normal",
+  "created": "2026-02-27T18:03:36+01:00",
+  "assignee": "self",
+  "subtasks": [],
+  "completed": true,
+  "attempts": 1,
+  "max_attempts": 3,
+  "verification": "Tested: Task system working, file creation verified, status tracking functional.",
+  "evidence": [],
+  "flagged_at": "2026-02-27T18:04:15+01:00",
+  "completed_at": "2026-02-27T18:51:12+01:00"
+}

@@ -1,0 +1,49 @@
+{
+  "name": "task-1772212244",
+  "description": "Comprehensive autonomy skill enhancement: VM integration, file watching, diagnostics, enhanced execution, logging, plugins",
+  "status": "completed",
+  "priority": "high",
+  "created": "2026-02-27T17:05:00+01:00",
+  "subtasks": [
+    "Analyze codebase structure",
+    "Create VM integration module",
+    "Create file watcher module",
+    "Create diagnostics module",
+    "Create enhanced task executor",
+    "Create intelligent logger",
+    "Create plugin system",
+    "Integrate with autonomy CLI",
+    "Update heartbeat builder",
+    "Create documentation"
+  ],
+  "completed_subtasks": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+  ],
+  "completed": true,
+  "completed_at": "2026-02-27T18:51:11+01:00",
+  "attempts": 2,
+  "verification": "Tested: All 6 capability modules created, CLI integration working, heartbeat updated, documentation complete. VM commands tested (cpu, memory, diagnostics).",
+  "evidence": [
+    "Created: capabilities/vm-integration.sh (377 lines)",
+    "Created: capabilities/file-watcher.sh (362 lines)",
+    "Created: capabilities/diagnostics.sh (320 lines)",
+    "Created: capabilities/task-executor.sh (284 lines)",
+    "Created: capabilities/intelligent-logger.sh (254 lines)",
+    "Created: capabilities/plugin-system.sh (267 lines)",
+    "Updated: autonomy CLI with 6 new command handlers",
+    "Updated: heartbeat-builder.sh with capabilities section",
+    "Created: CAPABILITIES.md documentation (9KB)",
+    "Tested: autonomy vm cpu → 0.0",
+    "Tested: autonomy vm memory → shows memory stats",
+    "Tested: autonomy diagnostic health → 8 OK, 1 warn"
+  ]
+}

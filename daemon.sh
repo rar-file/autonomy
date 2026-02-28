@@ -322,6 +322,11 @@ run_cycle() {
     log "=== Daemon cycle started ==="
     update_check_state
 
+    # ── Session Start Hook ─────────────────────────────────────
+    if [[ -f "$AUTONOMY_DIR/lib/heartbeat-session.sh" ]]; then
+        bash "$AUTONOMY_DIR/lib/heartbeat-session.sh" start >/dev/null 2>&1 || true
+    fi
+
     # ── Guard: skip if a heartbeat/task is already in progress ──
     local hb_lock="$AUTONOMY_DIR/state/heartbeat.lock"
     if [[ -f "$hb_lock" ]]; then
@@ -434,6 +439,12 @@ run_cycle() {
     rebuild_heartbeat
     ensure_webui
     update_stats
+    
+    # ── Session End Hook ───────────────────────────────────────
+    if [[ -f "$AUTONOMY_DIR/lib/heartbeat-session.sh" ]]; then
+        bash "$AUTONOMY_DIR/lib/heartbeat-session.sh" end >/dev/null 2>&1 || true
+    fi
+    
     log "=== Daemon cycle complete ==="
 }
 
