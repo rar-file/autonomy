@@ -1,0 +1,342 @@
+#!/usr/bin/env bash
+#
+# Token Budget Dashboard
+# Shows daily token usage vs 50k budget
+#
+
+set -e
+
+# Configuration
+DAILY_BUDGET=50000
+USAGE_FILE="${WORKSPACE_DIR:-/root/.openclaw/workspace}/logs/usage.jsonl"
+SESSIONS_FILE="/root/.openclaw/agents/main/sessions/sessions.json"
+WARNING_THRESHOLD=80  # Warn when >80% used
+
+# Ensure usage file exists
+if [[ ! -f "$USAGE_FILE" ]]; then
+    mkdir -p "$(dirname "$USAGE_FILE")"
+    touch "$USAGE_FILE"
+fi
+
+# Get today's date in ISO format (YYYY-MM-DD)
+TODAY=$(date +%Y-%m-%d)
+
+# Function to get current session ID from environment or session file
+get_current_session() {
+    # Try to get from OpenClaw environment
+    if [[ -n "${OPENCLAW_SESSION_ID:-}" ]]; then
+        echo "$OPENCLAW_SESSION_ID"
+        return
+    fi
+    
+    # Try to extract from sessions.json for agent:main:main
+    if [[ -f "$SESSIONS_FILE" ]]; then
+        jq -r '.["agent:main:main"].sessionId // empty' "$SESSIONS_FILE" 2>/dev/null || true
+    fi
+}
+
+# Function to calculate today's usage from usage.jsonl + current session
+calculate_today_usage() {
+    local today_start="${TODAY}T00:00:00"
+    local today_end="${TODAY}T23:59:59"
+    
+    local logged_usage=0
+    if [[ -s "$USAGE_FILE" ]]; then
+        # Sum total_tokens for today's entries
+        logged_usage=$(jq -s '
+            map(select(.timestamp >= '"$today_start"' and .timestamp <= '"$today_end"')) |
+            map(.total_tokens // 0) |
+            add // 0
+        ' "$USAGE_FILE" 2>/dev/null || echo "0")
+    fi
+    
+    # Add current session's tokens (they're live and may not be logged yet)
+    local current_session
+    current_session=$(get_current_session)
+    local current_tokens=0
+    
+    if [[ -n "$current_session" ]] && [[ -f "$SESSIONS_FILE" ]]; then
+        current_tokens=$(jq -r --arg sid "$current_session" '
+            to_entries |
+            map(select(.value.sessionId == $sid)) |
+            first |
+            .value.totalTokens // 0
+        ' "$SESSIONS_FILE" 2>/dev/null || echo "0")
+    fi
+    
+    echo "$((logged_usage + current_tokens))"
+}
+
+# Function to get current session's usage from sessions.json
+get_session_usage() {
+    local session_id="${1:-}"
+    
+    if [[ -z "$session_id" ]] || [[ ! -f "$SESSIONS_FILE" ]]; then
+        echo "0"
+        return
+    fi
+    
+    # Try to find the session and get totalTokens
+    jq -r --arg sid "$session_id" '
+        to_entries |
+        map(select(.value.sessionId == $sid)) |
+        first |
+        .value.totalTokens // 0
+    ' "$SESSIONS_FILE" 2>/dev/null || echo "0"
+}
+
+# Function to get current session input/output tokens
+get_session_details() {
+    local session_id="${1:-}"
+    
+    if [[ -z "$session_id" ]] || [[ ! -f "$SESSIONS_FILE" ]]; then
+        echo "0 0 0"
+        return
+    fi
+    
+    jq -r --arg sid "$session_id" '
+        to_entries |
+        map(select(.value.sessionId == $sid)) |
+        first |
+        [.value.inputTokens // 0, .value.outputTokens // 0, .value.totalTokens // 0] |
+        @tsv
+    ' "$SESSIONS_FILE" 2>/dev/null || echo "0 0 0"
+}
+
+# Function to log current session usage
+log_session_usage() {
+    local session_id="${1:-}"
+    
+    if [[ -z "$session_id" ]] || [[ ! -f "$SESSIONS_FILE" ]]; then
+        return 1
+    fi
+    
+    # Extract session data and append to usage.jsonl
+    local session_data
+    session_data=$(jq -r --arg sid "$session_id" --arg ts "$(date -Iseconds)" '
+        to_entries |
+        map(select(.value.sessionId == $sid)) |
+        first |
+        if . then
+            {
+                timestamp: $ts,
+                session: .value.sessionId,
+                tokens_in: (.value.inputTokens // 0),
+                tokens_out: (.value.outputTokens // 0),
+                total_tokens: (.value.totalTokens // 0),
+                model: (.value.model // "unknown"),
+                provider: (.value.modelProvider // "unknown"),
+                cache_read: (.value.cacheRead // 0),
+                cache_write: (.value.cacheWrite // 0)
+            }
+        else
+            empty
+        end
+    ' "$SESSIONS_FILE" 2>/dev/null)
+    
+    if [[ -n "$session_data" ]]; then
+        echo "$session_data" >> "$USAGE_FILE"
+        return 0
+    fi
+    
+    return 1
+}
+
+# Function to format numbers with commas
+format_number() {
+    printf "%'d" "${1:-0}" 2>/dev/null || echo "${1:-0}"
+}
+
+# Function to calculate percentage
+calculate_percentage() {
+    local value="${1:-0}"
+    local total="${2:-1}"
+    
+    if [[ "$total" -eq 0 ]]; then
+        echo "0"
+        return
+    fi
+    
+    echo "scale=1; ($value * 100) / $total" | bc 2>/dev/null || echo "0"
+}
+
+# Function to draw progress bar
+draw_progress_bar() {
+    local pct="${1:-0}"
+    local width=30
+    
+    # Remove decimal
+    local int_pct="${pct%.*}"
+    
+    # Cap at 100 for display
+    if [[ "$int_pct" -gt 100 ]]; then
+        int_pct=100
+    fi
+    
+    local filled=$((width * int_pct / 100))
+    local empty=$((width - filled))
+    
+    local bar=""
+    for ((i=0; i<filled; i++)); do bar="${bar}█"; done
+    for ((i=0; i<empty; i++)); do bar="${bar}░"; done
+    
+    echo "$bar"
+}
+
+# Function to get color based on percentage
+get_status_color() {
+    local pct="${1:-0}"
+    
+    # Remove decimal for comparison
+    local int_pct="${pct%.*}"
+    
+    if [[ "$int_pct" -ge "$WARNING_THRESHOLD" ]]; then
+        echo "$RED"
+    elif [[ "$int_pct" -ge 60 ]]; then
+        echo "$YELLOW"
+    else
+        echo "$GREEN"
+    fi
+}
+
+# Main display function
+show_budget() {
+    local current_session
+    current_session=$(get_current_session)
+    
+    # Log current session to usage file if not already logged
+    if [[ -n "$current_session" ]]; then
+        # Check if this session was already logged today
+        if ! grep -q "\"session\":\"$current_session\"" "$USAGE_FILE" 2>/dev/null; then
+            log_session_usage "$current_session" >/dev/null 2>&1 || true
+        fi
+    fi
+    
+    # Calculate usage
+    local today_usage
+    today_usage=$(calculate_today_usage)
+    
+    local session_in session_out session_total
+    read -r session_in session_out session_total <<< "$(get_session_details "$current_session")"
+    
+    # Calculate percentages
+    local today_pct
+    today_pct=$(calculate_percentage "$today_usage" "$DAILY_BUDGET")
+    
+    local remaining=$((DAILY_BUDGET - today_usage))
+    local over_budget=0
+    if [[ "$remaining" -lt 0 ]]; then
+        over_budget=$((remaining * -1))
+        remaining=0
+    fi
+    
+    local status_color
+    status_color=$(get_status_color "$today_pct")
+    
+    # Print dashboard
+    echo ""
+    echo "╭─────────────────────────────────────────╮"
+    echo "│      TOKEN BUDGET DASHBOARD            │"
+    echo "╰─────────────────────────────────────────╯"
+    echo ""
+    
+    # Progress bar
+    local bar
+    bar=$(draw_progress_bar "$today_pct")
+    echo "  $bar ${today_pct}%"
+    echo ""
+    
+    # Daily budget status
+    echo "  Daily Budget:      $(format_number "$DAILY_BUDGET") tokens"
+    echo "  Today's Usage:     $(format_number "$today_usage") tokens"
+    echo "  Remaining:         $(format_number "$remaining") tokens"
+    
+    if [[ "$over_budget" -gt 0 ]]; then
+        echo "  OVER BUDGET:       $(format_number "$over_budget") tokens"
+    fi
+    
+    echo ""
+    
+    # Current session
+    if [[ -n "$current_session" ]]; then
+        echo "  Current Session:   ${current_session:0:8}..."
+        echo "    Input:           $(format_number "$session_in")"
+        echo "    Output:          $(format_number "$session_out")"
+        echo "    Total:           $(format_number "$session_total")"
+        echo ""
+    fi
+    
+    # Warning if over threshold
+    if [[ "${today_pct%.*}" -ge "$WARNING_THRESHOLD" ]]; then
+        echo "  ⚠️  WARNING: Daily token usage exceeds ${WARNING_THRESHOLD}%!"
+        if [[ "$over_budget" -gt 0 ]]; then
+            echo "  🛑 DAILY BUDGET EXCEEDED - Consider starting a new day log"
+        fi
+        echo ""
+    fi
+    
+    # Show last 5 entries if requested
+    if [[ "${1:-}" == "--details" ]] && [[ -s "$USAGE_FILE" ]]; then
+        echo "  Recent Usage (last 5 sessions):"
+        echo "  ───────────────────────────────────────"
+        jq -r '
+            . | select(.timestamp | startswith("'$TODAY'")) |
+            "    \(.timestamp[11:16])  \(.total_tokens // 0 | tostring | (length | if . < 6 then " " * (6 - .) else "" end) + .) tokens  \(.model // "unknown")"
+        ' "$USAGE_FILE" 2>/dev/null | tail -5 || echo "    No entries for today"
+        echo ""
+    fi
+}
+
+# Handle command-line arguments
+case "${1:-}" in
+    --log)
+        # Log current session and exit
+        current_session=$(get_current_session)
+        if log_session_usage "$current_session"; then
+            echo "✓ Logged usage for session ${current_session:0:8}..."
+        else
+            echo "✗ Failed to log usage"
+            exit 1
+        fi
+        ;;
+    --today)
+        # Show just today's total
+        calculate_today_usage
+        ;;
+    --session)
+        # Show just current session usage
+        get_session_usage "$(get_current_session)"
+        ;;
+    --details)
+        show_budget --details
+        ;;
+    --help|-h)
+        cat << 'HELP'
+Token Budget Dashboard
+
+Usage: budget [OPTION]
+
+Options:
+  (no args)     Show full budget dashboard
+  --details     Show dashboard with recent session history
+  --log         Log current session usage to usage.jsonl
+  --today       Output just today's token total (for scripting)
+  --session     Output just current session tokens (for scripting)
+  --help, -h    Show this help message
+
+Environment:
+  WORKSPACE_DIR    Override default workspace path
+  OPENCLAW_SESSION_ID  Specify current session ID
+
+Files:
+  logs/usage.jsonl          Token usage log (JSONL format)
+  /root/.openclaw/agents/main/sessions/sessions.json  Session metadata
+
+Budget: 50,000 tokens/day
+Warning threshold: 80%
+HELP
+        ;;
+    *)
+        show_budget
+        ;;
+esac
