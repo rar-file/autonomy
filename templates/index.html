@@ -1131,9 +1131,9 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="tabs">
-                                <div class="tab active" onclick="showTab('tasks-all', this)">All</div>
-                                <div class="tab" onclick="showTab('tasks-pending', this)">Pending</div>
-                                <div class="tab" onclick="showTab('tasks-completed', this)">Completed</div>
+                                <div class="tab active" onclick="filterTasks('all', this)">All</div>
+                                <div class="tab" onclick="filterTasks('pending', this)">Pending</div>
+                                <div class="tab" onclick="filterTasks('completed', this)">Completed</div>
                             </div>
                             <div id="tasks-table-container">
                                 <div class="empty-state">Loading tasks...</div>
@@ -1470,6 +1470,44 @@
             };
             
             container.innerHTML = renderTasks(() => true);
+        }
+        
+        // Filter tasks by status
+        let currentTaskFilter = 'all';
+        function filterTasks(filter, element) {
+            currentTaskFilter = filter;
+            
+            // Update tab styles
+            document.querySelectorAll('#page-tasks .tab').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+            
+            // Re-render with filter
+            if (currentData) {
+                const tasks = currentData.tasks || [];
+                const container = document.getElementById('tasks-table-container');
+                
+                let filteredTasks;
+                if (filter === 'all') filteredTasks = tasks;
+                else if (filter === 'pending') filteredTasks = tasks.filter(t => t.status !== 'completed');
+                else if (filter === 'completed') filteredTasks = tasks.filter(t => t.status === 'completed');
+                
+                if (filteredTasks.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No ' + filter + ' tasks</div></div>';
+                } else {
+                    container.innerHTML = '<table><thead><tr><th>Status</th><th>Task</th><th>Description</th><th>Created</th><th style="text-align:right">Action</th></tr></thead><tbody>' +
+                        filteredTasks.map((t, i) => '<tr class="' + t.status + '" style="animation: slideIn 0.3s ease ' + (i * 0.05) + 's both">' +
+                            '<td><span class="badge badge-' + (t.status === 'completed' ? 'success' : t.status === 'in_progress' ? 'info' : 'warning') + '" style="text-transform: capitalize">' + t.status.replace('_', ' ') + '</span></td>' +
+                            '<td style="font-weight:500">' + escapeHtml(t.name) + '</td>' +
+                            '<td style="color:var(--text-secondary)">' + escapeHtml(t.description || '-') + '</td>' +
+                            '<td style="color:var(--text-muted)">' + formatDate(t.created_at) + '</td>' +
+                            '<td style="text-align:right">' + 
+                            (t.status !== 'completed' ? 
+                                '<button class="btn btn-primary" style="padding:0.4rem 0.875rem;font-size:0.8rem" onclick="completeTask(\'' + t.name + '\')">Complete</button>' : 
+                                '<span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="vertical-align:middle;margin-right:4px"><polyline points="20 6 9 17 4 12"></polyline></svg>Done</span>') +
+                            '</td></tr>'
+                        ).join('') + '</tbody></table>';
+                }
+            }
         }
         
         // Alerts
