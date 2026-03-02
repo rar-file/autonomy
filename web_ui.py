@@ -492,6 +492,9 @@ def suggest_personality():
         return jsonify({"success": True, "message": "Suggestion saved for review"})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
+
+
+@app.route("/api/skills/install", methods=["POST"])
 def install_skill():
     data = request.json
     repo = data.get("repo", "")
@@ -507,26 +510,6 @@ def install_skill():
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 
-@app.route("/api/personality/suggest", methods=["POST"])
-def suggest_personality():
-    data = request.json
-    file = data.get("file", "")
-    suggestion = data.get("suggestion", "")
-    
-    if not file or not suggestion:
-        return jsonify({"success": False, "error": "File and suggestion required"})
-    
-    # Save suggestion to a pending file
-    pending_dir = Path("/root/.openclaw/workspace/pending_changes")
-    pending_dir.mkdir(exist_ok=True)
-    
-    pending_file = pending_dir / f"{file.replace('.', '_')}_{int(datetime.now().timestamp())}.txt"
-    with open(pending_file, "w") as f:
-        f.write(f"File: {file}\n")
-        f.write(f"Date: {datetime.now().isoformat()}\n")
-        f.write(f"Suggestion:\n{suggestion}\n")
-    
-    return jsonify({"success": True, "message": "Suggestion saved for review"})
 
 if __name__ == "__main__":
     port = int(os.environ.get("AUTONOMY_WEB_PORT", 8767))
