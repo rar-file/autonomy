@@ -17,12 +17,18 @@
 
 ---
 
+<p align="center">
+  <img src="assets/diagram-workflow.svg" alt="Workflow" width="700">
+</p>
+
+---
+
 ## What's New in v3
 
 **Complete rewrite using OpenClaw native tools:**
 
-| v1 (Old) | v3 (This) |
-|----------|-----------|
+| Feature | v1 (Old) | v3 (This) |
+|---------|----------|-----------|
 | Custom sub-agent spawning | ✅ `sessions_spawn` tool |
 | Custom memory system | ✅ `memory_search` / `memory_get` |
 | Overwrites HEARTBEAT.md | ✅ Respects your file |
@@ -82,6 +88,137 @@ python3 web_ui.py
 | `autonomy vm process_list` | List all processes |
 | `autonomy vm top_cpu` | Top CPU consumers |
 | `autonomy vm docker_ps` | Docker containers |
+
+---
+
+## Safety Guards
+
+<p align="center">
+  <img src="assets/diagram-limits.svg" alt="Safety Limits" width="600">
+</p>
+
+### Hard Limits
+
+| Limit | Value | Purpose |
+|-------|-------|---------|
+| Max concurrent tasks | 5 | Prevent overload |
+| Max sub-agents | 3 | Limit parallelism |
+| Max schedules | 5 | Control recurring work |
+| Daily token budget | 50,000 | Cost protection |
+| Max iterations per task | 5 | Stop endless building |
+
+### Anti-Hallucination
+
+```
+❌ WRONG: "Task complete" (no proof)
+✅ RIGHT: "Task complete. Proof: Tested X, verified Y exists"
+```
+
+| Guard | Description |
+|-------|-------------|
+| Verification Required | Must prove work before marking complete |
+| Attempt Tracking | Max 3 attempts before forced stop |
+| File Verification | Files must exist (actually checked) |
+| Command Testing | Commands must work (actually run) |
+| Evidence Required | Hand-waving rejected |
+
+### Approval Required
+
+These actions need explicit approval:
+- External API calls
+- Sending messages
+- File deletion
+- Public posts
+- Git push
+- Installing packages
+
+---
+
+## How It Works
+
+<p align="center">
+  <img src="assets/diagram-heartbeat.svg" alt="Heartbeat Flow" width="500">
+</p>
+
+### 1. Heartbeat Triggers
+
+```
+OpenClaw → Read HEARTBEAT.md → AI decides what to do
+```
+
+### 2. AI Checks Workstation
+
+- Pending tasks?
+- Scheduled work due?
+- What needs attention?
+
+### 3. AI Reasons & Acts
+
+```
+"I should build a token tracker"
+↓
+Create task → Plan approach → Build → Test → Verify → Complete
+```
+
+### 4. Verification Required
+
+```bash
+# ❌ WRONG - No proof
+autonomy task complete X
+
+# ✅ RIGHT - With proof
+autonomy task complete X "Tested: logs tokens, file exists with data"
+```
+
+---
+
+## Example Session
+
+```bash
+# User creates a task
+$ autonomy task create "fix-auth" "Fix OAuth login bug"
+✓ Task 'fix-auth' created
+
+# User checks tasks
+$ autonomy task list
+  [pending] fix-auth: Fix OAuth login bug
+
+# (On next heartbeat, AI sees the task)
+# AI uses sessions_spawn to research OAuth2
+# AI creates a fix
+# AI marks complete with proof
+
+# User checks status
+$ autonomy task list
+  [completed] fix-auth: Fix OAuth login bug
+```
+
+---
+
+## Architecture
+
+```
+autonomy/
+├── autonomy              # Main CLI
+├── config.json           # Configuration & limits
+├── HEARTBEAT.md          # AI instructions
+├── ARCHITECTURE.md       # Design docs
+├── README.md             # This file
+├── USAGE.md              # Usage guide
+├── checks/               # Update checker
+├── lib/                  # Shared libraries
+├── tasks/                # Active tasks (JSON)
+├── agents/               # Running agents
+├── tools/                # Custom tools created by AI
+├── logs/                 # Activity logs
+├── state/                # Runtime state
+├── templates/            # Web UI templates
+└── assets/               # Visual assets
+```
+
+<p align="center">
+  <img src="assets/diagram-architecture.svg" alt="Architecture" width="700">
+</p>
 
 ---
 
@@ -145,37 +282,18 @@ openclaw cron add --name autonomy-check \
 
 ---
 
-## Safety Guards
+## Assets
 
-| Guard | Implementation |
-|-------|----------------|
-| **No HEARTBEAT.md overwrite** | Respects your existing file |
-| **No daemon** | Uses OpenClaw native cron |
-| **No custom memory** | Uses OpenClaw semantic search |
-| **Token tracking** | Pulls from OpenClaw API (accurate) |
-| **Approval required** | External APIs, messages, git push, deletions |
+<p align="center">
+  <img src="assets/logo.svg" alt="Logo" width="200">
+</p>
 
----
-
-## Architecture
-
-```
-autonomy/
-├── SKILL.md              # Skill manifest for ClawHub
-├── README.md             # This file
-├── USAGE.md              # Detailed usage guide
-├── autonomy              # Main CLI (bash)
-├── web_ui.py             # Flask dashboard
-├── install.sh            # Installation script
-├── config.json           # User configuration
-├── tasks/                # Task JSON storage
-├── logs/                 # Activity logs
-├── templates/            # Web UI templates
-│   └── index.html        # Dashboard HTML
-└── assets/               # Visual assets
-    ├── logo.svg          # Main logo
-    └── logo-banner.svg   # README banner
-```
+<p align="center">
+  This plugin includes visual assets:<br>
+  <code>assets/logo.svg</code> — Main logo<br>
+  <code>assets/logo-banner.svg</code> — Banner for README<br>
+  <code>assets/diagram-*.svg</code> — Workflow diagrams
+</p>
 
 ---
 
@@ -203,26 +321,18 @@ Edit `config.json`:
 
 ---
 
-## Example Session
+## Self-Update
+
+The autonomy can update itself from GitHub:
 
 ```bash
-# User creates a task
-$ autonomy task create "fix-auth" "Fix OAuth login bug"
-✓ Task 'fix-auth' created
-
-# User checks tasks
-$ autonomy task list
-  [pending] fix-auth: Fix OAuth login bug
-
-# (On next heartbeat, AI sees the task)
-# AI uses sessions_spawn to research OAuth2
-# AI creates a fix
-# AI marks complete with proof
-
-# User checks status
-$ autonomy task list
-  [completed] fix-auth: Fix OAuth login bug
+autonomy update check  # Check if new version available
+autonomy update apply  # Download and install
 ```
+
+<p align="center">
+  <img src="assets/diagram-update.svg" alt="Self-Update" width="500">
+</p>
 
 ---
 

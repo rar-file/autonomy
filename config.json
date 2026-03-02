@@ -1,0 +1,11 @@
+{
+  "version": "3.0.0",
+  "limits": {
+    "max_concurrent_tasks": 5,
+    "daily_task_budget": 20
+  },
+  "github": {
+    "default_repo": null,
+    "notify_on_ci_fail": true
+  }
+}
