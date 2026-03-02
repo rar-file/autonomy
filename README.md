@@ -1,7 +1,7 @@
-# Agentic Autonomy for OpenClaw
+# Autonomy 🤖
 
 <p align="center">
-  <img src="assets/logo-banner.svg" alt="Autonomy" width="600">
+  <img src="assets/logo-banner.svg" alt="Autonomy" width="500">
 </p>
 
 <p align="center">
@@ -17,23 +17,33 @@
 
 ---
 
+## How It Works
+
 <p align="center">
   <img src="assets/diagram-workflow.svg" alt="Workflow" width="700">
 </p>
 
----
+**The AI follows this loop:**
 
-## What's New in v3
+1. **REASON** — Check what's happening (tasks, schedules, notifications)
+2. **DECIDE** — Figure out what needs attention
+3. **BUILD** — Create the solution
+4. **VERIFY** — Test it and prove it works
+5. **DONE** — Mark complete with evidence
 
-**Complete rewrite using OpenClaw native tools:**
+### Triggered by Heartbeat
 
-| Feature | v1 (Old) | v3 (This) |
-|---------|----------|-----------|
-| Custom sub-agent spawning | ✅ `sessions_spawn` tool |
-| Custom memory system | ✅ `memory_search` / `memory_get` |
-| Overwrites HEARTBEAT.md | ✅ Respects your file |
-| Bash daemon (5 min loop) | ✅ OpenClaw cron |
-| ~23k lines of bash | ✅ ~500 lines, focused |
+<p align="center">
+  <img src="assets/diagram-heartbeat.svg" alt="Heartbeat Flow" width="500">
+</p>
+
+Every 30 minutes, OpenClaw reads your `HEARTBEAT.md`. The AI checks:
+- Pending tasks
+- Scheduled work
+- System health
+- GitHub notifications
+
+Then it decides what to do, with hard limits enforced.
 
 ---
 
@@ -61,7 +71,7 @@ python3 web_ui.py
 
 ## Commands
 
-### Core Commands
+### Task Management
 
 | Command | Description |
 |---------|-------------|
@@ -134,41 +144,14 @@ These actions need explicit approval:
 
 ---
 
-## How It Works
+## OpenClaw Integration
 
-<p align="center">
-  <img src="assets/diagram-heartbeat.svg" alt="Heartbeat Flow" width="500">
-</p>
+Autonomy uses OpenClaw's native tools instead of reinventing them:
 
-### 1. Heartbeat Triggers
-
-```
-OpenClaw → Read HEARTBEAT.md → AI decides what to do
-```
-
-### 2. AI Checks Workstation
-
-- Pending tasks?
-- Scheduled work due?
-- What needs attention?
-
-### 3. AI Reasons & Acts
-
-```
-"I should build a token tracker"
-↓
-Create task → Plan approach → Build → Test → Verify → Complete
-```
-
-### 4. Verification Required
-
-```bash
-# ❌ WRONG - No proof
-autonomy task complete X
-
-# ✅ RIGHT - With proof
-autonomy task complete X "Tested: logs tokens, file exists with data"
-```
+- **Sub-agents**: Uses `sessions_spawn` tool
+- **Memory**: Uses `memory_search` / `memory_get` 
+- **Scheduling**: Uses OpenClaw cron
+- **Heartbeat**: Respects your existing `HEARTBEAT.md`
 
 ---
 
@@ -184,9 +167,10 @@ $ autonomy task list
   [pending] fix-auth: Fix OAuth login bug
 
 # (On next heartbeat, AI sees the task)
-# AI uses sessions_spawn to research OAuth2
-# AI creates a fix
-# AI marks complete with proof
+# AI spawns a sub-agent to research OAuth2
+# AI creates a fix, tests it, verifies it works
+# AI marks complete with proof:
+# "Tested: Script runs, login works with OAuth"
 
 # User checks status
 $ autonomy task list
@@ -195,105 +179,24 @@ $ autonomy task list
 
 ---
 
-## Architecture
-
-```
-autonomy/
-├── autonomy              # Main CLI
-├── config.json           # Configuration & limits
-├── HEARTBEAT.md          # AI instructions
-├── ARCHITECTURE.md       # Design docs
-├── README.md             # This file
-├── USAGE.md              # Usage guide
-├── checks/               # Update checker
-├── lib/                  # Shared libraries
-├── tasks/                # Active tasks (JSON)
-├── agents/               # Running agents
-├── tools/                # Custom tools created by AI
-├── logs/                 # Activity logs
-├── state/                # Runtime state
-├── templates/            # Web UI templates
-└── assets/               # Visual assets
-```
+## Web Dashboard
 
 <p align="center">
   <img src="assets/diagram-architecture.svg" alt="Architecture" width="700">
 </p>
 
----
+Real-time dashboard at `http://localhost:8767`:
 
-## Web Dashboard
-
-Beautiful real-time dashboard at `http://localhost:8767`:
-
-**Features:**
 - 📋 Live task list with status badges
-- 📊 Token usage pulled from OpenClaw API
-- 💻 System health monitoring (CPU, memory, disk, load)
+- 📊 Token usage from OpenClaw API
+- 💻 System health (CPU, memory, disk, load)
 - 🎨 Dark theme with custom SVG assets
 - 🔄 Auto-refresh every 30 seconds
 
-**Start the dashboard:**
+**Start it:**
 ```bash
-python3 web_ui.py              # Default port 8767
-AUTONOMY_WEB_PORT=8080 python3 web_ui.py  # Custom port
+python3 web_ui.py
 ```
-
----
-
-## OpenClaw Integration
-
-### Native Sub-Agents
-
-Instead of custom bash spawning, use OpenClaw's native tool:
-
-```json
-{
-  "tool": "sessions_spawn",
-  "args": {
-    "task": "Research OAuth2 best practices",
-    "runtime": "subagent",
-    "mode": "run"
-  }
-}
-```
-
-### Native Memory
-
-Store context in MEMORY.md, retrieve via semantic search:
-
-```bash
-# AI stores decision
-echo "## Decision: Chose JWT over session tokens" >> ~/.openclaw/workspace/MEMORY.md
-
-# AI retrieves via memory_search tool
-```
-
-### Native Scheduling
-
-Use OpenClaw cron instead of a bash daemon:
-
-```bash
-# Check every 30 minutes
-openclaw cron add --name autonomy-check \
-  --schedule "*/30 * * * *" \
-  --command "autonomy check --notify"
-```
-
----
-
-## Assets
-
-<p align="center">
-  <img src="assets/logo.svg" alt="Logo" width="200">
-</p>
-
-<p align="center">
-  This plugin includes visual assets:<br>
-  <code>assets/logo.svg</code> — Main logo<br>
-  <code>assets/logo-banner.svg</code> — Banner for README<br>
-  <code>assets/diagram-*.svg</code> — Workflow diagrams
-</p>
 
 ---
 
@@ -321,30 +224,16 @@ Edit `config.json`:
 
 ---
 
-## Self-Update
-
-The autonomy can update itself from GitHub:
-
-```bash
-autonomy update check  # Check if new version available
-autonomy update apply  # Download and install
-```
+## Assets
 
 <p align="center">
-  <img src="assets/diagram-update.svg" alt="Self-Update" width="500">
+  <img src="assets/logo.svg" alt="Logo" width="200">
 </p>
 
----
-
-## Migration from v1
-
-If you were using Autonomy v1:
-
-1. **Backup tasks**: `cp -r autonomy/tasks autonomy-v2/tasks/`
-2. **Stop v1 daemon**: `autonomy off`
-3. **Remove v1 HEARTBEAT.md** (if auto-generated)
-4. **Use OpenClaw cron** instead of `autonomy schedule`
-5. **Use `sessions_spawn`** instead of `autonomy spawn`
+Visual assets included:
+- `assets/logo.svg` — Main logo
+- `assets/logo-banner.svg` — Banner for README
+- `assets/diagram-*.svg` — Workflow diagrams
 
 ---
 
