@@ -17,15 +17,13 @@
             --text-primary: #f0f0f5;
             --text-secondary: #a0a0b0;
             --text-muted: #606070;
-            --accent: #ff3366;
-            --accent-light: #ff5588;
-            --accent-glow: rgba(255, 51, 102, 0.3);
+            --accent: #e94560;
+            --accent-light: #ff6b6b;
+            --accent-glow: rgba(233, 69, 96, 0.3);
             --success: #00d9a3;
             --warning: #ffb800;
             --danger: #ff4757;
             --info: #00d0ff;
-            --gradient-1: linear-gradient(135deg, #ff3366 0%, #ff6b6b 100%);
-            --gradient-2: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
         * {
@@ -48,10 +46,6 @@
             border-radius: 4px;
         }
         
-        *::-webkit-scrollbar-thumb:hover {
-            background: var(--border-hover);
-        }
-        
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
@@ -60,7 +54,6 @@
             overflow-x: hidden;
         }
         
-        /* Layout */
         .app {
             display: flex;
             min-height: 100vh;
@@ -68,7 +61,7 @@
         
         /* Sidebar */
         .sidebar {
-            width: 260px;
+            width: 280px;
             background: var(--bg-secondary);
             border-right: 1px solid var(--border);
             display: flex;
@@ -93,27 +86,17 @@
         .brand-icon {
             width: 40px;
             height: 40px;
-            background: var(--gradient-1);
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
         }
         
         .brand-text {
             font-size: 1.25rem;
             font-weight: 700;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--accent);
         }
         
         .brand-version {
             font-size: 0.75rem;
             color: var(--text-muted);
-            margin-top: -2px;
         }
         
         .nav {
@@ -216,12 +199,11 @@
         /* Main Content */
         .main {
             flex: 1;
-            margin-left: 260px;
+            margin-left: 280px;
             display: flex;
             flex-direction: column;
         }
         
-        /* Header */
         .header {
             height: 64px;
             background: var(--bg-secondary);
@@ -275,11 +257,12 @@
         }
         
         .btn-primary {
-            background: var(--gradient-1);
+            background: var(--accent);
             color: white;
         }
         
         .btn-primary:hover {
+            background: var(--accent-light);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px var(--accent-glow);
         }
@@ -304,7 +287,6 @@
             justify-content: center;
         }
         
-        /* Content */
         .content {
             flex: 1;
             padding: 2rem;
@@ -325,7 +307,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Page Header */
         .page-header {
             margin-bottom: 2rem;
         }
@@ -341,7 +322,6 @@
             font-size: 0.95rem;
         }
         
-        /* Stats Grid */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -382,13 +362,9 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.25rem;
+            background: rgba(233, 69, 96, 0.15);
+            color: var(--accent);
         }
-        
-        .stat-icon.accent { background: rgba(255, 51, 102, 0.15); }
-        .stat-icon.success { background: rgba(0, 217, 163, 0.15); }
-        .stat-icon.warning { background: rgba(255, 184, 0, 0.15); }
-        .stat-icon.info { background: rgba(0, 208, 255, 0.15); }
         
         .stat-value {
             font-size: 2.5rem;
@@ -396,21 +372,12 @@
             margin-bottom: 0.5rem;
         }
         
-        .stat-change {
-            font-size: 0.8rem;
-            color: var(--success);
-        }
-        
-        .stat-change.negative {
-            color: var(--danger);
-        }
-        
-        /* Cards */
         .card {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 12px;
             overflow: hidden;
+            margin-bottom: 1.5rem;
         }
         
         .card-header {
@@ -435,7 +402,6 @@
             padding: 1.5rem;
         }
         
-        /* Tables */
         .table-container {
             overflow-x: auto;
         }
@@ -470,7 +436,16 @@
             border-bottom: none;
         }
         
-        /* Badges */
+        tr.completed td {
+            text-decoration: line-through;
+            opacity: 0.6;
+            color: var(--text-muted);
+        }
+        
+        tr.completed .task-status {
+            text-decoration: none;
+        }
+        
         .badge {
             display: inline-flex;
             align-items: center;
@@ -500,7 +475,11 @@
             color: var(--info);
         }
         
-        /* Progress Bars */
+        .badge-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+        
         .progress-bar {
             height: 6px;
             background: var(--bg-tertiary);
@@ -511,12 +490,11 @@
         
         .progress-fill {
             height: 100%;
-            background: var(--gradient-1);
+            background: var(--accent);
             border-radius: 3px;
             transition: width 0.3s ease;
         }
         
-        /* Grid Layout */
         .grid-2 {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -529,7 +507,223 @@
             gap: 1.5rem;
         }
         
-        /* Responsive */
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-hover) 50%, var(--bg-tertiary) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+            color: var(--text-muted);
+        }
+        
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .task-item:last-child {
+            border-bottom: none;
+        }
+        
+        .task-status {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            background: var(--bg-tertiary);
+        }
+        
+        .task-name {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .task-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        
+        .task-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        
+        .skill-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .skill-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .skill-name {
+            font-weight: 600;
+        }
+        
+        .skill-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+        
+        .skill-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        
+        .log-entry {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            padding: 0.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+        
+        .log-time {
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+        
+        .log-level {
+            padding: 0 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+        
+        .log-level.info { background: rgba(0, 208, 255, 0.15); color: var(--info); }
+        .log-level.warn { background: rgba(255, 184, 0, 0.15); color: var(--warning); }
+        .log-level.error { background: rgba(255, 71, 87, 0.15); color: var(--danger); }
+        
+        .log-message {
+            flex: 1;
+        }
+        
+        .personality-section {
+            margin-bottom: 2rem;
+        }
+        
+        .personality-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .file-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .file-card:hover {
+            border-color: var(--accent);
+        }
+        
+        .file-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+        
+        .file-path {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        
+        .textarea {
+            width: 100%;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .alert-card {
+            background: rgba(255, 184, 0, 0.1);
+            border: 1px solid var(--warning);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .alert-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--warning);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-primary);
+        }
+        
+        .alert-content {
+            flex: 1;
+        }
+        
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .alert-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
         @media (max-width: 1024px) {
             .grid-2, .grid-3 {
                 grid-template-columns: 1fr;
@@ -552,41 +746,6 @@
             .menu-toggle {
                 display: block;
             }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        /* Loading State */
-        .skeleton {
-            background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-hover) 50%, var(--bg-tertiary) 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 4px;
-        }
-        
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        
-        /* Empty State */
-        .empty-state {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: var(--text-muted);
-        }
-        
-        .empty-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-        
-        /* Animations */
-        .fade-in {
-            animation: fadeIn 0.3s ease;
         }
     </style>
 </head>
@@ -596,7 +755,23 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="brand">
-                    <div class="brand-icon">🤖</div>
+                    <svg class="brand-icon" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="100" cy="100" r="90" fill="#1a1a2e" stroke="#16213e" stroke-width="4"/>
+                        <circle cx="100" cy="100" r="80" fill="none" stroke="#0f3460" stroke-width="2"/>
+                        <circle cx="100" cy="50" r="15" fill="#e94560"/>
+                        <circle cx="100" cy="50" r="8" fill="#1a1a2e"/>
+                        <circle cx="55" cy="130" r="15" fill="#e94560"/>
+                        <circle cx="55" cy="130" r="8" fill="#1a1a2e"/>
+                        <circle cx="145" cy="130" r="15" fill="#e94560"/>
+                        <circle cx="145" cy="130" r="8" fill="#1a1a2e"/>
+                        <line x1="100" y1="65" x2="65" y2="118" stroke="#e94560" stroke-width="3"/>
+                        <line x1="100" y1="65" x2="135" y2="118" stroke="#e94560" stroke-width="3"/>
+                        <line x1="70" y1="130" x2="130" y2="130" stroke="#e94560" stroke-width="3"/>
+                        <circle cx="100" cy="100" r="20" fill="#16213e" stroke="#e94560" stroke-width="3"/>
+                        <circle cx="100" cy="100" r="8" fill="#e94560">
+                            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
                     <div>
                         <div class="brand-text">Autonomy</div>
                         <div class="brand-version">v3.0.0</div>
@@ -607,6 +782,7 @@
             <nav class="nav">
                 <div class="nav-section">
                     <div class="nav-label">Overview</div>
+                    
                     <a href="#" class="nav-item active" onclick="showPage('dashboard', this)">
                         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="3" y="3" width="7" height="7"/>
@@ -626,17 +802,50 @@
                         <span class="nav-badge" id="nav-task-count">0</span>
                     </a>
                     
-                    <a href="#" class="nav-item" onclick="showPage('agents', this)">
+                    <a href="#" class="nav-item" onclick="showPage('alerts', this)">
                         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="3"/>
-                            <path d="M12 1v6m0 6v6m4.22-10.22l4.24-4.24M6.34 17.66l-4.24 4.24M23 12h-6m-6 0H1m20.24-4.24l-4.24 4.24M6.34 6.34L2.1 2.1"/>
+                            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 01-3.46 0"/>
                         </svg>
-                        Agents
+                        Alerts & Reminders
+                        <span class="nav-badge" id="nav-alert-count" style="display: none;">0</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-label">Configuration</div>
+                    
+                    <a href="#" class="nav-item" onclick="showPage('skills', this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                            <polyline points="2 17 12 22 22 17"/>
+                            <polyline points="2 12 12 17 22 12"/>
+                        </svg>
+                        Skills
+                    </a>
+                    
+                    <a href="#" class="nav-item" onclick="showPage('personality', this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        Personality
                     </a>
                 </div>
                 
                 <div class="nav-section">
                     <div class="nav-label">System</div>
+                    
+                    <a href="#" class="nav-item" onclick="showPage('logs', this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                        Logs
+                    </a>
                     
                     <a href="#" class="nav-item" onclick="showPage('system', this)">
                         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -663,656 +872,37 @@
                 </div>
             </div>
         </aside>
-        
-        <!-- Main Content -->
-        <main class="main">
-            <header class="header">
-                <div class="header-left">
-                    <button class="menu-toggle" onclick="toggleSidebar()">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="3" y1="12" x2="21" y2="12"/>
-                            <line x1="3" y1="6" x2="21" y2="6"/>
-                            <line x1="3" y1="18" x2="21" y2="18"/>
-                        </svg>
-                    </button>
-                    <span class="header-title" id="page-title">Dashboard</span>
-                </div>
-                
-                <div class="header-actions">
-                    <button class="btn btn-secondary btn-icon" onclick="refreshData()" title="Refresh">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="23 4 23 10 17 10"/>
-                            <polyline points="1 20 1 14 7 14"/>
-                            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-                        </svg>
-                    </button>
-                    
-                    <button class="btn btn-primary" onclick="createTask()">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="5" x2="12" y2="19"/>
-                            <line x1="5" y1="12" x2="19" y2="12"/>
-                        </svg>
-                        New Task
-                    </button>
-                </div>
-            </header>
-            
-            <div class="content">
-                <!-- Dashboard Page -->
-                <div class="page active" id="page-dashboard">
-                    <div class="page-header">
-                        <h1 class="page-title">Dashboard</h1>
-                        <p class="page-subtitle">Overview of your autonomous workspace</p>
-                    </div>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <span class="stat-label">Active Tasks</span>
-                                <div class="stat-icon accent">📋</div>
-                            </div>
-                            <div class="stat-value" id="stat-tasks">-</div>
-                            <div class="stat-change">Pending + In Progress</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <span class="stat-label">GitHub Notifications</span>
-                                <div class="stat-icon info">🔔</div>
-                            </div>
-                            <div class="stat-value" id="stat-notifs">-</div>
-                            <div class="stat-change" id="stat-notifs-text">Unread</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <span class="stat-label">System Load</span>
-                                <div class="stat-icon warning">⚡</div>
-                            </div>
-                            <div class="stat-value" id="stat-load">-</div>
-                            <div class="stat-change">1min avg</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <span class="stat-label">Memory Usage</span>
-                                <div class="stat-icon success">💾</div>
-                            </div>
-                            <div class="stat-value" id="stat-memory">-</div>
-                            <div class="stat-change" id="stat-memory-detail">-</div>
-                        </div>
-                    </div>
-                    
-                    <div class="grid-2">
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-title">Recent Tasks</span>
-                                <div class="card-actions">
-                                    <button class="btn btn-secondary" onclick="showPage('tasks', null)">View All</button>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <div id="dashboard-tasks">
-                                    <div class="skeleton" style="height: 200px;"></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-title">OpenClaw Status</span>
-                            </div>
-                            <div class="card-body">
-                                <div id="dashboard-openclaw">
-                                    <div class="skeleton" style="height: 200px;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Tasks Page -->
-                <div class="page" id="page-tasks">
-                    <div class="page-header">
-                        <h1 class="page-title">Tasks</h1>
-                        <p class="page-subtitle">Manage and track autonomous tasks</p>
-                    </div>
-                    
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="table-container">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>Status</th>
-                                            <th>Name</th>
-                                            <th>Description</th>
-                                            <th>Created</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="tasks-table">
-                                        <tr>
-                                            <td colspan="5" class="empty-state">
-                                                <div class="empty-icon">📋</div>
-                                                <div>No tasks found</div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Agents Page -->
-                <div class="page" id="page-agents">
-                    <div class="page-header">
-                        <h1 class="page-title">Agents</h1>
-                        <p class="page-subtitle">Running autonomous agents and sessions</p>
-                    </div>
-                    
-                    <div id="agents-content">
-                        <div class="grid-2">
-                            <div class="card">
-                                <div class="card-header">
-                                    <span class="card-title">Active Agents</span>
-                                </div>
-                                <div class="card-body" id="agents-list">
-                                    <div class="skeleton" style="height: 150px;"></div>
-                                </div>
-                            </div>
-                            
-                            <div class="card">
-                                <div class="card-header">
-                                    <span class="card-title">Memory Status</span>
-                                </div>
-                                <div class="card-body" id="memory-status">
-                                    <div class="skeleton" style="height: 150px;"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- System Page -->
-                <div class="page" id="page-system">
-                    <div class="page-header">
-                        <h1 class="page-title">System Health</h1>
-                        <p class="page-subtitle">Monitor system resources and processes</p>
-                    </div>
-                    
-                    <div class="grid-2">
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-title">Top Processes (CPU)</span>
-                            </div>
-                            <div class="card-body">
-                                <div id="system-processes">
-                                    <div class="skeleton" style="height: 250px;"></div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="card">
-                            <div class="card-header">
-                                <span class="card-title">Docker Containers</span>
-                            </div>
-                            <div class="card-body">
-                                <div id="system-docker">
-                                    <div class="empty-state">
-                                        <div class="empty-icon">🐳</div>
-                                        <div>No containers running</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- GitHub Page -->
-                <div class="page" id="page-github">
-                    <div class="page-header">
-                        <h1 class="page-title">GitHub</h1>
-                        <p class="page-subtitle">Pull requests, reviews, and notifications</p>
-                    </div>
-                    
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <span class="stat-label">Notifications</span>
-                                <div class="stat-icon info">🔔</div>
-                            </div>
-                            <div class="stat-value" id="github-notifs">-</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <span class="stat-label">My Open PRs</span>
-                                <div class="stat-icon accent">🔀</div>
-                            </div>
-                            <div class="stat-value" id="github-prs">-</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <span class="stat-label">Pending Reviews</span>
-                                <div class="stat-icon warning">👀</div>
-                            </div>
-                            <div class="stat-value" id="github-reviews">-</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-    
-    <script>
-        // State
-        let currentData = null;
-        
+
+        <script>
         // Navigation
         function showPage(pageName, element) {
-            // Hide all pages
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             
-            // Show selected page
             document.getElementById('page-' + pageName).classList.add('active');
             
-            // Update nav
-            if (element) {
-                element.classList.add('active');
-            } else {
-                // Find nav item by onclick attribute
+            if (element) element.classList.add('active');
+            else {
                 document.querySelectorAll('.nav-item').forEach(n => {
-                    if (n.getAttribute('onclick')?.includes("'" + pageName + "'")) {
-                        n.classList.add('active');
-                    }
+                    if (n.getAttribute('onclick')?.includes("'" + pageName + "'")) n.classList.add('active');
                 });
             }
             
-            // Update title
             const titles = {
-                'dashboard': 'Dashboard',
-                'tasks': 'Tasks',
-                'agents': 'Agents',
-                'system': 'System Health',
-                'github': 'GitHub'
+                'dashboard': 'Dashboard', 'tasks': 'Tasks', 'alerts': 'Alerts & Reminders',
+                'skills': 'Skills', 'personality': 'Personality', 'logs': 'Logs',
+                'system': 'System Health', 'github': 'GitHub'
             };
             document.getElementById('page-title').textContent = titles[pageName] || pageName;
-            
-            // Refresh data for this page
-            if (currentData) {
-                updatePageContent(pageName, currentData);
-            }
         }
         
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
         }
         
-        // Data fetching
-        async function fetchData() {
-            try {
-                const response = await fetch('/api/status');
-                const data = await response.json();
-                currentData = data;
-                updateAllPages(data);
-                updateConnectionStatus(true);
-            } catch (error) {
-                console.error('Failed to fetch:', error);
-                updateConnectionStatus(false);
-            }
-        }
-        
-        function updateConnectionStatus(connected) {
-            const dot = document.getElementById('status-dot');
-            const text = document.getElementById('connection-text');
-            
-            if (connected) {
-                dot.classList.remove('offline');
-                text.textContent = 'Connected';
-            } else {
-                dot.classList.add('offline');
-                text.textContent = 'Disconnected';
-            }
-        }
-        
-        function updateAllPages(data) {
-            updateDashboard(data);
-            updateTasksPage(data);
-            updateAgentsPage(data);
-            updateSystemPage(data);
-            updateGithubPage(data);
-        }
-        
-        function updatePageContent(pageName, data) {
-            switch(pageName) {
-                case 'dashboard': updateDashboard(data); break;
-                case 'tasks': updateTasksPage(data); break;
-                case 'agents': updateAgentsPage(data); break;
-                case 'system': updateSystemPage(data); break;
-                case 'github': updateGithubPage(data); break;
-            }
-        }
-        
-        // Dashboard
-        function updateDashboard(data) {
-            const tasks = data.tasks || [];
-            const pending = tasks.filter(t => t.status === 'pending').length;
-            const inProgress = tasks.filter(t => t.status === 'in_progress').length;
-            
-            document.getElementById('stat-tasks').textContent = pending + inProgress;
-            document.getElementById('nav-task-count').textContent = pending + inProgress;
-            
-            const gh = data.github || {};
-            document.getElementById('stat-notifs').textContent = gh.notifications || 0;
-            
-            const health = data.health || {};
-            document.getElementById('stat-load').textContent = health.load?.split(',')[0] || '-';
-            document.getElementById('stat-memory').textContent = health.memory || '-';
-            document.getElementById('stat-memory-detail').textContent = health.memory_gb || '';
-            
-            // Recent tasks list
-            const tasksContainer = document.getElementById('dashboard-tasks');
-            if (tasks.length === 0) {
-                tasksContainer.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📋</div>
-                        <div>No tasks yet</div>
-                    </div>`;
-            } else {
-                tasksContainer.innerHTML = `
-                    <div class="table-container">
-                        <table>
-                            <tbody>
-                                ${tasks.slice(0, 5).map(task => `
-                                    <tr>
-                                        <td>${getStatusBadge(task.status)}</td>
-                                        <td>${escapeHtml(task.name)}</td>
-                                        <td>${escapeHtml(task.description || '')}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>`;
-            }
-            
-            // OpenClaw status
-            const oc = data.openclaw || {};
-            const agents = oc.agents || {};
-            const memory = oc.memory || {};
-            const gateway = oc.gateway || {};
-            
-            document.getElementById('dashboard-openclaw').innerHTML = `
-                <div style="display: grid; gap: 1rem;">
-                    <div class="stat-row" style="border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
-                        <span>Gateway</span>
-                        <span class="badge ${gateway.reachable ? 'badge-success' : 'badge-danger'}">
-                            ${gateway.reachable ? 'Online' : 'Offline'}
-                        </span>
-                    </div>
-                    <div class="stat-row" style="border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
-                        <span>Agents</span>
-                        <span>${(agents.agents || []).length}</span>
-                    </div>
-                    <div class="stat-row" style="border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
-                        <span>Sessions</span>
-                        <span>${agents.totalSessions || 0}</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Memory Chunks</span>
-                        <span>${memory.chunks || 0}</span>
-                    </div>
-                </div>`;
-        }
-        
-        // Tasks page
-        function updateTasksPage(data) {
-            const tasks = data.tasks || [];
-            const tbody = document.getElementById('tasks-table');
-            
-            if (tasks.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="empty-state">
-                            <div class="empty-icon">📋</div>
-                            <div>No tasks found. Create your first task!</div>
-                        </td>
-                    </tr>`;
-            } else {
-                tbody.innerHTML = tasks.map(task => `
-                    <tr>
-                        <td>${getStatusBadge(task.status)}</td>
-                        <td>${escapeHtml(task.name)}</td>
-                        <td>${escapeHtml(task.description || '-')}</td>
-                        <td>${formatDate(task.created_at)}</td>
-                        <td>
-                            ${task.status !== 'completed' ? `
-                                <button class="btn btn-secondary" onclick="completeTask('${task.name}')">Complete</button>
-                            ` : '-'}
-                        </td>
-                    </tr>
-                `).join('');
-            }
-        }
-        
-        // Agents page
-        function updateAgentsPage(data) {
-            const oc = data.openclaw || {};
-            const agents = oc.agents || {};
-            const memory = oc.memory || {};
-            
-            // Agents list
-            const agentsList = document.getElementById('agents-list');
-            const agentItems = agents.agents || [];
-            
-            if (agentItems.length === 0) {
-                agentsList.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">🤖</div>
-                        <div>No active agents</div>
-                    </div>`;
-            } else {
-                agentsList.innerHTML = `
-                    <div style="display: flex; flex-direction: column; gap: 1rem;">
-                        ${agentItems.map(agent => `
-                            <div style="padding: 1rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center;">
-                                    <span style="font-weight: 600;">${agent.id}</span>
-                                    <span class="badge badge-success">Active</span>
-                                </div>
-                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">
-                                    ${agent.sessionsCount} sessions · Last active: ${formatTimeAgo(agent.lastActiveAgeMs)}
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>`;
-            }
-            
-            // Memory status
-            document.getElementById('memory-status').innerHTML = `
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    <div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                            <span>Indexed Files</span>
-                            <span style="font-weight: 600;">${memory.files || 0}</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${Math.min((memory.files || 0) * 10, 100)}%"></div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
-                            <span>Memory Chunks</span>
-                            <span style="font-weight: 600;">${memory.chunks || 0}</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${Math.min((memory.chunks || 0) * 5, 100)}%"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-row" style="border-top: 1px solid var(--border); padding-top: 1rem;">
-                        <span>Provider</span>
-                        <span class="badge badge-info">${memory.provider || 'Unknown'}</span>
-                    </div>
-                </div>`;
-        }
-        
-        // System page
-        function updateSystemPage(data) {
-            const processes = data.processes || {};
-            const cpuProcs = processes.cpu || [];
-            
-            const procContainer = document.getElementById('system-processes');
-            if (cpuProcs.length === 0) {
-                procContainer.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">⚡</div>
-                        <div>Process data unavailable</div>
-                    </div>`;
-            } else {
-                procContainer.innerHTML = `
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Process</th>
-                                    <th>CPU</th>
-                                    <th>Memory</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${cpuProcs.map(p => `
-                                    <tr>
-                                        <td>${escapeHtml(p.cmd)}</td>
-                                        <td>${p.cpu}%</td>
-                                        <td>${p.mem}%</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>`;
-            }
-            
-            // Docker
-            const docker = data.docker || [];
-            const dockerContainer = document.getElementById('system-docker');
-            
-            if (docker.length === 0) {
-                dockerContainer.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">🐳</div>
-                        <div>No containers running</div>
-                    </div>`;
-            } else {
-                dockerContainer.innerHTML = `
-                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-                        ${docker.map(c => `
-                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
-                                <span style="font-weight: 500;">${escapeHtml(c.name)}</span>
-                                <span style="font-size: 0.85rem; color: var(--text-secondary);">${escapeHtml(c.status)}</span>
-                            </div>
-                        `).join('')}
-                    </div>`;
-            }
-        }
-        
-        // GitHub page
-        function updateGithubPage(data) {
-            const gh = data.github || {};
-            document.getElementById('github-notifs').textContent = gh.notifications || 0;
-            document.getElementById('github-prs').textContent = gh.my_prs || 0;
-            document.getElementById('github-reviews').textContent = gh.reviews || 0;
-        }
-        
-        // Helpers
-        function getStatusBadge(status) {
-            const badges = {
-                'pending': '<span class="badge badge-warning">Pending</span>',
-                'in_progress': '<span class="badge badge-info">In Progress</span>',
-                'completed': '<span class="badge badge-success">Completed</span>'
-            };
-            return badges[status] || `<span class="badge">${status}</span>`;
-        }
-        
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-        
-        function formatDate(isoString) {
-            if (!isoString) return '-';
-            const date = new Date(isoString);
-            return date.toLocaleDateString();
-        }
-        
-        function formatTimeAgo(ms) {
-            if (!ms) return 'unknown';
-            const seconds = Math.floor(ms / 1000);
-            if (seconds < 60) return `${seconds}s ago`;
-            const minutes = Math.floor(seconds / 60);
-            if (minutes < 60) return `${minutes}m ago`;
-            const hours = Math.floor(minutes / 60);
-            return `${hours}h ago`;
-        }
-        
-        // Actions
-        async function createTask() {
-            const name = prompt('Task name:');
-            if (!name) return;
-            
-            const description = prompt('Description (optional):') || '';
-            
-            try {
-                const response = await fetch('/api/task/create', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, description })
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    fetchData();
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            } catch (error) {
-                alert('Failed to create task: ' + error.message);
-            }
-        }
-        
-        async function completeTask(taskName) {
-            const proof = prompt('Proof of completion:');
-            if (!proof) return;
-            
-            try {
-                const response = await fetch(`/api/tasks/${taskName}/complete`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ proof })
-                });
-                
-                const data = await response.json();
-                if (data.success) {
-                    fetchData();
-                }
-            } catch (error) {
-                alert('Failed to complete task: ' + error.message);
-            }
-        }
-        
-        function refreshData() {
-            fetchData();
-        }
-        
-        // Init
+        // Initialize
         fetchData();
         setInterval(fetchData, 30000);
-    </script>
+        </script>
 </body>
 </html>
