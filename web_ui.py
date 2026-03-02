@@ -458,6 +458,40 @@ def save_personality():
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
+
+
+@app.route("/api/personality/suggest", methods=["POST"])
+def suggest_personality():
+    """Submit a suggestion for personality changes"""
+    data = request.json
+    filename = data.get("file", "")
+    suggestion = data.get("suggestion", "")
+    
+    if not filename or not suggestion:
+        return jsonify({"success": False, "error": "File and suggestion required"})
+    
+    safe_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md"]
+    if filename not in safe_files:
+        return jsonify({"success": False, "error": "Invalid file"})
+    
+    try:
+        # Save suggestion to a pending file
+        pending_dir = Path("/root/.openclaw/workspace/pending_personality_changes")
+        pending_dir.mkdir(exist_ok=True)
+        
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        suggestion_file = pending_dir / f"{filename}_{timestamp}.txt"
+        
+        with open(suggestion_file, 'w') as f:
+            f.write(f"Target File: {filename}\n")
+            f.write(f"Submitted: {datetime.now().isoformat()}\n")
+            f.write(f"Status: pending\n")
+            f.write("-" * 50 + "\n\n")
+            f.write(suggestion)
+        
+        return jsonify({"success": True, "message": "Suggestion saved for review"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
 def install_skill():
     data = request.json
     repo = data.get("repo", "")

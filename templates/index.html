@@ -1347,6 +1347,33 @@
                                 <textarea id="editor-content" placeholder="Select a file from the sidebar to edit..."></textarea>
                             </div>
                         </div>
+                        
+                        <!-- Right: Suggestions -->
+                        <div class="skills-panel" style="max-width:320px">
+                            <div class="skills-panel-header">
+                                <div class="skills-panel-title">💡 Suggest Changes</div>
+                            </div>
+                            <div class="skills-panel-body">
+                                <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:1rem">
+                                    Describe changes you'd like to see in the personality. OpenClaw will review and implement them.
+                                </p>
+                                
+                                <select id="suggestion-file" class="workshop-input" style="min-height:44px;margin-bottom:0.75rem">
+                                    <option value="">Select target file...</option>
+                                    <option value="SOUL.md">SOUL.md - Core personality</option>
+                                    <option value="IDENTITY.md">IDENTITY.md - Identity & name</option>
+                                    <option value="USER.md">USER.md - User preferences</option>
+                                    <option value="AGENTS.md">AGENTS.md - Agent settings</option>
+                                    <option value="TOOLS.md">TOOLS.md - Tool preferences</option>
+                                </select>
+                                
+                                <textarea id="suggestion-text" class="workshop-input" placeholder="I think the personality should be more..." style="min-height:150px;margin-bottom:0.75rem"></textarea>
+                                
+                                <button class="btn btn-primary" onclick="submitSuggestion()" style="width:100%">Submit Suggestion</button>
+                                
+                                <div id="suggestion-status" style="margin-top:1rem;font-size:0.85rem"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
