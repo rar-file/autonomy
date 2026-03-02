@@ -1036,6 +1036,291 @@
                 </div>
             </div>
         </aside>
+        
+        <main class="main">
+            <header class="header">
+                <div class="breadcrumb">
+                    <span class="header-title" id="page-title">Dashboard</span>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary btn-icon" onclick="refreshData()" title="Refresh">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-primary" onclick="createTask()">+ New Task</button>
+                </div>
+            </header>
+            
+            <div class="content">
+                <!-- Dashboard Page -->
+                <div class="page active" id="page-dashboard">
+                    <div class="page-header">
+                        <h1 class="page-title">Dashboard</h1>
+                        <p class="page-subtitle">Overview of your autonomous workspace</p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Active Tasks</span>
+                                <div class="stat-icon-wrapper accent">📋</div>
+                            </div>
+                            <div class="stat-value" id="stat-tasks">-</div>
+                            <div class="stat-trend">Pending + In Progress</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Installed Skills</span>
+                                <div class="stat-icon-wrapper success">🔧</div>
+                            </div>
+                            <div class="stat-value" id="stat-skills">-</div>
+                            <div class="stat-trend">From ClawHub</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">GitHub Notifications</span>
+                                <div class="stat-icon-wrapper info">🔔</div>
+                            </div>
+                            <div class="stat-value" id="stat-notifs">-</div>
+                            <div class="stat-trend">Unread notifications</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">CPU Usage</span>
+                                <div class="stat-icon-wrapper warning">⚡</div>
+                            </div>
+                            <div class="stat-value" id="stat-cpu">-</div>
+                            <div class="stat-trend">System load</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">Recent Tasks</span>
+                                <button class="btn btn-secondary" style="padding:0.4rem 0.875rem;font-size:0.8rem" onclick="showPage('tasks', null)">View All</button>
+                            </div>
+                            <div class="card-body" id="dashboard-tasks">
+                                <div class="empty-state">Loading...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">Active Alerts</span>
+                            </div>
+                            <div class="card-body" id="dashboard-alerts">
+                                <div class="empty-state">No active alerts</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tasks Page -->
+                <div class="page" id="page-tasks">
+                    <div class="page-header">
+                        <h1 class="page-title">Tasks</h1>
+                        <p class="page-subtitle">Manage and track all your tasks</p>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="tabs">
+                                <div class="tab active" onclick="showTab('tasks-all', this)">All</div>
+                                <div class="tab" onclick="showTab('tasks-pending', this)">Pending</div>
+                                <div class="tab" onclick="showTab('tasks-completed', this)">Completed</div>
+                            </div>
+                            <div id="tasks-table-container">
+                                <div class="empty-state">Loading tasks...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Alerts Page -->
+                <div class="page" id="page-alerts">
+                    <div class="page-header">
+                        <h1 class="page-title">Alerts & Reminders</h1>
+                        <p class="page-subtitle">Important notifications and reminders</p>
+                    </div>
+                    <div id="alerts-container">
+                        <div class="empty-state">No alerts</div>
+                    </div>
+                </div>
+                
+                <!-- Skills Workshop Page -->
+                <div class="page" id="page-skills">
+                    <div class="page-header">
+                        <h1 class="page-title">Skills Workshop</h1>
+                        <p class="page-subtitle">Manage installed skills and create new ones</p>
+                    </div>
+                    
+                    <div class="skills-workshop">
+                        <div class="skills-panel">
+                            <div class="skills-panel-header">
+                                <div class="skills-panel-title">Installed Skills</div>
+                            </div>
+                            <div class="skills-panel-body" id="skills-list">
+                                <div class="empty-state" style="padding:2rem">Loading skills...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="skills-panel">
+                            <div class="skills-panel-header">
+                                <div class="skills-panel-title">Workshop</div>
+                            </div>
+                            <div class="skills-panel-body">
+                                <div style="margin-bottom:1.5rem">
+                                    <h4 style="margin-bottom:0.75rem;color:var(--text-secondary);font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em">Install from ClawHub</h4>
+                                    <input type="text" id="skill-repo" class="workshop-input" style="min-height:44px;margin-bottom:0.75rem" placeholder="owner/repo-name">
+                                    <button class="btn btn-primary" onclick="installSkill()" style="width:100%">Install Skill</button>
+                                </div>
+                                
+                                <div style="border-top:1px solid var(--border);padding-top:1.5rem;margin-top:1.5rem">
+                                    <h4 style="margin-bottom:0.75rem;color:var(--text-secondary);font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em">Request Custom Skill</h4>
+                                    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem">Describe what you need and OpenClaw will build it</p>
+                                    <textarea id="skill-description" class="workshop-input" placeholder="I need a skill that can..."></textarea>
+                                    <button class="btn btn-secondary" onclick="requestSkill()" style="width:100%;margin-top:0.75rem">Submit Request</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Personality Page -->
+                <div class="page" id="page-personality">
+                    <div class="page-header">
+                        <h1 class="page-title">Personality Editor</h1>
+                        <p class="page-subtitle">Configure AI behavior and personality</p>
+                    </div>
+                    
+                    <div class="personality-editor">
+                        <div class="file-explorer">
+                            <div class="skills-panel-header">
+                                <div class="skills-panel-title">Files</div>
+                            </div>
+                            <div class="file-list" id="personality-file-list">
+                                <div class="empty-state" style="padding:1rem">Loading...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="editor-pane">
+                            <div class="editor-toolbar">
+                                <span id="editor-filename" style="font-weight:500">Select a file</span>
+                                <button class="btn btn-primary" style="padding:0.4rem 1rem;font-size:0.8rem" onclick="savePersonality()">Save Changes</button>
+                            </div>
+                            <div class="editor-content">
+                                <textarea id="editor-content" placeholder="Select a file from the sidebar to edit..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Logs Page -->
+                <div class="page" id="page-logs">
+                    <div class="page-header">
+                        <h1 class="page-title">System Logs</h1>
+                        <p class="page-subtitle">Application and system logs</p>
+                    </div>
+                    <div id="logs-container">
+                        <div class="empty-state">No logs available</div>
+                    </div>
+                </div>
+                
+                <!-- System Health Page -->
+                <div class="page" id="page-system">
+                    <div class="page-header">
+                        <h1 class="page-title">System Health</h1>
+                        <p class="page-subtitle">Monitor system resources and performance</p>
+                    </div>
+                    
+                    <div class="system-grid" style="margin-bottom:2rem">
+                        <div class="system-card">
+                            <div style="font-size:0.875rem;color:var(--text-muted);margin-bottom:0.5rem">CPU Usage</div>
+                            <svg class="progress-ring" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="52" fill="none" stroke="var(--bg-tertiary)" stroke-width="8"/>
+                                <circle id="cpu-ring" class="progress-ring-circle" cx="60" cy="60" r="52" fill="none" stroke="var(--success)" stroke-width="8" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round"/>
+                            </svg>
+                            <div class="system-value good" id="system-cpu">-</div>
+                        </div>
+                        
+                        <div class="system-card">
+                            <div style="font-size:0.875rem;color:var(--text-muted);margin-bottom:0.5rem">Memory</div>
+                            <svg class="progress-ring" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="52" fill="none" stroke="var(--bg-tertiary)" stroke-width="8"/>
+                                <circle id="memory-ring" class="progress-ring-circle" cx="60" cy="60" r="52" fill="none" stroke="var(--success)" stroke-width="8" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round"/>
+                            </svg>
+                            <div class="system-value good" id="system-memory">-</div>
+                        </div>
+                        
+                        <div class="system-card">
+                            <div style="font-size:0.875rem;color:var(--text-muted);margin-bottom:0.5rem">Disk</div>
+                            <svg class="progress-ring" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="52" fill="none" stroke="var(--bg-tertiary)" stroke-width="8"/>
+                                <circle id="disk-ring" class="progress-ring-circle" cx="60" cy="60" r="52" fill="none" stroke="var(--success)" stroke-width="8" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round"/>
+                            </svg>
+                            <div class="system-value good" id="system-disk">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="card">
+                            <div class="card-header"><span class="card-title">Top Processes</span></div>
+                            <div class="card-body" id="system-processes">
+                                <div class="empty-state">Loading...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header"><span class="card-title">Docker Containers</span></div>
+                            <div class="card-body" id="system-docker">
+                                <div class="empty-state">No containers running</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- GitHub Page -->
+                <div class="page" id="page-github">
+                    <div class="page-header">
+                        <h1 class="page-title">GitHub</h1>
+                        <p class="page-subtitle">Pull requests, reviews, and notifications</p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card" id="card-notifs">
+                            <div class="stat-header">
+                                <span class="stat-label">Notifications</span>
+                                <div class="stat-icon-wrapper info">🔔</div>
+                            </div>
+                            <div class="stat-value" id="github-notifs">-</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">My Open PRs</span>
+                                <div class="stat-icon-wrapper accent">🔀</div>
+                            </div>
+                            <div class="stat-value" id="github-prs">-</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Pending Reviews</span>
+                                <div class="stat-icon-wrapper warning">👀</div>
+                            </div>
+                            <div class="stat-value" id="github-reviews">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
 
         <script>
         let currentData = null;
