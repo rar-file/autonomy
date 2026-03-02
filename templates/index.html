@@ -1722,7 +1722,7 @@
                 fileList.innerHTML = '<div class="empty-state" style="padding:2rem"><div style="font-size:2rem;margin-bottom:0.5rem">📄</div><div style="color:var(--text-muted)">No personality files found</div></div>';
             } else {
                 fileList.innerHTML = files.map((f, i) => 
-                    '<div class="file-item ' + (f.name === currentFile ? 'active' : '') + '" onclick="openFile(\'' + f.name + '\')" style="animation: slideIn 0.2s ease ' + (i * 0.05) + 's both">' +
+                    '<div class="file-item ' + (f.name === currentFile ? 'active' : '') + '" onclick="openFile(event, \'' + f.name + '\')" style="animation: slideIn 0.2s ease ' + (i * 0.05) + 's both">' +
                     '<div class="file-icon">📄</div>' +
                     '<div class="file-info">' +
                     '<div class="file-name">' + escapeHtml(f.name) + '</div>' +
@@ -1739,13 +1739,31 @@
             }
         }
         
-        function openFile(filename) {
+        function openFile(event, filename) {
             currentFile = filename;
             document.querySelectorAll('.file-item').forEach(el => el.classList.remove('active'));
             event.currentTarget.classList.add('active');
             document.getElementById('editor-filename').textContent = filename;
-            document.getElementById('editor-content').value = 'Loading...';
-            // In real implementation, fetch file content
+            
+            // Load content from currentData
+            const files = currentData?.personality || [];
+            const file = files.find(f => f.name === filename);
+            if (file && file.content) {
+                document.getElementById('editor-content').value = file.content;
+            } else {
+                document.getElementById('editor-content').value = 'Loading...';
+                // Fetch file content
+                fetch('/api/personality/' + filename)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.content) {
+                            document.getElementById('editor-content').value = data.content;
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('editor-content').value = 'Failed to load file';
+                    });
+            }
         }
         
         // Logs

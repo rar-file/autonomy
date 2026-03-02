@@ -406,7 +406,58 @@ def toggle_skill(name):
     
     return jsonify({"success": True, "enabled": enabled})
 
-@app.route("/api/skills/install", methods=["POST"])
+@app.route("/api/personality/<filename>")
+def get_personality_file(filename):
+    """Get content of a specific personality file"""
+    workspace = Path("/root/.openclaw/workspace")
+    safe_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md", "HEARTBEAT.md"]
+    
+    if filename not in safe_files:
+        return jsonify({"error": "Invalid file"}), 400
+    
+    fpath = workspace / filename
+    if not fpath.exists():
+        return jsonify({"error": "File not found"}), 404
+    
+    try:
+        with open(fpath) as f:
+            content = f.read()
+        return jsonify({
+            "name": filename,
+            "content": content,
+            "size": fpath.stat().st_size
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/personality/save", methods=["POST"])
+def save_personality():
+    """Save changes to a personality file"""
+    data = request.json
+    filename = data.get("file", "")
+    content = data.get("content", "")
+    
+    safe_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md"]
+    if filename not in safe_files:
+        return jsonify({"success": False, "error": "Invalid file"})
+    
+    workspace = Path("/root/.openclaw/workspace")
+    fpath = workspace / filename
+    
+    try:
+        # Backup first
+        backup_dir = workspace / "backups"
+        backup_dir.mkdir(exist_ok=True)
+        if fpath.exists():
+            import shutil
+            shutil.copy(fpath, backup_dir / f"{filename}.{datetime.now().strftime('%Y%m%d_%H%M%S')}.bak")
+        
+        with open(fpath, 'w') as f:
+            f.write(content)
+        
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
 def install_skill():
     data = request.json
     repo = data.get("repo", "")
