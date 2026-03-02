@@ -21,6 +21,24 @@ A lightweight, OpenClaw-native approach to agentic task management. Uses OpenCla
 | Lines of code | ~23,000 | ~2,000 |
 | Complexity | High | Low |
 
+## 🌐 Web Dashboard
+
+Custom web UI with real-time data:
+
+```bash
+# Start the dashboard
+python3 web_ui.py
+
+# Open http://localhost:8767
+```
+
+**Features:**
+- 📋 Live task list
+- 📊 Token usage (from OpenClaw)
+- 💻 System health monitoring
+- 🎨 Dark theme with custom SVG assets
+- 🔄 Auto-refresh every 30s
+
 ## 🚀 Quick Start
 
 ```bash

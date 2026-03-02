@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomy Dashboard</title>
+    <style>
+        :root {
+            --bg-dark: #0d1117;
+            --bg-card: #161b22;
+            --bg-hover: #21262d;
+            --border: #30363d;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --accent: #58a6ff;
+            --accent-glow: rgba(88, 166, 255, 0.3);
+            --success: #3fb950;
+            --warning: #d29922;
+            --danger: #f85149;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .logo {
+            width: 48px;
+            height: 48px;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .header .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s;
+        }
+        
+        .card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--accent);
+        }
+        
+        .card h2 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .health-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .health-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .health-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .health-value.good { color: var(--success); }
+        .health-value.warn { color: var(--warning); }
+        .health-value.danger { color: var(--danger); }
+        
+        .task-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            background: var(--bg-hover);
+            border-left: 3px solid var(--accent);
+        }
+        
+        .task-item.pending { border-left-color: var(--warning); }
+        .task-item.in_progress { border-left-color: var(--accent); }
+        .task-item.completed { border-left-color: var(--success); opacity: 0.7; }
+        
+        .task-status {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background: var(--bg-dark);
+        }
+        
+        .task-name {
+            flex: 1;
+            font-weight: 500;
+        }
+        
+        .task-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .token-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .token-bar {
+            height: 8px;
+            background: var(--bg-hover);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .token-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+        
+        .refresh-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px var(--accent-glow);
+            transition: transform 0.2s;
+        }
+        
+        .refresh-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .refresh-btn svg {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+        
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .updating {
+            animation: pulse 1s infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <!-- Logo SVG -->
+        <svg class="logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="20" stroke="#58a6ff" stroke-width="2"/>
+            <circle cx="24" cy="24" r="14" stroke="#58a6ff" stroke-width="2" stroke-dasharray="4 4"/>
+            <circle cx="24" cy="24" r="8" fill="#58a6ff" opacity="0.3"/>
+            <circle cx="24" cy="24" r="4" fill="#58a6ff"/>
+            <path d="M24 4V12M24 36V44M4 24H12M36 24H44" stroke="#58a6ff" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div>
+            <h1>Autonomy Dashboard</h1>
+            <div class="subtitle">v2.0 — OpenClaw-Native</div>
+        </div>
+    </div>
+    
+    <div class="grid">
+        <!-- Tasks Card -->
+        <div class="card" id="tasks-card">
+            <div class="card-header">
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                </svg>
+                <h2>Tasks</h2>
+            </div>
+            <div class="stat-value" id="task-count">-</div>
+            <div class="stat-label">active tasks</div>
+        </div>
+        
+        <!-- Token Usage Card -->
+        <div class="card" id="token-card">
+            <div class="card-header">
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                </svg>
+                <h2>Token Usage</h2>
+            </div>
+            <div class="token-info">
+                <div class="stat-value" id="token-percent">-</div>
+                <div class="token-bar">
+                    <div class="token-fill" id="token-bar" style="width: 0%"></div>
+                </div>
+                <div class="stat-label" id="token-detail">-</div>
+            </div>
+        </div>
+        
+        <!-- System Health Card -->
+        <div class="card">
+            <div class="card-header">
+                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+                <h2>System Health</h2>
+            </div>
+            <div class="health-grid" id="health-grid">
+                <div class="health-item">
+                    <span class="stat-label">CPU</span>
+                    <span class="health-value" id="cpu">-</span>
+                </div>
+                <div class="health-item">
+                    <span class="stat-label">Memory</span>
+                    <span class="health-value" id="memory">-</span>
+                </div>
+                <div class="health-item">
+                    <span class="stat-label">Disk</span>
+                    <span class="health-value" id="disk">-</span>
+                </div>
+                <div class="health-item">
+                    <span class="stat-label">Load</span>
+                    <span class="health-value" id="load">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Task List -->
+    <div class="card">
+        <div class="card-header">
+            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
+            </svg>
+            <h2>Recent Tasks</h2>
+        </div>
+        <div class="task-list" id="task-list">
+            <div class="empty-state">Loading...</div>
+        </div>
+    </div>
+    
+    <!-- Refresh Button -->
+    <button class="refresh-btn" onclick="refreshData()" title="Refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+        </svg>
+    </button>
+    
+    <script>
+        let isLoading = false;
+        
+        async function fetchData() {
+            if (isLoading) return;
+            isLoading = true;
+            
+            document.body.classList.add('updating');
+            
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                updateUI(data);
+            } catch (error) {
+                console.error('Failed to fetch:', error);
+                showError('Failed to load data');
+            } finally {
+                isLoading = false;
+                document.body.classList.remove('updating');
+            }
+        }
+        
+        function updateUI(data) {
+            // Tasks
+            const tasks = data.tasks || [];
+            const pending = tasks.filter(t => t.status === 'pending').length;
+            const inProgress = tasks.filter(t => t.status === 'in_progress').length;
+            document.getElementById('task-count').textContent = pending + inProgress;
+            
+            // Task list
+            const taskList = document.getElementById('task-list');
+            if (tasks.length === 0) {
+                taskList.innerHTML = '<div class="empty-state">No tasks yet</div>';
+            } else {
+                taskList.innerHTML = tasks.slice(0, 10).map(task => `
+                    <div class="task-item ${task.status}">
+                        <span class="task-status">${task.status.replace('_', ' ')}</span>
+                        <div>
+                            <div class="task-name">${escapeHtml(task.name)}</div>
+                            <div class="task-desc">${escapeHtml(task.description || '')}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            // Token usage from OpenClaw
+            if (data.openclaw) {
+                const sessions = data.openclaw.sessions || [];
+                let totalUsed = 0;
+                let totalLimit = 0;
+                
+                sessions.forEach(session => {
+                    if (session.tokens) {
+                        const used = session.tokens.used || 0;
+                        const limit = session.tokens.limit || 262000;
+                        totalUsed += used;
+                        totalLimit += limit;
+                    }
+                });
+                
+                const percent = totalLimit > 0 ? (totalUsed / totalLimit * 100).toFixed(1) : 0;
+                document.getElementById('token-percent').textContent = percent + '%';
+                document.getElementById('token-bar').style.width = percent + '%';
+                document.getElementById('token-detail').textContent = 
+                    `${(totalUsed/1000).toFixed(0)}k / ${(totalLimit/1000).toFixed(0)}k tokens`;
+            } else {
+                document.getElementById('token-percent').textContent = 'N/A';
+                document.getElementById('token-detail').textContent = 'OpenClaw not connected';
+            }
+            
+            // System health
+            const health = data.health || {};
+            updateHealthValue('cpu', health.cpu);
+            updateHealthValue('memory', health.memory);
+            updateHealthValue('disk', health.disk);
+            document.getElementById('load').textContent = health.load || 'N/A';
+        }
+        
+        function updateHealthValue(id, value) {
+            const el = document.getElementById(id);
+            el.textContent = value || 'N/A';
+            
+            // Color coding
+            el.className = 'health-value';
+            if (value) {
+                const num = parseFloat(value);
+                if (num > 80) el.classList.add('danger');
+                else if (num > 50) el.classList.add('warn');
+                else el.classList.add('good');
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function showError(message) {
+            document.getElementById('task-list').innerHTML = 
+                `<div class="empty-state" style="color: var(--danger)">${message}</div>`;
+        }
+        
+        function refreshData() {
+            fetchData();
+        }
+        
+        // Initial load
+        fetchData();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(fetchData, 30000);
+    </script>
+</body>
+</html>

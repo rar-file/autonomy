@@ -21,6 +21,7 @@ metadata:
         - python3
         - git
         - gh
+        - flask  # for web UI
 ---
 
 # Autonomy v2 — OpenClaw-Native Task Management
@@ -72,7 +73,22 @@ autonomy gh ci-status                 # CI status on default branch
 autonomy gh issues --label bug        # Issues labeled 'bug'
 ```
 
-### 4. File Watching
+### 4. Web Dashboard
+Real-time web UI showing tasks, token usage from OpenClaw, and system health:
+
+```bash
+python3 web_ui.py              # Start dashboard
+# Open http://localhost:8767
+```
+
+Features:
+- Live task list with status
+- Token usage from OpenClaw sessions
+- System health (CPU, memory, disk, load)
+- Auto-refresh every 30 seconds
+- Dark theme with SVG assets
+
+### 5. File Watching
 Monitor files and trigger OpenClaw actions:
 
 ```bash
