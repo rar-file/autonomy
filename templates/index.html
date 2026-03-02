@@ -173,87 +173,27 @@
                     </div>
                 </div>
                 <div class="page" id="page-tasks">
-                    <div class="page-header">
-                        <h1 class="page-title">Tasks</h1>
-                        <p class="page-subtitle">All tasks. Completed tasks shown with strikethrough.</p>
-                    </div>
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="tabs">
-                                <div class="tab active" onclick="showTab('tasks-all',this)">All</div>
-                                <div class="tab" onclick="showTab('tasks-pending',this)">Pending</div>
-                                <div class="tab" onclick="showTab('tasks-completed',this)">Completed</div>
-                            </div>
-                            <div id="tasks-table-container"><div class="empty-state">Loading...</div></div>
-                        </div>
-                    </div>
+                    <div class="page-header"><h1 class="page-title">Tasks</h1><p class="page-subtitle">All tasks. Completed tasks shown with strikethrough.</p></div>
+                    <div class="card"><div class="card-body"><div class="tabs"><div class="tab active" onclick="showTab('tasks-all',this)">All</div><div class="tab" onclick="showTab('tasks-pending',this)">Pending</div><div class="tab" onclick="showTab('tasks-completed',this)">Completed</div></div><div id="tasks-table-container"><div class="empty-state">Loading...</div></div></div></div>
                 </div>
-                <div class="page" id="page-alerts">
-                    <div class="page-header"><h1 class="page-title">Alerts & Reminders</h1><p class="page-subtitle">Important notifications</p></div>
-                    <div id="alerts-container"><div class="empty-state">No alerts</div></div>
-                </div>
+                <div class="page" id="page-alerts"><div class="page-header"><h1 class="page-title">Alerts & Reminders</h1><p class="page-subtitle">Important notifications</p></div><div id="alerts-container"><div class="empty-state">No alerts</div></div></div>
                 <div class="page" id="page-skills">
                     <div class="page-header"><h1 class="page-title">Skills</h1><p class="page-subtitle">Manage installed skills</p></div>
-                    <div class="tabs">
-                        <div class="tab active" onclick="showTab('skills-installed',this)">Installed</div>
-                        <div class="tab" onclick="showTab('skills-clawhub',this)">ClawHub</div>
-                        <div class="tab" onclick="showTab('skills-workshop',this)">Workshop</div>
-                    </div>
-                    <div class="tab-content active" id="skills-installed">
-                        <div class="card"><div class="card-header"><span class="card-title">Installed Skills</span></div><div class="card-body" id="skills-list"><div class="empty-state">Loading...</div></div></div>
-                    </div>
-                    <div class="tab-content" id="skills-clawhub">
-                        <div class="card"><div class="card-header"><span class="card-title">Install from ClawHub</span></div><div class="card-body">
-                            <p style="margin-bottom:1rem;color:var(--text-secondary)">Enter skill repository:</p>
-                            <input type="text" id="skill-repo" class="textarea" style="min-height:40px;margin-bottom:1rem" placeholder="owner/repo-name">
-                            <button class="btn btn-primary" onclick="installSkill()">Install</button>
-                        </div></div>
-                    </div>
-                    <div class="tab-content" id="skills-workshop">
-                        <div class="card"><div class="card-header"><span class="card-title">Skill Workshop</span></div><div class="card-body">
-                            <p style="margin-bottom:1rem;color:var(--text-secondary)">Describe a skill for OpenClaw to build:</p>
-                            <textarea id="skill-description" class="textarea" placeholder="I need a skill that..."></textarea>
-                            <button class="btn btn-primary" style="margin-top:1rem" onclick="requestSkill()">Request</button>
-                        </div></div>
-                    </div>
+                    <div class="tabs"><div class="tab active" onclick="showTab('skills-installed',this)">Installed</div><div class="tab" onclick="showTab('skills-clawhub',this)">ClawHub</div><div class="tab" onclick="showTab('skills-workshop',this)">Workshop</div></div>
+                    <div class="tab-content active" id="skills-installed"><div class="card"><div class="card-header"><span class="card-title">Installed Skills</span></div><div class="card-body" id="skills-list"><div class="empty-state">Loading...</div></div></div></div>
+                    <div class="tab-content" id="skills-clawhub"><div class="card"><div class="card-header"><span class="card-title">Install from ClawHub</span></div><div class="card-body"><p style="margin-bottom:1rem;color:var(--text-secondary)">Enter skill repository:</p><input type="text" id="skill-repo" class="textarea" style="min-height:40px;margin-bottom:1rem" placeholder="owner/repo-name"><button class="btn btn-primary" onclick="installSkill()">Install</button></div></div></div>
+                    <div class="tab-content" id="skills-workshop"><div class="card"><div class="card-header"><span class="card-title">Skill Workshop</span></div><div class="card-body"><p style="margin-bottom:1rem;color:var(--text-secondary)">Describe a skill for OpenClaw to build:</p><textarea id="skill-description" class="textarea" placeholder="I need a skill that..."></textarea><button class="btn btn-primary" style="margin-top:1rem" onclick="requestSkill()">Request</button></div></div></div>
                 </div>
                 <div class="page" id="page-personality">
                     <div class="page-header"><h1 class="page-title">Personality</h1><p class="page-subtitle">Configure AI behavior</p></div>
                     <div class="grid-2">
                         <div class="card"><div class="card-header"><span class="card-title">Personality Files</span></div><div class="card-body" id="personality-files"><div class="empty-state">Loading...</div></div></div>
-                        <div class="card"><div class="card-header"><span class="card-title">Suggest Changes</span></div><div class="card-body">
-                            <select id="personality-file-select" class="textarea" style="min-height:40px;margin-bottom:1rem">
-                                <option value="">Select file...</option>
-                                <option value="SOUL.md">SOUL.md</option>
-                                <option value="IDENTITY.md">IDENTITY.md</option>
-                                <option value="USER.md">USER.md</option>
-                                <option value="AGENTS.md">AGENTS.md</option>
-                                <option value="TOOLS.md">TOOLS.md</option>
-                            </select>
-                            <textarea id="personality-suggestion" class="textarea" placeholder="I think the personality should..."></textarea>
-                            <button class="btn btn-primary" style="margin-top:1rem" onclick="submitPersonalitySuggestion()">Submit</button>
-                        </div></div>
+                        <div class="card"><div class="card-header"><span class="card-title">Suggest Changes</span></div><div class="card-body"><select id="personality-file-select" class="textarea" style="min-height:40px;margin-bottom:1rem"><option value="">Select file...</option><option value="SOUL.md">SOUL.md</option><option value="IDENTITY.md">IDENTITY.md</option><option value="USER.md">USER.md</option><option value="AGENTS.md">AGENTS.md</option><option value="TOOLS.md">TOOLS.md</option></select><textarea id="personality-suggestion" class="textarea" placeholder="I think the personality should..."></textarea><button class="btn btn-primary" style="margin-top:1rem" onclick="submitPersonalitySuggestion()">Submit</button></div></div>
                     </div>
                 </div>
-                <div class="page" id="page-logs">
-                    <div class="page-header"><h1 class="page-title">Logs</h1><p class="page-subtitle">System logs</p></div>
-                    <div class="card"><div class="card-body" id="logs-container"><div class="empty-state">No logs</div></div></div>
-                </div>
-                <div class="page" id="page-system">
-                    <div class="page-header"><h1 class="page-title">System Health</h1><p class="page-subtitle">Monitor resources</p></div>
-                    <div class="grid-2">
-                        <div class="card"><div class="card-header"><span class="card-title">Top Processes</span></div><div class="card-body" id="system-processes"><div class="empty-state">Loading...</div></div></div>
-                        <div class="card"><div class="card-header"><span class="card-title">Docker</span></div><div class="card-body" id="system-docker"><div class="empty-state">No containers</div></div></div>
-                    </div>
-                </div>
-                <div class="page" id="page-github">
-                    <div class="page-header"><h1 class="page-title">GitHub</h1><p class="page-subtitle">Pull requests and notifications</p></div>
-                    <div class="stats-grid">
-                        <div class="stat-card"><div class="stat-value" id="github-notifs">-</div><div class="stat-label">Notifications</div></div>
-                        <div class="stat-card"><div class="stat-value" id="github-prs">-</div><div class="stat-label">My PRs</div></div>
-                        <div class="stat-card"><div class="stat-value" id="github-reviews">-</div><div class="stat-label">Reviews</div></div>
-                    </div>
-                </div>
+                <div class="page" id="page-logs"><div class="page-header"><h1 class="page-title">Logs</h1><p class="page-subtitle">System logs</p></div><div class="card"><div class="card-body" id="logs-container"><div class="empty-state">No logs</div></div></div></div>
+                <div class="page" id="page-system"><div class="page-header"><h1 class="page-title">System Health</h1><p class="page-subtitle">Monitor resources</p></div><div class="grid-2"><div class="card"><div class="card-header"><span class="card-title">Top Processes</span></div><div class="card-body" id="system-processes"><div class="empty-state">Loading...</div></div></div><div class="card"><div class="card-header"><span class="card-title">Docker</span></div><div class="card-body" id="system-docker"><div class="empty-state">No containers</div></div></div></div></div>
+                <div class="page" id="page-github"><div class="page-header"><h1 class="page-title">GitHub</h1><p class="page-subtitle">Pull requests and notifications</p></div><div class="stats-grid"><div class="stat-card"><div class="stat-value" id="github-notifs">-</div><div class="stat-label">Notifications</div></div><div class="stat-card"><div class="stat-value" id="github-prs">-</div><div class="stat-label">My PRs</div></div><div class="stat-card"><div class="stat-value" id="github-reviews">-</div><div class="stat-label">Reviews</div></div></div></div>
             </div>
         </main>
     </div>
@@ -269,11 +209,7 @@
                     if (n.getAttribute('onclick')?.includes("'" + pageName + "'")) n.classList.add('active');
                 });
             }
-            const titles = {
-                'dashboard': 'Dashboard', 'tasks': 'Tasks', 'alerts': 'Alerts',
-                'skills': 'Skills', 'personality': 'Personality', 'logs': 'Logs',
-                'system': 'System', 'github': 'GitHub'
-            };
+            const titles = { 'dashboard': 'Dashboard', 'tasks': 'Tasks', 'alerts': 'Alerts', 'skills': 'Skills', 'personality': 'Personality', 'logs': 'Logs', 'system': 'System', 'github': 'GitHub' };
             document.getElementById('page-title').textContent = titles[pageName] || pageName;
         }
         function showTab(tabName, element) {
@@ -292,6 +228,7 @@
                 console.error('Failed:', error);
             }
         }
+        function refreshData() { fetchData(); }
         function updateAllPages() {
             const data = currentData;
             const tasks = data.tasks || [];
@@ -319,13 +256,7 @@
             if (tasks.length === 0) {
                 container.innerHTML = '<div class="empty-state">No tasks</div>';
             } else {
-                container.innerHTML = '<table><tbody>' + tasks.map(t => \`
-                    <tr class="${t.status}">
-                        <td><span class="badge badge-${t.status === 'completed' ? 'success' : t.status === 'in_progress' ? 'info' : 'warning'}">${t.status}</span></td>
-                        <td>${escapeHtml(t.name)}</td>
-                        <td style="color:var(--text-muted)">${formatDate(t.created_at)}</td>
-                    </tr>
-                \`).join('') + '</tbody></table>';
+                container.innerHTML = '<table><tbody>' + tasks.map(t => '<tr class="' + t.status + '"><td><span class="badge badge-' + (t.status === "completed" ? "success" : t.status === "in_progress" ? "info" : "warning") + '">' + t.status + '</span></td><td>' + escapeHtml(t.name) + '</td><td style="color:var(--text-muted)">' + formatDate(t.created_at) + '</td></tr>').join('') + '</tbody></table>';
             }
             const alerts = data.alerts || [];
             const alertContainer = document.getElementById('dashboard-alerts');
@@ -335,12 +266,7 @@
             if (alerts.length === 0) {
                 alertContainer.innerHTML = '<div class="empty-state">No alerts</div>';
             } else {
-                alertContainer.innerHTML = alerts.slice(0, 3).map(a => \`
-                    <div style="padding:1rem;background:rgba(255,184,0,0.1);border:1px solid var(--warning);border-radius:8px;margin-bottom:0.75rem">
-                        <div style="font-weight:600">${escapeHtml(a.title)}</div>
-                        <div style="font-size:0.85rem;color:var(--text-secondary)">${escapeHtml(a.message)}</div>
-                    </div>
-                \`).join('');
+                alertContainer.innerHTML = alerts.slice(0, 3).map(a => '<div style="padding:1rem;background:rgba(255,184,0,0.1);border:1px solid var(--warning);border-radius:8px;margin-bottom:0.75rem"><div style="font-weight:600">' + escapeHtml(a.title) + '</div><div style="font-size:0.85rem;color:var(--text-secondary)">' + escapeHtml(a.message) + '</div></div>').join('');
             }
         }
         function updateTasks(data) {
@@ -349,16 +275,7 @@
             const renderTable = (filterFn) => {
                 const filtered = tasks.filter(filterFn);
                 if (filtered.length === 0) return '<div class="empty-state">No tasks</div>';
-                return '<table><thead><tr><th>Status</th><th>Name</th><th>Description</th><th>Created</th><th></th></tr></thead><tbody>' +
-                    filtered.map(t => \`
-                        <tr class="${t.status}">
-                            <td><span class="badge badge-${t.status === 'completed' ? 'success' : t.status === 'in_progress' ? 'info' : 'warning'}">${t.status}</span></td>
-                            <td>${escapeHtml(t.name)}</td>
-                            <td>${escapeHtml(t.description || '-')}</td>
-                            <td>${formatDate(t.created_at)}</td>
-                            <td>${t.status !== 'completed' ? \`<button class="btn btn-secondary" onclick="completeTask('${t.name}')">Complete</button>\` : '<span style="color:var(--success)">Done</span>'}</td>
-                        </tr>
-                    \`).join('') + '</tbody></table>';
+                return '<table><thead><tr><th>Status</th><th>Name</th><th>Description</th><th>Created</th><th></th></tr></thead><tbody>' + filtered.map(t => '<tr class="' + t.status + '"><td><span class="badge badge-' + (t.status === "completed" ? "success" : t.status === "in_progress" ? "info" : "warning") + '">' + t.status + '</span></td><td>' + escapeHtml(t.name) + '</td><td>' + escapeHtml(t.description || '-') + '</td><td>' + formatDate(t.created_at) + '</td><td>' + (t.status !== 'completed' ? '<button class="btn btn-secondary" onclick="completeTask(\'' + t.name + '\')">Complete</button>' : '<span style="color:var(--success)">Done</span>') + '</td></tr>').join('') + '</tbody></table>';
             };
             container.innerHTML = renderTable(() => true);
         }
@@ -368,15 +285,7 @@
             if (alerts.length === 0) {
                 container.innerHTML = '<div class="empty-state">No alerts</div>';
             } else {
-                container.innerHTML = alerts.map(a => \`
-                    <div style="padding:1rem;background:rgba(255,184,0,0.1);border:1px solid var(--warning);border-radius:8px;margin-bottom:0.75rem;display:flex;align-items:center;gap:1rem">
-                        <div style="width:40px;height:40px;border-radius:50%;background:var(--warning);display:flex;align-items:center;justify-content:center;color:var(--bg-primary);font-weight:bold">!</div>
-                        <div>
-                            <div style="font-weight:600">${escapeHtml(a.title)}</div>
-                            <div style="font-size:0.9rem;color:var(--text-secondary)">${escapeHtml(a.message)}</div>
-                        </div>
-                    </div>
-                \`).join('');
+                container.innerHTML = alerts.map(a => '<div style="padding:1rem;background:rgba(255,184,0,0.1);border:1px solid var(--warning);border-radius:8px;margin-bottom:0.75rem;display:flex;align-items:center;gap:1rem"><div style="width:40px;height:40px;border-radius:50%;background:var(--warning);display:flex;align-items:center;justify-content:center;color:var(--bg-primary);font-weight:bold">!</div><div><div style="font-weight:600">' + escapeHtml(a.title) + '</div><div style="font-size:0.9rem;color:var(--text-secondary)">' + escapeHtml(a.message) + '</div></div></div>').join('');
             }
         }
         function updateSkills(data) {
@@ -385,15 +294,7 @@
             if (skills.length === 0) {
                 container.innerHTML = '<div class="empty-state">No skills</div>';
             } else {
-                container.innerHTML = skills.map(s => \`
-                    <div class="skill-card">
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
-                            <span style="font-weight:600">${escapeHtml(s.name)}</span>
-                            <span class="badge badge-success">Active</span>
-                        </div>
-                        <div style="font-size:0.85rem;color:var(--text-secondary)">${escapeHtml(s.description)}</div>
-                    </div>
-                \`).join('');
+                container.innerHTML = skills.map(s => '<div class="skill-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem"><span style="font-weight:600">' + escapeHtml(s.name) + '</span><span class="badge badge-success">Active</span></div><div style="font-size:0.85rem;color:var(--text-secondary)">' + escapeHtml(s.description) + '</div></div>').join('');
             }
         }
         function updatePersonality(data) {
@@ -402,13 +303,7 @@
             if (files.length === 0) {
                 container.innerHTML = '<div class="empty-state">No files</div>';
             } else {
-                container.innerHTML = files.map(f => \`
-                    <div class="file-card">
-                        <div style="font-weight:600">${escapeHtml(f.name)}</div>
-                        <div style="font-size:0.8rem;color:var(--text-muted)">${escapeHtml(f.path)}</div>
-                        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem">Modified: ${formatDate(f.modified)}</div>
-                    </div>
-                \`).join('');
+                container.innerHTML = files.map(f => '<div class="file-card"><div style="font-weight:600">' + escapeHtml(f.name) + '</div><div style="font-size:0.8rem;color:var(--text-muted)">' + escapeHtml(f.path) + '</div><div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem">Modified: ' + formatDate(f.modified) + '</div></div>').join('');
             }
         }
         function updateLogs(data) {
@@ -417,14 +312,7 @@
             if (logs.length === 0) {
                 container.innerHTML = '<div class="empty-state">No logs</div>';
             } else {
-                container.innerHTML = '<div style="font-family:monospace;font-size:0.85rem">' +
-                    logs.map(l => \`
-                        <div style="padding:0.5rem;border-bottom:1px solid var(--border)">
-                            <span style="color:var(--text-muted)">${l.time}</span>
-                            <span class="badge badge-${l.level}" style="margin:0 0.5rem">${l.level}</span>
-                            ${escapeHtml(l.message)}
-                        </div>
-                    \`).join('') + '</div>';
+                container.innerHTML = '<div style="font-family:monospace;font-size:0.85rem">' + logs.map(l => '<div style="padding:0.5rem;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted)">' + l.time + '</span><span class="badge badge-' + l.level + '" style="margin:0 0.5rem">' + l.level + '</span>' + escapeHtml(l.message) + '</div>').join('') + '</div>';
             }
         }
         function updateSystem(data) {
@@ -434,20 +322,14 @@
             if (cpuProcs.length === 0) {
                 procContainer.innerHTML = '<div class="empty-state">No data</div>';
             } else {
-                procContainer.innerHTML = '<table><thead><tr><th>Process</th><th>CPU</th><th>Mem</th></tr></thead><tbody>' +
-                    cpuProcs.map(p => \`<tr><td>${escapeHtml(p.cmd)}</td><td>${p.cpu}%</td><td>${p.mem}%</td></tr>\`).join('') + '</tbody></table>';
+                procContainer.innerHTML = '<table><thead><tr><th>Process</th><th>CPU</th><th>Mem</th></tr></thead><tbody>' + cpuProcs.map(p => '<tr><td>' + escapeHtml(p.cmd) + '</td><td>' + p.cpu + '%</td><td>' + p.mem + '%</td></tr>').join('') + '</tbody></table>';
             }
             const docker = data.docker || [];
             const dockerContainer = document.getElementById('system-docker');
             if (docker.length === 0) {
                 dockerContainer.innerHTML = '<div class="empty-state">No containers</div>';
             } else {
-                dockerContainer.innerHTML = docker.map(c => \`
-                    <div style="padding:0.75rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
-                        <span>${escapeHtml(c.name)}</span>
-                        <span style="color:var(--text-muted);font-size:0.85rem">${escapeHtml(c.status)}</span>
-                    </div>
-                \`).join('');
+                dockerContainer.innerHTML = docker.map(c => '<div style="padding:0.75rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between"><span>' + escapeHtml(c.name) + '</span><span style="color:var(--text-muted);font-size:0.85rem">' + escapeHtml(c.status) + '</span></div>').join('');
             }
         }
         async function createTask() {
@@ -510,7 +392,6 @@
             alert('Suggestion saved!');
             document.getElementById('personality-suggestion').value = '';
         }
-        function refreshData() { fetchData(); }
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
