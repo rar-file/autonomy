@@ -3,20 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autonomy Dashboard</title>
+    <title>Autonomy — AI Agent Dashboard</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
         :root {
-            --bg-dark: #0d1117;
-            --bg-card: #161b22;
-            --bg-hover: #21262d;
-            --border: #30363d;
-            --text-primary: #c9d1d9;
-            --text-secondary: #8b949e;
-            --accent: #58a6ff;
-            --accent-glow: rgba(88, 166, 255, 0.3);
-            --success: #3fb950;
-            --warning: #d29922;
-            --danger: #f85149;
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --bg-hover: #252533;
+            --border: #2a2a3a;
+            --border-hover: #3a3a4f;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent: #ff3366;
+            --accent-light: #ff5588;
+            --accent-glow: rgba(255, 51, 102, 0.3);
+            --success: #00d9a3;
+            --warning: #ffb800;
+            --danger: #ff4757;
+            --info: #00d0ff;
+            --gradient-1: linear-gradient(135deg, #ff3366 0%, #ff6b6b 100%);
+            --gradient-2: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
         * {
@@ -25,202 +34,178 @@
             box-sizing: border-box;
         }
         
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-dark);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding: 2rem;
+        *::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
         }
         
-        .header {
+        *::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        
+        *::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        
+        *::-webkit-scrollbar-thumb:hover {
+            background: var(--border-hover);
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Layout */
+        .app {
             display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
+            min-height: 100vh;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem;
             border-bottom: 1px solid var(--border);
         }
         
-        .logo {
-            width: 48px;
-            height: 48px;
-        }
-        
-        .header h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-        
-        .header .subtitle {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.2s;
-        }
-        
-        .card:hover {
-            border-color: var(--accent);
-            box-shadow: 0 0 20px var(--accent-glow);
-        }
-        
-        .card-header {
+        .brand {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            margin-bottom: 1rem;
         }
         
-        .card-icon {
-            width: 24px;
-            height: 24px;
-            color: var(--accent);
-        }
-        
-        .card h2 {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-        
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
-        
-        .health-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-        
-        .health-item {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-        
-        .health-value {
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-        
-        .health-value.good { color: var(--success); }
-        .health-value.warn { color: var(--warning); }
-        .health-value.danger { color: var(--danger); }
-        
-        .task-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .task-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            background: var(--bg-hover);
-            border-left: 3px solid var(--accent);
-        }
-        
-        .task-item.pending { border-left-color: var(--warning); }
-        .task-item.in_progress { border-left-color: var(--accent); }
-        .task-item.completed { border-left-color: var(--success); opacity: 0.7; }
-        
-        .task-status {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            background: var(--bg-dark);
-        }
-        
-        .task-name {
-            flex: 1;
-            font-weight: 500;
-        }
-        
-        .task-desc {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-        
-        .token-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .token-bar {
-            height: 8px;
-            background: var(--bg-hover);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        
-        .token-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent), var(--success));
-            border-radius: 4px;
-            transition: width 0.3s;
-        }
-        
-        .refresh-btn {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            background: var(--accent);
-            border: none;
-            cursor: pointer;
+        .brand-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-1);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px var(--accent-glow);
-            transition: transform 0.2s;
+            font-size: 1.25rem;
         }
         
-        .refresh-btn:hover {
-            transform: scale(1.1);
+        .brand-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
-        .refresh-btn svg {
-            width: 24px;
-            height: 24px;
-            color: white;
+        .brand-version {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: -2px;
         }
         
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
+        .nav {
+            flex: 1;
+            padding: 1rem 0;
+            overflow-y: auto;
         }
         
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-label {
+            padding: 0 1.5rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1.5rem;
             color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .nav-item:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .nav-item.active {
+            background: var(--bg-tertiary);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+        
+        .nav-icon {
+            width: 20px;
+            height: 20px;
+            opacity: 0.7;
+        }
+        
+        .nav-item.active .nav-icon {
+            opacity: 1;
+        }
+        
+        .nav-badge {
+            margin-left: auto;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.15rem 0.5rem;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+        
+        .sidebar-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.offline {
+            background: var(--danger);
+            box-shadow: 0 0 8px var(--danger);
         }
         
         @keyframes pulse {
@@ -228,218 +213,1105 @@
             50% { opacity: 0.5; }
         }
         
-        .updating {
-            animation: pulse 1s infinite;
+        /* Main Content */
+        .main {
+            flex: 1;
+            margin-left: 260px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header */
+        .header {
+            height: 64px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+        
+        .header-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Content */
+        .content {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        
+        .page {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Page Header */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+        
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+        
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        .stat-icon.accent { background: rgba(255, 51, 102, 0.15); }
+        .stat-icon.success { background: rgba(0, 217, 163, 0.15); }
+        .stat-icon.warning { background: rgba(255, 184, 0, 0.15); }
+        .stat-icon.info { background: rgba(0, 208, 255, 0.15); }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-change {
+            font-size: 0.8rem;
+            color: var(--success);
+        }
+        
+        .stat-change.negative {
+            color: var(--danger);
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .card-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            background: var(--bg-tertiary);
+        }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+        
+        tr:hover td {
+            background: var(--bg-tertiary);
+        }
+        
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-success {
+            background: rgba(0, 217, 163, 0.15);
+            color: var(--success);
+        }
+        
+        .badge-warning {
+            background: rgba(255, 184, 0, 0.15);
+            color: var(--warning);
+        }
+        
+        .badge-danger {
+            background: rgba(255, 71, 87, 0.15);
+            color: var(--danger);
+        }
+        
+        .badge-info {
+            background: rgba(0, 208, 255, 0.15);
+            color: var(--info);
+        }
+        
+        /* Progress Bars */
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-1);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        /* Grid Layout */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .grid-2, .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main {
+                margin-left: 0;
+            }
+            
+            .menu-toggle {
+                display: block;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Loading State */
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-hover) 50%, var(--bg-tertiary) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+        
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.3s ease;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <!-- Logo SVG -->
-        <svg class="logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="24" cy="24" r="20" stroke="#58a6ff" stroke-width="2"/>
-            <circle cx="24" cy="24" r="14" stroke="#58a6ff" stroke-width="2" stroke-dasharray="4 4"/>
-            <circle cx="24" cy="24" r="8" fill="#58a6ff" opacity="0.3"/>
-            <circle cx="24" cy="24" r="4" fill="#58a6ff"/>
-            <path d="M24 4V12M24 36V44M4 24H12M36 24H44" stroke="#58a6ff" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-        <div>
-            <h1>Autonomy Dashboard</h1>
-            <div class="subtitle">v2.0 — OpenClaw-Native</div>
-        </div>
-    </div>
-    
-    <div class="grid">
-        <!-- Tasks Card -->
-        <div class="card" id="tasks-card">
-            <div class="card-header">
-                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-                </svg>
-                <h2>Tasks</h2>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="brand-icon">🤖</div>
+                    <div>
+                        <div class="brand-text">Autonomy</div>
+                        <div class="brand-version">v3.0.0</div>
+                    </div>
+                </div>
             </div>
-            <div class="stat-value" id="task-count">-</div>
-            <div class="stat-label">active tasks</div>
-        </div>
+            
+            <nav class="nav">
+                <div class="nav-section">
+                    <div class="nav-label">Overview</div>
+                    <a href="#" class="nav-item active" onclick="showPage('dashboard', this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/>
+                            <rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                        Dashboard
+                    </a>
+                    
+                    <a href="#" class="nav-item" onclick="showPage('tasks', this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4"/>
+                            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                        </svg>
+                        Tasks
+                        <span class="nav-badge" id="nav-task-count">0</span>
+                    </a>
+                    
+                    <a href="#" class="nav-item" onclick="showPage('agents', this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 1v6m0 6v6m4.22-10.22l4.24-4.24M6.34 17.66l-4.24 4.24M23 12h-6m-6 0H1m20.24-4.24l-4.24 4.24M6.34 6.34L2.1 2.1"/>
+                        </svg>
+                        Agents
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-label">System</div>
+                    
+                    <a href="#" class="nav-item" onclick="showPage('system', this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21"/>
+                            <line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                        System Health
+                    </a>
+                    
+                    <a href="#" class="nav-item" onclick="showPage('github', this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        GitHub
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="connection-status">
+                    <span class="status-dot" id="status-dot"></span>
+                    <span id="connection-text">Connected</span>
+                </div>
+            </div>
+        </aside>
         
-        <!-- Token Usage Card -->
-        <div class="card" id="token-card">
-            <div class="card-header">
-                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 6v6l4 2"/>
-                </svg>
-                <h2>Token Usage</h2>
+        <!-- Main Content -->
+        <main class="main">
+            <header class="header">
+                <div class="header-left">
+                    <button class="menu-toggle" onclick="toggleSidebar()">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="3" y1="12" x2="21" y2="12"/>
+                            <line x1="3" y1="6" x2="21" y2="6"/>
+                            <line x1="3" y1="18" x2="21" y2="18"/>
+                        </svg>
+                    </button>
+                    <span class="header-title" id="page-title">Dashboard</span>
+                </div>
+                
+                <div class="header-actions">
+                    <button class="btn btn-secondary btn-icon" onclick="refreshData()" title="Refresh">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <polyline points="1 20 1 14 7 14"/>
+                            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                        </svg>
+                    </button>
+                    
+                    <button class="btn btn-primary" onclick="createTask()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        New Task
+                    </button>
+                </div>
+            </header>
+            
+            <div class="content">
+                <!-- Dashboard Page -->
+                <div class="page active" id="page-dashboard">
+                    <div class="page-header">
+                        <h1 class="page-title">Dashboard</h1>
+                        <p class="page-subtitle">Overview of your autonomous workspace</p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Active Tasks</span>
+                                <div class="stat-icon accent">📋</div>
+                            </div>
+                            <div class="stat-value" id="stat-tasks">-</div>
+                            <div class="stat-change">Pending + In Progress</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">GitHub Notifications</span>
+                                <div class="stat-icon info">🔔</div>
+                            </div>
+                            <div class="stat-value" id="stat-notifs">-</div>
+                            <div class="stat-change" id="stat-notifs-text">Unread</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">System Load</span>
+                                <div class="stat-icon warning">⚡</div>
+                            </div>
+                            <div class="stat-value" id="stat-load">-</div>
+                            <div class="stat-change">1min avg</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Memory Usage</span>
+                                <div class="stat-icon success">💾</div>
+                            </div>
+                            <div class="stat-value" id="stat-memory">-</div>
+                            <div class="stat-change" id="stat-memory-detail">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">Recent Tasks</span>
+                                <div class="card-actions">
+                                    <button class="btn btn-secondary" onclick="showPage('tasks', null)">View All</button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div id="dashboard-tasks">
+                                    <div class="skeleton" style="height: 200px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">OpenClaw Status</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="dashboard-openclaw">
+                                    <div class="skeleton" style="height: 200px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tasks Page -->
+                <div class="page" id="page-tasks">
+                    <div class="page-header">
+                        <h1 class="page-title">Tasks</h1>
+                        <p class="page-subtitle">Manage and track autonomous tasks</p>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Status</th>
+                                            <th>Name</th>
+                                            <th>Description</th>
+                                            <th>Created</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tasks-table">
+                                        <tr>
+                                            <td colspan="5" class="empty-state">
+                                                <div class="empty-icon">📋</div>
+                                                <div>No tasks found</div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Agents Page -->
+                <div class="page" id="page-agents">
+                    <div class="page-header">
+                        <h1 class="page-title">Agents</h1>
+                        <p class="page-subtitle">Running autonomous agents and sessions</p>
+                    </div>
+                    
+                    <div id="agents-content">
+                        <div class="grid-2">
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-title">Active Agents</span>
+                                </div>
+                                <div class="card-body" id="agents-list">
+                                    <div class="skeleton" style="height: 150px;"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-title">Memory Status</span>
+                                </div>
+                                <div class="card-body" id="memory-status">
+                                    <div class="skeleton" style="height: 150px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- System Page -->
+                <div class="page" id="page-system">
+                    <div class="page-header">
+                        <h1 class="page-title">System Health</h1>
+                        <p class="page-subtitle">Monitor system resources and processes</p>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">Top Processes (CPU)</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="system-processes">
+                                    <div class="skeleton" style="height: 250px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">Docker Containers</span>
+                            </div>
+                            <div class="card-body">
+                                <div id="system-docker">
+                                    <div class="empty-state">
+                                        <div class="empty-icon">🐳</div>
+                                        <div>No containers running</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- GitHub Page -->
+                <div class="page" id="page-github">
+                    <div class="page-header">
+                        <h1 class="page-title">GitHub</h1>
+                        <p class="page-subtitle">Pull requests, reviews, and notifications</p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Notifications</span>
+                                <div class="stat-icon info">🔔</div>
+                            </div>
+                            <div class="stat-value" id="github-notifs">-</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">My Open PRs</span>
+                                <div class="stat-icon accent">🔀</div>
+                            </div>
+                            <div class="stat-value" id="github-prs">-</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Pending Reviews</span>
+                                <div class="stat-icon warning">👀</div>
+                            </div>
+                            <div class="stat-value" id="github-reviews">-</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="token-info">
-                <div class="stat-value" id="token-percent">-</div>
-                <div class="token-bar">
-                    <div class="token-fill" id="token-bar" style="width: 0%"></div>
-                </div>
-                <div class="stat-label" id="token-detail">-</div>
-            </div>
-        </div>
-        
-        <!-- System Health Card -->
-        <div class="card">
-            <div class="card-header">
-                <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
-                </svg>
-                <h2>System Health</h2>
-            </div>
-            <div class="health-grid" id="health-grid">
-                <div class="health-item">
-                    <span class="stat-label">CPU</span>
-                    <span class="health-value" id="cpu">-</span>
-                </div>
-                <div class="health-item">
-                    <span class="stat-label">Memory</span>
-                    <span class="health-value" id="memory">-</span>
-                </div>
-                <div class="health-item">
-                    <span class="stat-label">Disk</span>
-                    <span class="health-value" id="disk">-</span>
-                </div>
-                <div class="health-item">
-                    <span class="stat-label">Load</span>
-                    <span class="health-value" id="load">-</span>
-                </div>
-            </div>
-        </div>
+        </main>
     </div>
-    
-    <!-- Task List -->
-    <div class="card">
-        <div class="card-header">
-            <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>
-            </svg>
-            <h2>Recent Tasks</h2>
-        </div>
-        <div class="task-list" id="task-list">
-            <div class="empty-state">Loading...</div>
-        </div>
-    </div>
-    
-    <!-- Refresh Button -->
-    <button class="refresh-btn" onclick="refreshData()" title="Refresh">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
-        </svg>
-    </button>
     
     <script>
-        let isLoading = false;
+        // State
+        let currentData = null;
         
+        // Navigation
+        function showPage(pageName, element) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            // Show selected page
+            document.getElementById('page-' + pageName).classList.add('active');
+            
+            // Update nav
+            if (element) {
+                element.classList.add('active');
+            } else {
+                // Find nav item by onclick attribute
+                document.querySelectorAll('.nav-item').forEach(n => {
+                    if (n.getAttribute('onclick')?.includes("'" + pageName + "'")) {
+                        n.classList.add('active');
+                    }
+                });
+            }
+            
+            // Update title
+            const titles = {
+                'dashboard': 'Dashboard',
+                'tasks': 'Tasks',
+                'agents': 'Agents',
+                'system': 'System Health',
+                'github': 'GitHub'
+            };
+            document.getElementById('page-title').textContent = titles[pageName] || pageName;
+            
+            // Refresh data for this page
+            if (currentData) {
+                updatePageContent(pageName, currentData);
+            }
+        }
+        
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+        
+        // Data fetching
         async function fetchData() {
-            if (isLoading) return;
-            isLoading = true;
-            
-            document.body.classList.add('updating');
-            
             try {
                 const response = await fetch('/api/status');
                 const data = await response.json();
-                updateUI(data);
+                currentData = data;
+                updateAllPages(data);
+                updateConnectionStatus(true);
             } catch (error) {
                 console.error('Failed to fetch:', error);
-                showError('Failed to load data');
-            } finally {
-                isLoading = false;
-                document.body.classList.remove('updating');
+                updateConnectionStatus(false);
             }
         }
         
-        function updateUI(data) {
-            // Tasks
+        function updateConnectionStatus(connected) {
+            const dot = document.getElementById('status-dot');
+            const text = document.getElementById('connection-text');
+            
+            if (connected) {
+                dot.classList.remove('offline');
+                text.textContent = 'Connected';
+            } else {
+                dot.classList.add('offline');
+                text.textContent = 'Disconnected';
+            }
+        }
+        
+        function updateAllPages(data) {
+            updateDashboard(data);
+            updateTasksPage(data);
+            updateAgentsPage(data);
+            updateSystemPage(data);
+            updateGithubPage(data);
+        }
+        
+        function updatePageContent(pageName, data) {
+            switch(pageName) {
+                case 'dashboard': updateDashboard(data); break;
+                case 'tasks': updateTasksPage(data); break;
+                case 'agents': updateAgentsPage(data); break;
+                case 'system': updateSystemPage(data); break;
+                case 'github': updateGithubPage(data); break;
+            }
+        }
+        
+        // Dashboard
+        function updateDashboard(data) {
             const tasks = data.tasks || [];
             const pending = tasks.filter(t => t.status === 'pending').length;
             const inProgress = tasks.filter(t => t.status === 'in_progress').length;
-            document.getElementById('task-count').textContent = pending + inProgress;
             
-            // Task list
-            const taskList = document.getElementById('task-list');
-            if (tasks.length === 0) {
-                taskList.innerHTML = '<div class="empty-state">No tasks yet</div>';
-            } else {
-                taskList.innerHTML = tasks.slice(0, 10).map(task => `
-                    <div class="task-item ${task.status}">
-                        <span class="task-status">${task.status.replace('_', ' ')}</span>
-                        <div>
-                            <div class="task-name">${escapeHtml(task.name)}</div>
-                            <div class="task-desc">${escapeHtml(task.description || '')}</div>
-                        </div>
-                    </div>
-                `).join('');
-            }
+            document.getElementById('stat-tasks').textContent = pending + inProgress;
+            document.getElementById('nav-task-count').textContent = pending + inProgress;
             
-            // Token usage from OpenClaw
-            if (data.openclaw) {
-                const sessions = data.openclaw.sessions || [];
-                let totalUsed = 0;
-                let totalLimit = 0;
-                
-                sessions.forEach(session => {
-                    if (session.tokens) {
-                        const used = session.tokens.used || 0;
-                        const limit = session.tokens.limit || 262000;
-                        totalUsed += used;
-                        totalLimit += limit;
-                    }
-                });
-                
-                const percent = totalLimit > 0 ? (totalUsed / totalLimit * 100).toFixed(1) : 0;
-                document.getElementById('token-percent').textContent = percent + '%';
-                document.getElementById('token-bar').style.width = percent + '%';
-                document.getElementById('token-detail').textContent = 
-                    `${(totalUsed/1000).toFixed(0)}k / ${(totalLimit/1000).toFixed(0)}k tokens`;
-            } else {
-                document.getElementById('token-percent').textContent = 'N/A';
-                document.getElementById('token-detail').textContent = 'OpenClaw not connected';
-            }
+            const gh = data.github || {};
+            document.getElementById('stat-notifs').textContent = gh.notifications || 0;
             
-            // System health
             const health = data.health || {};
-            updateHealthValue('cpu', health.cpu);
-            updateHealthValue('memory', health.memory);
-            updateHealthValue('disk', health.disk);
-            document.getElementById('load').textContent = health.load || 'N/A';
+            document.getElementById('stat-load').textContent = health.load?.split(',')[0] || '-';
+            document.getElementById('stat-memory').textContent = health.memory || '-';
+            document.getElementById('stat-memory-detail').textContent = health.memory_gb || '';
+            
+            // Recent tasks list
+            const tasksContainer = document.getElementById('dashboard-tasks');
+            if (tasks.length === 0) {
+                tasksContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <div>No tasks yet</div>
+                    </div>`;
+            } else {
+                tasksContainer.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <tbody>
+                                ${tasks.slice(0, 5).map(task => `
+                                    <tr>
+                                        <td>${getStatusBadge(task.status)}</td>
+                                        <td>${escapeHtml(task.name)}</td>
+                                        <td>${escapeHtml(task.description || '')}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>`;
+            }
+            
+            // OpenClaw status
+            const oc = data.openclaw || {};
+            const agents = oc.agents || {};
+            const memory = oc.memory || {};
+            const gateway = oc.gateway || {};
+            
+            document.getElementById('dashboard-openclaw').innerHTML = `
+                <div style="display: grid; gap: 1rem;">
+                    <div class="stat-row" style="border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+                        <span>Gateway</span>
+                        <span class="badge ${gateway.reachable ? 'badge-success' : 'badge-danger'}">
+                            ${gateway.reachable ? 'Online' : 'Offline'}
+                        </span>
+                    </div>
+                    <div class="stat-row" style="border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+                        <span>Agents</span>
+                        <span>${(agents.agents || []).length}</span>
+                    </div>
+                    <div class="stat-row" style="border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">
+                        <span>Sessions</span>
+                        <span>${agents.totalSessions || 0}</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Memory Chunks</span>
+                        <span>${memory.chunks || 0}</span>
+                    </div>
+                </div>`;
         }
         
-        function updateHealthValue(id, value) {
-            const el = document.getElementById(id);
-            el.textContent = value || 'N/A';
+        // Tasks page
+        function updateTasksPage(data) {
+            const tasks = data.tasks || [];
+            const tbody = document.getElementById('tasks-table');
             
-            // Color coding
-            el.className = 'health-value';
-            if (value) {
-                const num = parseFloat(value);
-                if (num > 80) el.classList.add('danger');
-                else if (num > 50) el.classList.add('warn');
-                else el.classList.add('good');
+            if (tasks.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <div class="empty-icon">📋</div>
+                            <div>No tasks found. Create your first task!</div>
+                        </td>
+                    </tr>`;
+            } else {
+                tbody.innerHTML = tasks.map(task => `
+                    <tr>
+                        <td>${getStatusBadge(task.status)}</td>
+                        <td>${escapeHtml(task.name)}</td>
+                        <td>${escapeHtml(task.description || '-')}</td>
+                        <td>${formatDate(task.created_at)}</td>
+                        <td>
+                            ${task.status !== 'completed' ? `
+                                <button class="btn btn-secondary" onclick="completeTask('${task.name}')">Complete</button>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `).join('');
             }
+        }
+        
+        // Agents page
+        function updateAgentsPage(data) {
+            const oc = data.openclaw || {};
+            const agents = oc.agents || {};
+            const memory = oc.memory || {};
+            
+            // Agents list
+            const agentsList = document.getElementById('agents-list');
+            const agentItems = agents.agents || [];
+            
+            if (agentItems.length === 0) {
+                agentsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🤖</div>
+                        <div>No active agents</div>
+                    </div>`;
+            } else {
+                agentsList.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 1rem;">
+                        ${agentItems.map(agent => `
+                            <div style="padding: 1rem; background: var(--bg-tertiary); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-weight: 600;">${agent.id}</span>
+                                    <span class="badge badge-success">Active</span>
+                                </div>
+                                <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.5rem;">
+                                    ${agent.sessionsCount} sessions · Last active: ${formatTimeAgo(agent.lastActiveAgeMs)}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            }
+            
+            // Memory status
+            document.getElementById('memory-status').innerHTML = `
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Indexed Files</span>
+                            <span style="font-weight: 600;">${memory.files || 0}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min((memory.files || 0) * 10, 100)}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Memory Chunks</span>
+                            <span style="font-weight: 600;">${memory.chunks || 0}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${Math.min((memory.chunks || 0) * 5, 100)}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-row" style="border-top: 1px solid var(--border); padding-top: 1rem;">
+                        <span>Provider</span>
+                        <span class="badge badge-info">${memory.provider || 'Unknown'}</span>
+                    </div>
+                </div>`;
+        }
+        
+        // System page
+        function updateSystemPage(data) {
+            const processes = data.processes || {};
+            const cpuProcs = processes.cpu || [];
+            
+            const procContainer = document.getElementById('system-processes');
+            if (cpuProcs.length === 0) {
+                procContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚡</div>
+                        <div>Process data unavailable</div>
+                    </div>`;
+            } else {
+                procContainer.innerHTML = `
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Process</th>
+                                    <th>CPU</th>
+                                    <th>Memory</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${cpuProcs.map(p => `
+                                    <tr>
+                                        <td>${escapeHtml(p.cmd)}</td>
+                                        <td>${p.cpu}%</td>
+                                        <td>${p.mem}%</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>`;
+            }
+            
+            // Docker
+            const docker = data.docker || [];
+            const dockerContainer = document.getElementById('system-docker');
+            
+            if (docker.length === 0) {
+                dockerContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🐳</div>
+                        <div>No containers running</div>
+                    </div>`;
+            } else {
+                dockerContainer.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        ${docker.map(c => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--bg-tertiary); border-radius: 8px;">
+                                <span style="font-weight: 500;">${escapeHtml(c.name)}</span>
+                                <span style="font-size: 0.85rem; color: var(--text-secondary);">${escapeHtml(c.status)}</span>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            }
+        }
+        
+        // GitHub page
+        function updateGithubPage(data) {
+            const gh = data.github || {};
+            document.getElementById('github-notifs').textContent = gh.notifications || 0;
+            document.getElementById('github-prs').textContent = gh.my_prs || 0;
+            document.getElementById('github-reviews').textContent = gh.reviews || 0;
+        }
+        
+        // Helpers
+        function getStatusBadge(status) {
+            const badges = {
+                'pending': '<span class="badge badge-warning">Pending</span>',
+                'in_progress': '<span class="badge badge-info">In Progress</span>',
+                'completed': '<span class="badge badge-success">Completed</span>'
+            };
+            return badges[status] || `<span class="badge">${status}</span>`;
         }
         
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
         
-        function showError(message) {
-            document.getElementById('task-list').innerHTML = 
-                `<div class="empty-state" style="color: var(--danger)">${message}</div>`;
+        function formatDate(isoString) {
+            if (!isoString) return '-';
+            const date = new Date(isoString);
+            return date.toLocaleDateString();
+        }
+        
+        function formatTimeAgo(ms) {
+            if (!ms) return 'unknown';
+            const seconds = Math.floor(ms / 1000);
+            if (seconds < 60) return `${seconds}s ago`;
+            const minutes = Math.floor(seconds / 60);
+            if (minutes < 60) return `${minutes}m ago`;
+            const hours = Math.floor(minutes / 60);
+            return `${hours}h ago`;
+        }
+        
+        // Actions
+        async function createTask() {
+            const name = prompt('Task name:');
+            if (!name) return;
+            
+            const description = prompt('Description (optional):') || '';
+            
+            try {
+                const response = await fetch('/api/task/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, description })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    fetchData();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Failed to create task: ' + error.message);
+            }
+        }
+        
+        async function completeTask(taskName) {
+            const proof = prompt('Proof of completion:');
+            if (!proof) return;
+            
+            try {
+                const response = await fetch(`/api/tasks/${taskName}/complete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ proof })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    fetchData();
+                }
+            } catch (error) {
+                alert('Failed to complete task: ' + error.message);
+            }
         }
         
         function refreshData() {
             fetchData();
         }
         
-        // Initial load
+        // Init
         fetchData();
-        
-        // Auto-refresh every 30 seconds
         setInterval(fetchData, 30000);
     </script>
 </body>
