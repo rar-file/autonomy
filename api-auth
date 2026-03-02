@@ -1,6 +1,0 @@
-#!/bin/bash
-# API Auth CLI wrapper
-# Usage: autonomy api-auth {generate|validate|revoke|list|status|setup}
-
-AUTONOMY_DIR="${AUTONOMY_DIR:-${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills/autonomy}"
-bash "$AUTONOMY_DIR/lib/api-auth.sh" "$@"

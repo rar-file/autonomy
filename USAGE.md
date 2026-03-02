@@ -1,170 +1,135 @@
-# Autonomy System - Usage Guide
+# USAGE.md — Autonomy v2
 
-## What's Been Built
+## Quick Reference
 
-### Core System
-- **Context-aware monitoring** - Not generic checks, project-specific intelligence
-- **Smart actions** - Auto-stash, quick-commit, push suggestions
-- **Discord integration** - Real-time status with slash commands
-- **Adaptive frequency** - Slows down when idle, speeds up when active
+### Task Management
 
-### Current Contexts
-
-| Context | Type | Use Case |
-|---------|------|----------|
-| `git-aware` | Smart | Prevents lost work, keeps repos clean |
-| `webapp` | Standard | Web app monitoring |
-| `business` | Standard | Business ops tracking |
-| `default` | Standard | General workspace |
-
-## Quick Start
-
-### 1. Check Status
 ```bash
-./skills/autonomy/autonomy status
+# Create a task
+autonomy task create "refactor-auth" "Refactor authentication to use JWT tokens"
+
+# List all tasks
+autonomy task list
+
+# Mark as in-progress
+autonomy task work "refactor-auth"
+
+# Complete with proof
+autonomy task complete "refactor-auth" "Tested: Login works, tokens refresh correctly"
+
+# Delete task
+autonomy task delete "refactor-auth"
 ```
 
-### 2. Enable Git-Aware Monitoring
+### GitHub Integration
+
 ```bash
-./skills/autonomy/autonomy on git-aware
+# Your open PRs
+autonomy gh prs
+
+# PRs waiting for your review  
+autonomy gh reviews
+
+# CI status
+autonomy gh ci-status
+
+# Check all GitHub status
+autonomy gh status
 ```
 
-### 3. Smart Actions
+### System Monitoring
+
 ```bash
-# Auto-commit with generated message
-./skills/autonomy/autonomy action commit .
+# Quick health check
+autonomy vm health
 
-# Stash before switching contexts  
-./skills/autonomy/autonomy action stash ~/myproject
+# Top CPU processes
+autonomy vm top_cpu
 
-# Push current branch
-./skills/autonomy/autonomy action push .
+# Docker containers
+autonomy vm docker_ps
 
-# Sync with remote (fast-forward only)
-./skills/autonomy/autonomy action sync .
+# Service status
+autonomy vm service_status nginx
 ```
 
-### 4. Discord Commands
-Type in Discord:
-- `/autonomy` - Show current status
-- `/autonomy_on git-aware` - Enable git monitoring
-- `/autonomy_off` - Disable
-- `/autonomy_contexts` - List available contexts
+## OpenClaw Integration Examples
 
-## Git-Aware Features
+### Example 1: Heartbeat Checks
 
-### What It Monitors
-1. **Dirty repo warning** - Alerts if uncommitted changes sit >2 hours
-2. **Stale commit reminder** - Warns if commits unpushed >1 hour  
-3. **Unpushed branch check** - Flags branches not pushed in >24 hours
-4. **Branch sync status** - Alerts if behind remote
-5. **Stash reminder** - Warns about forgotten stashes >3 days old
+Add to your HEARTBEAT.md:
 
-### Smart Behaviors
-- **Context switch protection** - Warns before switching with dirty repos
-- **Auto-suggest commit messages** - Based on changed files
-- **Intelligent timing** - Checks more frequently when you're active
+```markdown
+## Autonomy Checks
 
-## Making It Useful (Not Silly)
-
-### Current Problem with Most Automation
-- Runs on schedule regardless of need
-- Alerts for things you don't care about
-- No learning or adaptation
-
-### This System's Approach
-1. **Trigger-based, not schedule-based**
-   - Checks run when files change
-   - Alerts when thresholds crossed (not every 20 min)
-   - Quiet when nothing's happening
-
-2. **Action-oriented, not alert-oriented**
-   - "Stash these changes before you switch?" not "You have changes"
-   - "Commit with message 'Update config'?" not "Uncommitted files detected"
-   - Auto-fix when safe, suggest when uncertain
-
-3. **Learning mode** (next phase)
-   - Tracks which alerts you actually act on
-   - Disables noisy checks
-   - Learns your schedule (no 3am alerts)
-
-## Test It Out
-
-### Scenario 1: The Forgotten Commit
-```bash
-# Edit some files
-echo "changes" >> README.md
-
-# Wait 2+ hours...
-# Autonomy will alert: "2 hours of uncommitted changes on master"
-
-# Quick fix:
-./skills/autonomy/autonomy action commit .
+- Run `autonomy check` to see if there are pending tasks
+- Run `autonomy gh status` for GitHub overview
+- Run `autonomy vm health` for system status
 ```
 
-### Scenario 2: Context Switch Protection
+### Example 2: Cron Scheduling
+
 ```bash
-# Working on feature branch with changes
-echo "feature code" >> feature.txt
+# Check every 30 minutes
+openclaw cron add --name autonomy-check \
+  --schedule "*/30 * * * *" \
+  --command "autonomy check --notify"
 
-# Try to switch contexts:
-./skills/autonomy/autonomy on webapp
-
-# Autonomy warns: "You have uncommitted changes. Stash first?"
-./skills/autonomy/autonomy action stash .
+# Daily GitHub summary
+openclaw cron add --name gh-daily \
+  --schedule "0 9 * * *" \
+  --command "autonomy gh status"
 ```
 
-### Scenario 3: End of Day
-```bash
-# Autonomy detects EOD pattern
-# Checks: commits unpushed, uncommitted changes, stashes
-# Alerts with actionable suggestions
-```
+### Example 3: AI Uses Native Tools
 
-## Next Enhancements
+Instead of custom sub-agents, the AI uses OpenClaw's `sessions_spawn`:
 
-### Phase 2: Learning
-```bash
-autonomy learn on
-# Adapts to your patterns, disables noise
-```
-
-### Phase 3: Predictive
-```bash
-# "You're about to deploy, run tests first?"
-# "That file usually causes bugs, extra careful?"
-```
-
-### Phase 4: Integration
-- GitHub PR status
-- Test results
-- Deployment status
-- Error tracking
-
-## Configuration
-
-Edit context configs:
-```bash
-./skills/autonomy/contexts/git-aware.json
-```
-
-Adjust thresholds:
 ```json
 {
-  "config": {
-    "dirty_warning_threshold": 7200,  // 2 hours
-    "stale_commit_threshold": 3600,   // 1 hour
-    "auto_suggest_commit": true
+  "tool": "sessions_spawn",
+  "args": {
+    "task": "Research OAuth2 best practices",
+    "runtime": "subagent",
+    "mode": "run"
   }
 }
 ```
 
-## Current Status
+Instead of custom memory, use MEMORY.md:
 
-- ✅ Discord bot running (PID: 197560)
-- ✅ Git-aware context enabled
-- ✅ Smart actions working
-- ✅ Slash commands active
-- 🔄 Learning mode: pending
+```bash
+# AI stores decision
+echo "## Decision: Use JWT with 24h expiry" >> MEMORY.md
 
-**Try it:** Make some changes to files, wait a bit, see what autonomy suggests.
+# Later, AI searches via memory_search
+```
+
+## Directory Structure
+
+```
+autonomy-v2/
+├── SKILL.md          # Skill manifest
+├── USAGE.md          # This file
+├── autonomy          # Main CLI
+├── tasks/            # Task JSON files
+├── logs/             # Activity logs
+└── config.json       # User config
+```
+
+## Migration from v1
+
+If you were using Autonomy v1:
+
+1. **Backup your tasks**: `cp -r autonomy/tasks autonomy-v2/tasks/`
+2. **Stop the old daemon**: `autonomy off` (v1)
+3. **Use OpenClaw cron** instead of `autonomy schedule`
+4. **Use OpenClaw sessions** instead of `autonomy spawn`
+5. **Remove old HEARTBEAT.md** if it was auto-generated
+
+## Safety
+
+- No daemon running in background
+- No HEARTBEAT.md overwrite
+- Uses OpenClaw native tools
+- Manual approval for destructive actions

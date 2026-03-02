@@ -1,15 +1,15 @@
 ---
-name: autonomy
+name: autonomy-v2
 description: >-
-  AI-driven self-improving autonomy system for OpenClaw agents.
-  Agentic decision making, sub-agent spawning, scheduled heartbeats,
-  continuous improvement, and a real-time web dashboard.
-version: 2.2.0
+  Lightweight task management for OpenClaw agents. 
+  Uses native OpenClaw tools for sub-agents, memory, and scheduling.
+  Keeps VM diagnostics, file watching, and GitHub integration.
+version: 3.0.0
 user-invocable: true
 metadata:
   openclaw:
-    skillKey: autonomy
-    emoji: "\U0001F916"
+    skillKey: autonomy-v2
+    emoji: "🤖"
     homepage: https://github.com/rar-file/autonomy
     os:
       - linux
@@ -20,172 +20,139 @@ metadata:
         - jq
         - python3
         - git
-      env:
-        - AUTONOMY_DIR
-      config: []
-    primaryEnv: AUTONOMY_DIR
+        - gh
 ---
 
-# Agentic Autonomy — OpenClaw Plugin
+# Autonomy v2 — OpenClaw-Native Task Management
 
-**Version:** 2.2.0
-**Type:** Agentic Self-Improvement System
-**Requires:** OpenClaw Gateway, bash, jq, python3
+**Version:** 3.0.0  
+**Type:** Task Management + System Capabilities  
+**Philosophy:** Use OpenClaw's native tools, add what's missing
 
-## Quick Install
+## What's Different from v1
 
-```bash
-# Clone to your OpenClaw skills directory
-cd "${OPENCLAW_HOME:-$HOME/.openclaw}/workspace/skills"
-git clone https://github.com/rar-file/autonomy.git
-
-# Run install script
-cd autonomy
-bash install.sh
-
-# Start using
-autonomy on
-autonomy work "Your first task"
-```
+| v1 (Old) | v2 (This) |
+|----------|-----------|
+| Custom sub-agent spawning | Uses `sessions_spawn` |
+| Custom memory system | Uses `memory_search` / `memory_get` |
+| Overwrites HEARTBEAT.md | Uses OpenClaw cron for scheduling |
+| Bash daemon (5 min loop) | OpenClaw native cron |
+| Token tracking | Uses OpenClaw status |
+| ~23k lines of bash | ~2k lines, focused |
 
 ## What It Does
 
-This plugin turns your OpenClaw agent into a **self-improving autonomous system** that:
-
-- **Decides what to do** based on context and priorities
-- **Creates its own tasks** when it identifies needs
-- **Spawns sub-agents** for parallel work
-- **Schedules recurring checks** (every 20 minutes by default)
-- **Updates itself** from GitHub automatically
-- **Verifies its work** before marking complete
-- **Respects hard limits** to prevent runaway usage
-
-## Key Features
-
-### Agentic Decision Making
-The AI decides what to work on based on:
-- Pending tasks
-- Scheduled work
-- System state
-- User needs
-
-### Continuous Improvement
-- Runs every 20 minutes via heartbeat
-- Spawns sub-agents for parallel research
-- Updates web UI continuously
-- Adds new features automatically
-
-### Safety First
-- Hard limits: 5 tasks, 3 agents, 50k tokens/day
-- Anti-hallucination: Must verify work before completion
-- Approval required for risky actions
-- Built-in token budget tracking
-
-### Web Dashboard
-Beautiful web UI at `http://localhost:8767`:
-- Real-time status monitoring
-- Task management with complete/delete
-- Activity logs
-- Quick action buttons
-- Dark theme with brand colors
-
-## Configuration
-
-Edit `config.json` to customize:
-
-```json
-{
-  "agentic_config": {
-    "hard_limits": {
-      "max_concurrent_tasks": 5,
-      "max_sub_agents": 3,
-      "daily_token_budget": 50000
-    },
-    "requires_approval": [
-      "external_api_calls",
-      "sending_messages",
-      "file_deletion"
-    ]
-  }
-}
-```
-
-## Commands
+### 1. Task Management
+Simple JSON-based task tracking that OpenClaw agents can read/write:
 
 ```bash
-autonomy on                          # Activate agentic mode
-autonomy off                         # Deactivate
-autonomy work "Build X"              # Give the AI a task
-autonomy task list                   # View all tasks
-autonomy spawn "Research Y"          # Spawn sub-agent
-autonomy schedule add 30m "Check Z"  # Schedule recurring work
-autonomy status                      # View system status
-autonomy update check                # Check for updates
+autonomy task create "fix-auth" "Fix authentication bug in login flow"
+autonomy task list                    # Show all tasks
+autonomy task work "fix-auth"         # Mark as in-progress
+autonomy task complete "fix-auth" "Tested: login works with OAuth"
+```
+
+### 2. System Capabilities (VM Integration)
+Direct system access for diagnostics and monitoring:
+
+```bash
+autonomy vm process_list              # List processes
+autonomy vm top_cpu                   # CPU hogs
+autonomy vm docker_ps                 # Container status
+autonomy vm service_status nginx      # Check service
+```
+
+### 3. GitHub Integration
+GitHub checks and PR management:
+
+```bash
+autonomy gh prs                       # Your open PRs
+autonomy gh reviews                   # PRs waiting for your review
+autonomy gh ci-status                 # CI status on default branch
+autonomy gh issues --label bug        # Issues labeled 'bug'
+```
+
+### 4. File Watching
+Monitor files and trigger OpenClaw actions:
+
+```bash
+autonomy watcher add ./src "autonomy task create 'review-changes'"
 ```
 
 ## OpenClaw Integration
 
-This skill integrates deeply with OpenClaw's runtime:
+### Native Sub-Agents
+Instead of bash sub-processes, use OpenClaw's `sessions_spawn`:
 
-- **Gateway**: Heartbeat triggers arrive via the OpenClaw Gateway WebSocket
-- **Sessions**: Sub-agents can bridge to `sessions_send` / `sessions_spawn` for cross-session coordination when the OpenClaw CLI is available
-- **Centralized Config**: AI provider, model, and API keys are read from `~/.openclaw/openclaw.json` when not overridden locally
-- **OPENCLAW_HOME**: All paths respect the `OPENCLAW_HOME` environment variable (defaults to `~/.openclaw`)
-- **ClawHub**: This skill is structured for publishing to ClawHub (`clawhub.com`)
+```json
+{
+  "tool": "sessions_spawn",
+  "args": {
+    "task": "Research OAuth2 flows",
+    "runtime": "subagent",
+    "mode": "run"
+  }
+}
+```
 
-## Heartbeat Integration
+### Native Memory
+Store context in MEMORY.md, retrieve via semantic search:
 
-The plugin integrates with OpenClaw's heartbeat system:
+```bash
+# AI stores decision
+echo "## Decision: Chose JWT over session tokens" >> MEMORY.md
 
-1. **Heartbeat triggers** every 20 minutes
-2. **AI reads HEARTBEAT.md** for instructions
-3. **AI checks workstation** for pending work
-4. **AI decides** what to prioritize
-5. **AI executes** within hard limits
-6. **AI reports** brief status update
+# AI retrieves via memory_search
+```
 
-### Smart Updates (No Spam)
+### Native Scheduling
+Use OpenClaw cron instead of bash daemon:
 
-- Work completed -> Brief summary + proof
-- Phase transitioned -> Single notification
-- Limit reached -> Alert with details
-- Nothing to do -> HEARTBEAT_OK (silent)
+```bash
+openclaw cron add --name autonomy-check \
+  --schedule "*/30 * * * *" \
+  --command "autonomy check --notify"
+```
 
-## Continuous Improvement Workflow
+## Quick Start
 
-Once installed, the system automatically:
+```bash
+# Install
+ln -s ~/.openclaw/workspace/skills/autonomy-v2/autonomy ~/bin/autonomy 2>/dev/null || true
 
-1. **Creates 9 improvement tasks:**
-   - Web UI enhancements
-   - API endpoints
-   - Autonomy levels
-   - Monitoring tools
-   - CLI improvements
-   - Integrations
-   - Documentation
+# Create a task
+autonomy task create "refactor-auth" "Refactor auth to use JWT"
 
-2. **Sets 4 schedules:**
-   - Every 20m: Check web UI improvements
-   - Every 30m: Monitor sub-agents
-   - Every 1h: Review new features
-   - Every 2h: Check integrations
+# Check system
+autonomy vm health
 
-3. **Spawns sub-agents** for parallel research
+# Check GitHub
+autonomy gh prs
+```
 
-## Production Ready
+## Safety Guards
 
-- Self-contained — no external dependencies beyond bash/jq/python3
-- Self-updating — checks GitHub for new versions
-- Self-monitoring — tracks token usage and limits
-- Self-documenting — creates its own docs
-- Safe — hard limits prevent runaway usage
+- **No HEARTBEAT.md overwrite** — respects user's file
+- **No daemon** — uses OpenClaw cron
+- **No custom memory** — uses OpenClaw semantic search
+- **Approval required** for: external APIs, messages, git push, deletions
 
-## Support
+## Configuration
 
-- **Dashboard:** http://localhost:8767
-- **Docs:** `IMPROVEMENT_WORKFLOW.md`
-- **Logs:** `logs/agentic.jsonl`
+Edit `config.json`:
+
+```json
+{
+  "limits": {
+    "max_concurrent_tasks": 5,
+    "daily_task_budget": 20
+  },
+  "github": {
+    "default_repo": null,
+    "notify_on_ci_fail": true
+  }
+}
+```
 
 ## License
-
 MIT

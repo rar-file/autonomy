@@ -1,70 +1,35 @@
 #!/bin/bash
-# Agentic Autonomy Core
-# The AI decides. This is just the interface.
+# Autonomy v2 — OpenClaw-Native Task Management
+# Lightweight, uses native OpenClaw tools
 
-# Resolve script path (handle symlinks)
-SCRIPT_SOURCE="${BASH_SOURCE[0]}"
-while [[ -L "$SCRIPT_SOURCE" ]]; do
-    SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_SOURCE")" && pwd)"
-    SCRIPT_SOURCE="$(readlink "$SCRIPT_SOURCE")"
-    [[ "$SCRIPT_SOURCE" != /* ]] && SCRIPT_SOURCE="$SCRIPT_DIR/$SCRIPT_SOURCE"
-done
-SCRIPT_DIR="$(cd "$(dirname "$SCRIPT_SOURCE")" && pwd)"
+set -e
 
-AUTONOMY_DIR="$SCRIPT_DIR"
-WORKSPACE="$(dirname "$(dirname "$AUTONOMY_DIR")")"
-CONFIG="$AUTONOMY_DIR/config.json"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+AUTONOMY_DIR="${AUTONOMY_DIR:-$SCRIPT_DIR}"
+WORKSPACE="${WORKSPACE:-$(dirname "$AUTONOMY_DIR")}"
+
+# Directories
 TASKS_DIR="$AUTONOMY_DIR/tasks"
-AGENTS_DIR="$AUTONOMY_DIR/agents"
-TOOLS_DIR="$AUTONOMY_DIR/tools"
 LOGS_DIR="$AUTONOMY_DIR/logs"
-STATE_DIR="$AUTONOMY_DIR/state"
+mkdir -p "$TASKS_DIR" "$LOGS_DIR"
 
-mkdir -p "$TASKS_DIR" "$AGENTS_DIR" "$TOOLS_DIR" "$LOGS_DIR" "$STATE_DIR"
-
-# ── Config-free defaults: auto-create config if missing ─────
+# Config
+CONFIG="$AUTONOMY_DIR/config.json"
 ensure_config() {
     [[ -f "$CONFIG" ]] && return 0
-    cat > "$CONFIG" << 'DEFAULTS'
+    cat > "$CONFIG" << 'EOF'
 {
-  "version": "2.1.0",
-  "workstation": {
-    "active": false,
-    "mode": "agentic",
-    "level": "semi-autonomous",
-    "running_agents": [],
-    "schedules": [],
-    "created_tools": [],
-    "token_usage_today": 0
-  },
-  "daemon": {
-    "interval_minutes": 5
-  },
-  "global_config": {
-    "base_interval_minutes": 5,
-    "max_schedules": 5,
+  "version": "3.0.0",
+  "limits": {
     "max_concurrent_tasks": 5,
-    "max_sub_agents": 3
+    "daily_task_budget": 20
   },
-  "agentic_config": {
-    "autonomy_level": "semi-autonomous",
-    "hard_limits": {
-      "max_concurrent_tasks": 5,
-      "max_sub_agents": 3,
-      "max_schedules": 5,
-      "daily_token_budget": 50000,
-      "max_file_edits_per_session": 50,
-      "max_web_searches": 10,
-      "max_iterations_per_task": 5
-    },
-    "completion_criteria": {
-      "require_verification": true,
-      "max_attempts": 3
-    }
+  "github": {
+    "default_repo": null,
+    "notify_on_ci_fail": true
   }
 }
-DEFAULTS
-    echo -e "${GREEN}✓${NC} Created default config.json (zero-config mode)"
+EOF
 }
 ensure_config
 
@@ -73,1131 +38,275 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 BLUE='\033[0;34m'
-CYAN='\033[0;36m'
 NC='\033[0m'
 
-# Get config value
-get_config() {
-    jq -r "$1" "$CONFIG" 2>/dev/null
+# Disable colors if not terminal
+[[ ! -t 1 ]] && { GREEN=''; YELLOW=''; RED=''; BLUE=''; NC=''; }
+
+# Helpers
+log() {
+    echo -e "${BLUE}[autonomy]${NC} $1"
 }
 
-# Check limits
-check_limits() {
-    local limit_type="$1"
-    local current=0
-    local max=0
-    
-    # Get current count based on type
-    case "$limit_type" in
-        tasks)
-            current=$(ls -1 "$TASKS_DIR"/*.json 2>/dev/null | wc -l)
-            ;;
-        sub_agents)
-            current=$(get_config '.workstation.running_agents | length // 0')
-            ;;
-        schedules)
-            current=$(get_config '.workstation.schedules | length // 0')
-            ;;
-        *)
-            current=$(get_config ".workstation.${limit_type} | length // 0")
-            ;;
-    esac
-    
-    # Get max limit
-    max=$(get_config ".agentic_config.hard_limits.max_${limit_type} // 0")
-    
-    # Handle null/empty values
-    current=${current:-0}
-    max=${max:-0}
-    
-    if [[ "$current" -ge "$max" && "$max" -gt 0 ]]; then
-        echo "LIMIT_EXCEEDED:$limit_type:$current/$max"
-        return 1
-    fi
-    return 0
+error() {
+    echo -e "${RED}[error]${NC} $1" >&2
 }
 
-# Log agentic activity
-log_activity() {
-    local action="$1"
-    local details="${2:-{}}"
-    echo "{\"timestamp\":\"$(date -Iseconds)\",\"action\":\"$action\",\"details\":$details}" >> "$LOGS_DIR/agentic.jsonl"
+success() {
+    echo -e "${GREEN}[✓]${NC} $1"
 }
 
-# Show agentic status
-show_agentic_status() {
-    echo ""
-    echo "═══════════════════════════════════════════════════════════"
-    echo "  AGENTIC AUTONOMY STATUS"
-    echo "═══════════════════════════════════════════════════════════"
-    echo ""
-    
-    local active=$(get_config '.workstation.active')
-    local mode=$(get_config '.mode')
-    
-    if [[ "$active" == "true" ]]; then
-        echo -e "  ${GREEN}●${NC} Workstation: ACTIVE"
-    else
-        echo -e "  ${RED}○${NC} Workstation: INACTIVE"
-    fi
-    echo "  Mode: ${CYAN}$mode${NC}"
-    
-    # Show autonomy level
-    local level=$(get_config '.agentic_config.autonomy_level // "semi-autonomous"')
-    echo "  Level: ${CYAN}$level${NC}"
-    echo ""
-    
-    # Show current tasks
-    local tasks=$(ls -1 "$TASKS_DIR"/*.json 2>/dev/null | wc -l)
-    echo "  Active Tasks: $tasks"
-    if [[ "$tasks" -gt 0 ]]; then
-        for task_file in "$TASKS_DIR"/*.json; do
-            [[ -f "$task_file" ]] || continue
-            local task_name=$(basename "$task_file" .json)
-            local status=$(jq -r '.status // "unknown"' "$task_file")
-            local priority=$(jq -r '.priority // "normal"' "$task_file")
-            echo "    • $task_name [$status] ($priority)"
-        done
-    fi
-    echo ""
-    
-    # Show running agents
-    local agents=$(get_config '.workstation.running_agents | length')
-    echo "  Running Agents: $agents"
-    
-    # Show schedules
-    local schedules=$(get_config '.workstation.schedules | length')
-    echo "  Scheduled Tasks: $schedules"
-    
-    # Show created tools
-    local tools=$(ls -1 "$TOOLS_DIR"/* 2>/dev/null | wc -l)
-    echo "  Custom Tools: $tools"
-    
-    # Show limits
-    echo ""
-    echo "  Hard Limits:"
-    echo "    Max Tasks: $(get_config '.agentic_config.hard_limits.max_concurrent_tasks')"
-    echo "    Max Agents: $(get_config '.agentic_config.hard_limits.max_sub_agents')"
-    echo "    Max Schedules: $(get_config '.agentic_config.hard_limits.max_schedules')"
-    echo "    Daily Token Budget: $(get_config '.agentic_config.hard_limits.daily_token_budget')"
-    
-    # Show token usage
-    local tokens=$(get_config '.workstation.token_usage_today')
-    echo ""
-    echo "  Today's Token Usage: $tokens"
-    
-    echo ""
-    echo "═══════════════════════════════════════════════════════════"
-}
-
-# Activate agentic mode
-cmd_on() {
-    local tmp_file="${CONFIG}.tmp"
-    
-    jq '.workstation.active = true | .last_activated = "'$(date -Iseconds)'"' "$CONFIG" > "$tmp_file" && mv "$tmp_file" "$CONFIG"
-    
-    echo -e "${GREEN}✓${NC} Agentic Autonomy ACTIVATED"
-    echo ""
-    echo "  The AI now decides what to work on."
-    echo "  On each heartbeat, the AI will:"
-    echo "    1. Check pending tasks and schedules"
-    echo "    2. Reason about priorities"
-    echo "    3. Decide what to do next"
-    echo "    4. Execute (within hard limits)"
-    echo ""
-    echo "  Hard limits protect against runaway usage."
-    echo "  Run 'autonomy status' to monitor."
-    
-    log_activity "workstation_activated" "{}"
-    
-    # Auto-start heartbeat daemon if not already running
-    local daemon_pid_file="$AUTONOMY_DIR/state/daemon.pid"
-    local daemon_running=false
-    if [[ -f "$daemon_pid_file" ]]; then
-        local daemon_pid
-        daemon_pid=$(cat "$daemon_pid_file" 2>/dev/null)
-        if [[ -n "$daemon_pid" ]] && kill -0 "$daemon_pid" 2>/dev/null; then
-            daemon_running=true
-        else
-            rm -f "$daemon_pid_file"
-        fi
-    fi
-
-    if [[ "$daemon_running" == true ]]; then
-        echo ""
-        echo -e "  ${GREEN}✓${NC} Daemon already running (PID: $daemon_pid)"
-    else
-        echo ""
-        echo "  Starting heartbeat daemon..."
-        "$AUTONOMY_DIR/daemon.sh" start > /dev/null 2>&1
-        sleep 1
-        if [[ -f "$daemon_pid_file" ]]; then
-            local interval
-            interval=$(jq -r '.daemon.interval_minutes // .global_config.base_interval_minutes // 5' "$CONFIG" 2>/dev/null || echo 5)
-            echo -e "  ${GREEN}✓${NC} Daemon started (auto-runs every ${interval}m)"
-        else
-            echo -e "  ${RED}✗${NC} Daemon failed to start — try: autonomy daemon start"
-        fi
-    fi
-
-    # Auto-start web UI if not already running
-    if pgrep -f "web_ui.py" >/dev/null 2>&1; then
-        echo -e "  ${GREEN}✓${NC} Web UI already running — http://localhost:8767"
-    else
-        echo "  Starting web UI..."
-        cd "$AUTONOMY_DIR"
-        nohup python3 "$AUTONOMY_DIR/web_ui.py" >> "$AUTONOMY_DIR/logs/webui.log" 2>&1 &
-        sleep 2
-        if pgrep -f "web_ui.py" >/dev/null 2>&1; then
-            echo -e "  ${GREEN}✓${NC} Web UI started — http://localhost:8767"
-        else
-            echo -e "  ${RED}✗${NC} Web UI failed to start — check logs/webui.log"
-        fi
-    fi
-}
-
-# Deactivate
-cmd_off() {
-    local tmp_file="${CONFIG}.tmp"
-    
-    jq '.workstation.active = false | .last_deactivated = "'$(date -Iseconds)'"' "$CONFIG" > "$tmp_file" && mv "$tmp_file" "$CONFIG"
-    
-    # Stop daemon
-    "$AUTONOMY_DIR/daemon.sh" stop > /dev/null 2>&1
-    
-    echo -e "${RED}○${NC} Agentic Autonomy DEACTIVATED"
-    echo "  Daemon stopped. Web UI still available for monitoring."
-    
-    log_activity "workstation_deactivated" "{}"
-}
-
-# Create a new task
+# Task Management
 cmd_task() {
     local subcmd="${1:-list}"
+    shift 2>/dev/null || true
     
     case "$subcmd" in
-        list)
-            echo "Active Tasks:"
-            for task_file in "$TASKS_DIR"/*.json; do
-                [[ -f "$task_file" ]] || continue
-                local name=$(basename "$task_file" .json)
-                local status=$(jq -r '.status' "$task_file")
-                local desc=$(jq -r '.description' "$task_file")
-                echo "  • $name: $desc [$status]"
-            done
-            ;;
+        create|add)
+            local name="${1:-}"
+            local desc="${2:-}"
+            [[ -z "$name" ]] && { error "Task name required"; return 1; }
+            [[ -z "$desc" ]] && read -rp "Description: " desc
             
-        create)
-            shift
-            local name="$1"
-            local description="${2:-No description}"
-            local priority="${3:-normal}"
+            local task_file="$TASKS_DIR/${name}.json"
+            [[ -f "$task_file" ]] && { error "Task '$name' already exists"; return 1; }
             
-            if [[ -z "$name" ]]; then
-                echo "Usage: autonomy task create <name> [description] [priority]"
-                echo "Priority: critical, high, normal (default), low"
-                return 1
-            fi
-            
-            # Validate priority
-            case "$priority" in
-                critical|high|normal|low) ;;
-                *) priority="normal" ;;
-            esac
-            
-            # Check limits
-            if ! check_limits "tasks"; then
-                echo -e "${RED}Error:${NC} Task limit reached. Complete existing tasks first."
-                return 1
-            fi
-            
-            cat > "$TASKS_DIR/${name}.json" << EOF
+            cat > "$task_file" << EOF
 {
+  "id": "$(date +%s)",
   "name": "$name",
-  "description": "$description",
+  "description": "$desc",
   "status": "pending",
-  "priority": "$priority",
-  "created": "$(date -Iseconds)",
-  "assignee": "self",
-  "subtasks": [],
-  "completed": false,
-  "attempts": 0,
-  "max_attempts": $(get_config '.agentic_config.completion_criteria.max_attempts // 3'),
-  "verification": null,
-  "evidence": []
+  "created_at": "$(date -Iseconds)",
+  "updated_at": "$(date -Iseconds)",
+  "completed_at": null,
+  "proof": null
 }
 EOF
-            
-            echo -e "${GREEN}✓${NC} Task created: $name (priority: $priority)"
-            log_activity "task_created" "{\"name\": \"$name\", \"priority\": \"$priority\"}"
+            success "Task '$name' created"
             ;;
             
-        complete)
-            shift
-            local name="$1"
-            local verification="${2:-}"  # Optional verification proof
+        list|ls)
+            log "Tasks:"
+            local count=0
+            for task in "$TASKS_DIR"/*.json; do
+                [[ -f "$task" ]] || continue
+                local name=$(jq -r '.name' "$task")
+                local status=$(jq -r '.status' "$task")
+                local desc=$(jq -r '.description' "$task" | cut -c1-50)
+                local color="${NC}"
+                [[ "$status" == "completed" ]] && color="${GREEN}"
+                [[ "$status" == "in_progress" ]] && color="${YELLOW}"
+                echo -e "  ${color}[$status]${NC} $name: $desc"
+                ((count++))
+            done
+            [[ $count -eq 0 ]] && echo "  No tasks"
+            ;;
             
-            if [[ -f "$TASKS_DIR/${name}.json" ]]; then
-                # Check if verification is required
-                local require_verify=$(get_config '.agentic_config.completion_criteria.require_verification // true')
-                
-                if [[ "$require_verify" == "true" && -z "$verification" ]]; then
-                    echo -e "${YELLOW}⚠${NC} Verification required before marking complete"
-                    echo "  Provide proof the task works:"
-                    echo "    autonomy task complete $name 'Tested: [describe what was tested]'"
-                    return 1
-                fi
-                
-                # Update task with verification
-                local tmp_task_file="${TASKS_DIR}/${name}.tmp.$$"
-                jq --arg verify "$verification" --arg date "$(date -Iseconds)" '.status = "completed" | .completed = true | .completed_at = $date | .verification = $verify | .attempts = (.attempts // 0) + 1' "$TASKS_DIR/${name}.json" > "$tmp_task_file" && mv "$tmp_task_file" "$TASKS_DIR/${name}.json"
-                
-                echo -e "${GREEN}✓${NC} Task completed: $name"
-                if [[ -n "$verification" ]]; then
-                    echo "  Verification: $verification"
-                fi
-                log_activity "task_completed" "{\"name\": \"$name\", \"verification\": \"$verification\"}"
-                
-                # ── Completion notifications (multi-channel) ────────
-                # 1. Write completed.md summary
-                local desc
-                desc=$(jq -r '.description // ""' "$TASKS_DIR/${name}.json" 2>/dev/null)
-                {
-                    echo ""
-                    echo "## ✅ $name — Completed $(date '+%Y-%m-%d %H:%M')"
-                    echo "**Description:** $desc"
-                    echo "**Verification:** $verification"
-                    echo ""
-                } >> "$STATE_DIR/completed.md"
-
-                # 2. Clear needs_attention if this was the active task
-                if [[ -f "$STATE_DIR/needs_attention.json" ]]; then
-                    local attn_task
-                    attn_task=$(jq -r '.task_name // ""' "$STATE_DIR/needs_attention.json" 2>/dev/null)
-                    [[ "$attn_task" == "$name" ]] && rm -f "$STATE_DIR/needs_attention.json"
-                fi
-
-                # 3. Journal entry
-                if [[ -f "$AUTONOMY_DIR/lib/journal.sh" ]]; then
-                    bash "$AUTONOMY_DIR/lib/journal.sh" append "$name" \
-                        "Task completed. Verification: $verification" "completed" "" > /dev/null 2>&1
-                fi
-
-                # 4. Email notification
-                if [[ -f "$AUTONOMY_DIR/lib/notify.sh" ]]; then
-                    bash "$AUTONOMY_DIR/lib/notify.sh" task-complete "$name" "$verification" > /dev/null 2>&1 || true
-                fi
-
-                # 5. Discord notification (if integration exists)
-                if [[ -f "$AUTONOMY_DIR/integrations/discord.sh" ]]; then
-                    bash "$AUTONOMY_DIR/integrations/discord.sh" send \
-                        "✅ Task **$name** completed: $verification" > /dev/null 2>&1 || true
-                fi
-
-                # 6. Rebuild HEARTBEAT.md so next cycle sees the updated state
-                if [[ -f "$AUTONOMY_DIR/lib/heartbeat-builder.sh" ]]; then
-                    bash "$AUTONOMY_DIR/lib/heartbeat-builder.sh" build > /dev/null 2>&1
-                fi
-            else
-                echo -e "${RED}Error:${NC} Task not found: $name"
-                return 1
-            fi
+        work|start)
+            local name="${1:-}"
+            [[ -z "$name" ]] && { error "Task name required"; return 1; }
+            local task_file="$TASKS_DIR/${name}.json"
+            [[ ! -f "$task_file" ]] && { error "Task '$name' not found"; return 1; }
+            
+            jq '.status = "in_progress" | .updated_at = "'$(date -Iseconds)'"' "$task_file" > "$task_file.tmp" && mv "$task_file.tmp" "$task_file"
+            success "Task '$name' marked as in-progress"
+            ;;
+            
+        complete|done)
+            local name="${1:-}"
+            local proof="${2:-}"
+            [[ -z "$name" ]] && { error "Task name required"; return 1; }
+            [[ -z "$proof" ]] && { error "Proof required (what was tested/verified)"; return 1; }
+            
+            local task_file="$TASKS_DIR/${name}.json"
+            [[ ! -f "$task_file" ]] && { error "Task '$name' not found"; return 1; }
+            
+            jq '.status = "completed" | .completed_at = "'$(date -Iseconds)'" | .proof = "'$proof'" | .updated_at = "'$(date -Iseconds)'"' "$task_file" > "$task_file.tmp" && mv "$task_file.tmp" "$task_file"
+            success "Task '$name' completed"
+            echo "  Proof: $proof"
+            ;;
+            
+        delete|rm)
+            local name="${1:-}"
+            [[ -z "$name" ]] && { error "Task name required"; return 1; }
+            local task_file="$TASKS_DIR/${name}.json"
+            [[ ! -f "$task_file" ]] && { error "Task '$name' not found"; return 1; }
+            rm "$task_file"
+            success "Task '$name' deleted"
             ;;
             
         *)
-            echo "Usage: autonomy task {list|create <name> [desc] [priority]|complete <name>}"
-            echo "Priority levels: critical, high, normal (default), low"
+            echo "Usage: autonomy task {create|list|work|complete|delete} [args]"
             ;;
     esac
 }
 
-# Spawn a sub-agent
-cmd_spawn() {
-    local task="$1"
-    
-    if [[ -z "$task" ]]; then
-        echo "Usage: autonomy spawn <task-description>"
-        return 1
-    fi
-    
-    # Check limits
-    local agents=$(get_config '.workstation.running_agents | length')
-    local max_agents=$(get_config '.agentic_config.hard_limits.max_sub_agents')
-    
-    if [[ "$agents" -ge "$max_agents" ]]; then
-        echo -e "${RED}Error:${NC} Agent limit reached ($agents/$max_agents)"
-        return 1
-    fi
-    
-    local agent_id="agent-$(date +%s)"
-    
-    # Spawn via sessions_spawn
-    echo "Spawning agent: $agent_id"
-    echo "Task: $task"
-    
-    # Record the agent
-    local tmp_file="${CONFIG}.tmp"
-    jq '.workstation.running_agents += [{"id": "'$agent_id'", "task": "'$task'", "started": "'$(date -Iseconds)'", "status": "running"}]' "$CONFIG" > "$tmp_file" && mv "$tmp_file" "$CONFIG"
-    
-    log_activity "agent_spawned" "{\"id\": \"$agent_id\", \"task\": \"$task\"}"
-    
-    echo -e "${GREEN}✓${NC} Agent spawned: $agent_id"
-    echo "  The agent will work on: $task"
-}
-
-# Schedule a recurring task
-cmd_schedule() {
-    local subcmd="${1:-list}"
+# GitHub Integration
+cmd_gh() {
+    local subcmd="${1:-status}"
+    shift 2>/dev/null || true
     
     case "$subcmd" in
-        list)
-            echo "Scheduled Tasks:"
-            get_config '.workstation.schedules[]' | while read -r schedule; do
-                echo "  • $schedule"
-            done
+        prs|pull-requests)
+            log "Your open PRs:"
+            gh pr list --author @me --state open --json number,title,headRefName,url,createdAt -q '.[] | "  #\(.number) \(.title) [\(.headRefName)]"' 2>/dev/null || echo "  No open PRs"
             ;;
             
-        add)
-            shift
-            local interval="$1"
-            local task="$2"
-            
-            if [[ -z "$interval" || -z "$task" ]]; then
-                echo "Usage: autonomy schedule add <interval> <task>"
-                echo "Example: autonomy schedule add '30m' 'check email'"
-                return 1
-            fi
-            
-            # Check limits
-            local schedules=$(get_config '.workstation.schedules | length')
-            local max_schedules=$(get_config '.agentic_config.hard_limits.max_schedules')
-            
-            if [[ "$schedules" -ge "$max_schedules" ]]; then
-                echo -e "${RED}Error:${NC} Schedule limit reached ($schedules/$max_schedules)"
-                return 1
-            fi
-            
-            local tmp_file="${CONFIG}.tmp"
-            local timestamp
-            timestamp=$(date -Iseconds)
-            jq --arg interval "$interval" \
-               --arg task "$task" \
-               --arg created "$timestamp" \
-               '.workstation.schedules += [{"interval": $interval, "task": $task, "last_run": null, "created": $created}]' \
-               "$CONFIG" > "$tmp_file" && mv "$tmp_file" "$CONFIG"
-            
-            echo -e "${GREEN}✓${NC} Scheduled: $task every $interval"
-            log_activity "schedule_added" "{\"interval\": \"$interval\", \"task\": \"$task\"}"
+        reviews)
+            log "PRs waiting for your review:"
+            gh pr list --review-requested=@me --state open --json number,title,url -q '.[] | "  #\(.number) \(.title)"' 2>/dev/null || echo "  None"
             ;;
             
-        remove)
-            shift
-            local index="$1"
+        ci-status|checks)
+            log "Recent CI status:"
+            gh run list --limit 5 --json name,headBranch,conclusion,createdAt -q '.[] | "  \(.conclusion): \(.name) on \(.headBranch)"' 2>/dev/null || echo "  No recent runs"
+            ;;
             
-            local tmp_file="${CONFIG}.tmp"
-            jq 'del(.workstation.schedules['$index'])' "$CONFIG" > "$tmp_file" && mv "$tmp_file" "$CONFIG"
+        notifications|notifs)
+            log "Unread notifications:"
+            local count=$(gh api notifications --jq '[.[] | select(.unread)] | length' 2>/dev/null || echo "0")
+            [[ "$count" -gt 0 ]] && gh api notifications --jq '.[] | select(.unread) | "  \(.subject.type): \(.subject.title)"' 2>/dev/null | head -10
+            [[ "$count" -eq 0 ]] && echo "  No unread notifications"
+            ;;
             
-            echo -e "${GREEN}✓${NC} Schedule removed"
+        issues)
+            log "Recent issues in your repos:"
+            gh issue list --author @me --state open --limit 5 --json number,title,url -q '.[] | "  #\(.number) \(.title)"' 2>/dev/null || echo "  No open issues"
+            ;;
+            
+        status)
+            echo "GitHub Status:"
+            local prs=$(gh pr list --author @me --state open --json number -q 'length' 2>/dev/null || echo "0")
+            local reviews=$(gh pr list --review-requested=@me --state open --json number -q 'length' 2>/dev/null || echo "0")
+            echo "  Open PRs: $prs"
+            echo "  Reviews requested: $reviews"
             ;;
             
         *)
-            echo "Usage: autonomy schedule {list|add <interval> <task>|remove <index>}"
+            echo "Usage: autonomy gh {prs|reviews|ci-status|notifications|issues|status}"
             ;;
     esac
 }
 
-# Create a custom tool
-cmd_tool() {
-    local subcmd="${1:-list}"
+# VM / System Commands
+cmd_vm() {
+    local subcmd="${1:-help}"
+    shift 2>/dev/null || true
     
     case "$subcmd" in
-        list)
-            echo "Custom Tools:"
-            for tool in "$TOOLS_DIR"/*; do
-                [[ -f "$tool" ]] || continue
-                echo "  • $(basename "$tool")"
-            done
+        process_list|ps)
+            ps aux --sort=-%cpu | head -20
             ;;
-            
-        create)
-            shift
-            local name="$1"
-            
-            if [[ -z "$name" ]]; then
-                echo "Usage: autonomy tool create <name>"
-                echo "Then write the tool code."
-                return 1
-            fi
-            
-            cat > "$TOOLS_DIR/$name" << 'TOOL_HEADER'
-#!/bin/bash
-# Custom tool created by Agentic Autonomy
-# Created: $(date -Iseconds)
-
-TOOL_HEADER
-            chmod +x "$TOOLS_DIR/$name"
-            
-            # Record in config
-            local tmp_file="${CONFIG}.tmp"
-            jq '.workstation.created_tools += ["'$name'"]' "$CONFIG" > "$tmp_file" && mv "$tmp_file" "$CONFIG"
-            
-            echo -e "${GREEN}✓${NC} Tool created: $TOOLS_DIR/$name"
-            echo "  Edit it to add functionality."
-            log_activity "tool_created" "{\"name\": \"$name\"}"
+        top_cpu)
+            ps aux --sort=-%cpu | head -10
             ;;
-            
+        top_memory)
+            ps aux --sort=-%mem | head -10
+            ;;
+        disk|df)
+            df -h
+            ;;
+        memory|mem)
+            free -h
+            ;;
+        load)
+            uptime
+            ;;
+        docker_ps)
+            docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || echo "Docker not available"
+            ;;
+        docker_images)
+            docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" 2>/dev/null || echo "Docker not available"
+            ;;
+        service_list)
+            systemctl list-units --type=service --state=running 2>/dev/null | head -15 || echo "systemctl not available"
+            ;;
+        service_status)
+            local svc="${1:-}"
+            [[ -z "$svc" ]] && { error "Service name required"; return 1; }
+            systemctl status "$svc" 2>/dev/null || service "$svc" status 2>/dev/null || echo "Service '$svc' not found"
+            ;;
+        health)
+            echo "System Health:"
+            echo "  CPU: $(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1)%"
+            echo "  Memory: $(free | grep Mem | awk '{printf "%.1f%%", $3/$2 * 100.0}')"
+            echo "  Disk: $(df / | tail -1 | awk '{print $5}')"
+            echo "  Load: $(uptime | awk -F'load average:' '{print $2}')"
+            ;;
         *)
-            echo "Usage: autonomy tool {list|create <name>}"
+            echo "VM Commands:"
+            echo "  process_list, top_cpu, top_memory, disk, memory, load"
+            echo "  docker_ps, docker_images"
+            echo "  service_list, service_status <service>"
+            echo "  health"
             ;;
     esac
 }
 
-# Install/configure scheduler
-# Install/configure scheduler
-cmd_install() {
-    local scheduler_type="${1:-daemon}"
+# Check command (for cron/heartbeat)
+cmd_check() {
+    local notify=false
+    [[ "$1" == "--notify" ]] && notify=true
     
-    case "$scheduler_type" in
-        daemon)
-            echo "Switching to built-in daemon scheduler..."
-            
-            # Stop cron if exists
-            if crontab -l 2>/dev/null | grep -q "autonomy.*daemon"; then
-                (crontab -l 2>/dev/null | grep -v "autonomy.*daemon") | crontab -
-                echo "  Removed cron entry"
-            fi
-            
-            # Update config
-            local tmp_file="${CONFIG}.tmp"
-            jq '.scheduler.type = "daemon" | .scheduler.auto_start = true' "$CONFIG" > "$tmp_file" && mv "$tmp_file" "$CONFIG"
-            
-            # Start daemon
-            "$AUTONOMY_DIR/daemon.sh" restart 2>/dev/null || "$AUTONOMY_DIR/daemon.sh" start
-            
-            echo -e "${GREEN}✓${NC} Now using built-in daemon"
-            echo "  Auto-starts when you run 'autonomy on'"
-            ;;
-            
-        cron)
-            echo "Switching to system cron scheduler..."
-            
-            # Stop daemon
-            "$AUTONOMY_DIR/daemon.sh" stop 2>/dev/null
-            
-            # Add cron entry
-            local cron_cmd="cd $AUTONOMY_DIR && bash daemon.sh once >> logs/cron.log 2>&1"
-            local cron_entry="*/10 * * * * $cron_cmd"
-            
-            # Remove existing entries first
-            (crontab -l 2>/dev/null | grep -v "autonomy.*daemon") | crontab -
-            
-            # Add new entry
-            (crontab -l 2>/dev/null; echo "$cron_entry") | crontab -
-            
-            # Update config
-            local tmp_file="${CONFIG}.tmp"
-            jq '.scheduler.type = "cron" | .scheduler.auto_start = false' "$CONFIG" > "$tmp_file" && mv "$tmp_file" "$CONFIG"
-            
-            echo -e "${GREEN}✓${NC} Now using system cron"
-            echo "  Cron entry added: Every 10 minutes"
-            echo "  Verify with: crontab -l"
-            ;;
-            
-        auto)
-            echo "Auto-detecting best scheduler..."
-            
-            # Check if cron is available
-            if command -v crontab >/dev/null 2>&1; then
-                # Try to use cron (more reliable)
-                cmd_install cron
-            else
-                # Fall back to daemon
-                cmd_install daemon
-            fi
-            ;;
-            
-        *)
-            echo "Usage: autonomy install {daemon|cron|auto}"
-            echo ""
-            echo "Scheduler types:"
-            echo "  daemon  - Built-in daemon (default, works everywhere)"
-            echo "  cron    - System cron (survives reboots, requires crontab)"
-            echo "  auto    - Auto-detect best option"
-            echo ""
-            echo "Current: $(get_config '.scheduler.type // \"daemon\"')"
-            ;;
-    esac
-}
-
-# ═══════════════════════════════════════════════════════════════
-# autonomy go — One-shot bootstrap: activate + task + heartbeat
-# "Start this project and keep going"
-# ═══════════════════════════════════════════════════════════════
-cmd_go() {
-    local instruction="$*"
-
-    echo ""
-    echo "═══════════════════════════════════════════════════════════"
-    echo "  AUTONOMY GO — Bootstrapping agentic mode"
-    echo "═══════════════════════════════════════════════════════════"
-    echo ""
-
-    # 1. Ensure config exists (config-free defaults handle this)
-    ensure_config
-
-    # 2. Activate workstation if not already active
-    local active=$(get_config '.workstation.active')
-    if [[ "$active" != "true" ]]; then
-        echo "  [1/5] Activating workstation..."
-        cmd_on
-        echo ""
+    local issues=()
+    
+    # Check pending tasks
+    local pending=$(ls -1 "$TASKS_DIR"/*.json 2>/dev/null | while read f; do jq -r 'select(.status == "pending") | .name' "$f"; done | wc -l)
+    [[ $pending -gt 0 ]] && issues+=("$pending pending tasks")
+    
+    # Check GitHub notifications
+    local notifs=$(gh api notifications --jq '[.[] | select(.unread)] | length' 2>/dev/null || echo "0")
+    [[ $notifs -gt 0 ]] && issues+=("$notifs GitHub notifications")
+    
+    # Check CI failures
+    local failed_ci=$(gh run list --status failure --limit 5 --json conclusion -q 'length' 2>/dev/null || echo "0")
+    [[ $failed_ci -gt 0 ]] && issues+=("$failed_ci failed CI runs")
+    
+    if [[ ${#issues[@]} -gt 0 ]]; then
+        log "Issues found:"
+        for issue in "${issues[@]}"; do
+            echo "  • $issue"
+        done
+        $notify && echo "[autonomy] ${#issues[@]} issues need attention: ${issues[*]}"
     else
-        echo "  [1/5] Workstation already active ✓"
+        log "All clear"
     fi
-
-    # 3. Scan workspace
-    echo "  [2/5] Scanning workspace..."
-    if [[ -f "$AUTONOMY_DIR/lib/workspace-scanner.sh" ]]; then
-        local scan_result
-        scan_result=$(bash "$AUTONOMY_DIR/lib/workspace-scanner.sh" oneliner 2>/dev/null)
-        echo "         $scan_result"
-    fi
-    echo ""
-
-    # 4. Create task if instruction provided
-    if [[ -n "$instruction" ]]; then
-        echo "  [3/5] Creating task from instruction..."
-        local task_name="go-$(date +%s)"
-        cmd_task create "$task_name" "$instruction"
-        echo ""
-
-        # 5. Immediately flag it + rebuild HEARTBEAT.md
-        echo "  [4/5] Flagging task for AI processing..."
-        local tmp="${TASKS_DIR}/${task_name}.json.tmp.$$"
-        jq --arg ts "$(date -Iseconds)" \
-           '.status = "needs_ai_attention" | .flagged_at = $ts | .flagged_by = "go"' \
-           "$TASKS_DIR/${task_name}.json" > "$tmp" && mv "$tmp" "$TASKS_DIR/${task_name}.json"
-
-        # Write needs_attention state
-        cat > "$STATE_DIR/needs_attention.json" <<EOF
-{
-  "timestamp": "$(date -Iseconds)",
-  "task_name": "$task_name",
-  "task_file": "$TASKS_DIR/${task_name}.json",
-  "description": "$instruction",
-  "status": "needs_ai_attention",
-  "flagged_by": "go"
-}
-EOF
-        log_activity "go_task_flagged" "{\"task\": \"$task_name\", \"instruction\": \"$instruction\"}"
-    else
-        echo "  [3/5] No instruction — AI will decide what to do"
-        echo "  [4/5] Skipping task creation"
-    fi
-
-    # 5. Build fresh HEARTBEAT.md
-    echo "  [5/5] Building HEARTBEAT.md with live context..."
-    if [[ -f "$AUTONOMY_DIR/lib/heartbeat-builder.sh" ]]; then
-        bash "$AUTONOMY_DIR/lib/heartbeat-builder.sh" build > /dev/null 2>&1
-        echo -e "         ${GREEN}✓${NC} HEARTBEAT.md ready"
-    fi
-
-    echo ""
-    echo "═══════════════════════════════════════════════════════════"
-    echo ""
-    echo -e "  ${GREEN}AUTONOMY IS GO${NC}"
-    echo ""
-    if [[ -n "$instruction" ]]; then
-        echo "  Instruction: $instruction"
-        echo ""
-    fi
-    echo "  The AI will pick this up on the next heartbeat cycle."
-    echo "  Monitor: http://localhost:8767"
-    echo "  Logs:    autonomy logs"
-    echo "  Status:  autonomy status"
-    echo "  Stop:    autonomy off"
-    echo ""
-    echo "═══════════════════════════════════════════════════════════"
-}
-
-# Work on something (the main entry point)
-cmd_work() {
-    local instruction="$*"
-    
-    if [[ -z "$instruction" ]]; then
-        echo "Usage: autonomy work <instruction>"
-        echo ""
-        echo "Examples:"
-        echo '  autonomy work "Build a memory system for tracking conversations"'
-        echo '  autonomy work "Research API rate limits and document findings"'
-        echo '  autonomy work "Create a tool that checks disk space daily"'
-        return 1
-    fi
-    
-    # Check if workstation is active
-    local active=$(get_config '.workstation.active')
-    if [[ "$active" != "true" ]]; then
-        echo -e "${YELLOW}⚠${NC} Workstation not active. Run 'autonomy on' first."
-        return 1
-    fi
-    
-    # Create a task from the instruction
-    local task_name="task-$(date +%s)"
-    cmd_task create "$task_name" "$instruction"
-    
-    echo ""
-    echo "═══════════════════════════════════════════════════════════"
-    echo "  WORK ASSIGNMENT"
-    echo "═══════════════════════════════════════════════════════════"
-    echo ""
-    echo "  Instruction: $instruction"
-    echo "  Task ID: $task_name"
-    echo ""
-    echo "  The AI will now:"
-    echo "    1. REASON about the instruction"
-    echo "    2. DECIDE how to approach it"
-    echo "    3. CREATE a plan if needed"
-    echo "    4. EXECUTE (within hard limits)"
-    echo "    5. REPORT back when complete"
-    echo ""
-    echo "  Hard limits in effect:"
-    echo "    • Max $(get_config '.agentic_config.hard_limits.max_file_edits_per_session') file edits"
-    echo "    • Max $(get_config '.agentic_config.hard_limits.max_web_searches') web searches"
-    echo "    • Daily token budget: $(get_config '.agentic_config.hard_limits.daily_token_budget')"
-    echo ""
-    echo "═══════════════════════════════════════════════════════════"
-    echo ""
-    
-    log_activity "work_assigned" "{\"task\": \"$task_name\", \"instruction\": \"$instruction\"}"
-    
-    # The AI now takes over and decides what to do
-    # This is where the agentic part happens - the AI reasons and acts
-    echo "  AI: Analyzing instruction..."
-    echo "  AI: Reasoning about approach..."
-    echo "  AI: Ready to execute."
-    echo ""
-    echo "  (The AI is now in control - check logs for progress)"
-}
-
-# Update from GitHub (keep this)
-cmd_update() {
-    if [[ -f "$AUTONOMY_DIR/checks/self_update.sh" ]]; then
-        bash "$AUTONOMY_DIR/checks/self_update.sh" "${1:-check}"
-    else
-        echo "Self-update not available"
-    fi
-}
-
-# Manage autonomy levels
-cmd_level() {
-    if [[ -f "$AUTONOMY_DIR/lib/autonomy-levels.sh" ]]; then
-        bash "$AUTONOMY_DIR/lib/autonomy-levels.sh" "$@"
-    else
-        echo "Autonomy levels not available"
-    fi
-}
-
-# Configuration wizard
-cmd_wizard() {
-    echo "═══════════════════════════════════════════════════════"
-    echo "  Autonomy Configuration Wizard"
-    echo "═══════════════════════════════════════════════════════"
-    echo ""
-    
-    # Step 1: Workstation activation
-    echo "Step 1: Workstation Activation"
-    read -p "Enable agentic autonomy? (y/n): " enable
-    if [[ "$enable" == "y" ]]; then
-        cmd_on
-    fi
-    echo ""
-    
-    # Step 2: Scheduler setup
-    echo "Step 2: Scheduler Setup"
-    echo "  1) Built-in daemon (recommended)"
-    echo "  2) System cron"
-    read -p "Choose scheduler (1/2): " scheduler
-    if [[ "$scheduler" == "1" ]]; then
-        cmd_install daemon
-    elif [[ "$scheduler" == "2" ]]; then
-        cmd_install cron
-    fi
-    echo ""
-    
-    # Step 3: Web UI
-    echo "Step 3: Web UI"
-    read -p "Start web UI? (y/n): " webui
-    if [[ "$webui" == "y" ]]; then
-        cd "$AUTONOMY_DIR" && nohup python3 web_ui.py > /tmp/webui.log 2>&1 &
-        echo "Web UI started on http://localhost:8767"
-    fi
-    echo ""
-    
-    # Step 4: Completion setup
-    echo "Step 4: Shell Completion"
-    echo "Add this to your ~/.bashrc:"
-    echo "  source $AUTONOMY_DIR/completion.sh"
-    echo ""
-    
-    echo "═══════════════════════════════════════════════════════"
-    echo "  Wizard Complete!"
-    echo "═══════════════════════════════════════════════════════"
-    echo ""
-    echo "Quick commands:"
-    echo "  autonomy status     - Check status"
-    echo "  autonomy work       - Give the AI a task"
-    echo "  autonomy daemon     - Control the daemon"
-}
-
-# Manage aliases
-cmd_alias() {
-    local alias_file="$AUTONOMY_DIR/state/aliases"
-    mkdir -p "$AUTONOMY_DIR/state"
-    
-    case "${1:-list}" in
-        list)
-            echo "Defined aliases:"
-            if [[ -f "$alias_file" ]]; then
-                cat "$alias_file" | while read line; do
-                    name=$(echo "$line" | cut -d= -f1)
-                    cmd=$(echo "$line" | cut -d= -f2-)
-                    echo "  $name -> $cmd"
-                done
-            else
-                echo "  No aliases defined"
-            fi
-            echo ""
-            echo "Usage: autonomy alias add <name> '<command>'"
-            echo "       autonomy alias remove <name>"
-            ;;
-        add)
-            shift
-            local name="$1"
-            shift
-            local cmd="$*"
-            echo "${name}=${cmd}" >> "$alias_file"
-            echo "Added alias: $name -> $cmd"
-            ;;
-        remove)
-            shift
-            local name="$1"
-            if [[ -f "$alias_file" ]]; then
-                grep -v "^${name}=" "$alias_file" > "${alias_file}.tmp" && mv "${alias_file}.tmp" "$alias_file"
-                echo "Removed alias: $name"
-            fi
-            ;;
-        *)
-            echo "Usage: autonomy alias {list|add <name> '<command>'|remove <name>}"
-            ;;
-    esac
-}
-
-# Check for updates
-cmd_check_updates() {
-    local current=$(get_config '.version // "2.0.0"')
-    echo "Current version: $current"
-    
-    # Check if git repo
-    if [[ -d "$AUTONOMY_DIR/.git" ]]; then
-        cd "$AUTONOMY_DIR"
-        git fetch origin 2>/dev/null
-        behind=$(git rev-list HEAD..origin/main --count 2>/dev/null || echo 0)
-        if [[ $behind -gt 0 ]]; then
-            echo "📦 Update available: $behind commits behind"
-            echo "Run 'autonomy update apply' to update"
-        else
-            echo "✅ Up to date"
-        fi
-    else
-        echo "Not a git repository - manual updates required"
-    fi
-}
-
-# Show help
-show_help() {
-    cat << EOF
-Agentic Autonomy - AI-driven self-improvement for OpenClaw
-
-QUICK START:
-  onboard                  Interactive setup wizard (first time)
-  onboard quick            Quick auto-setup
-  go "<instruction>"       ONE-SHOT: activate + task + go (plug & play)
-  go                       Activate with no task (AI decides)
-  work "<instruction>"      Give the AI a task and let it decide how
-  on                       Activate agentic mode (auto-starts daemon)
-  off                      Deactivate
-
-HEARTBEAT DAEMON (Self-contained scheduling):
-  daemon start             Start heartbeat daemon (every 10 min)
-  daemon stop              Stop the daemon
-  daemon restart           Restart the daemon
-  daemon status            Check if daemon is running
-  daemon once              Run a single heartbeat cycle now
-  daemon logs              View daemon logs
-
-SCHEDULER INSTALLATION:
-  install daemon           Use built-in daemon (default, works everywhere)
-  install cron             Use system cron (survives reboots)
-  install auto             Auto-detect best option
-                           Current: $(get_config '.scheduler.type // "daemon"')
-
-AUTONOMY LEVELS:
-  level                    Show current autonomy level
-  level list               List available levels
-  level set supervised     All actions require approval
-  level set semi-autonomous Balanced automation (default)
-  level set fully-autonomous Maximum automation within hard limits
-
-ANTI-HALLUCINATION (Required):
-  task complete <name> "proof"  Must provide proof task actually works
-  
-  Good:  task complete X "Tested: logs tokens, file exists with data"
-  Bad:   task complete X (no proof = rejection)
-
-AGENT SPAWNING:
-  spawn "<task>"           Spawn a sub-agent for parallel work
-                           (max $(get_config '.agentic_config.hard_limits.max_sub_agents') agents)
-
-SCHEDULING:
-  schedule list            Show recurring schedules
-  schedule add <int> <task> Add schedule (e.g., '30m', '1h')
-                           (max $(get_config '.agentic_config.hard_limits.max_schedules') schedules)
-
-TASK DEPENDENCIES:
-  deps add <task> <dep>    Add dependency (task requires dep first)
-  deps remove <task> <dep> Remove dependency
-  deps check <task>        Check if task can start
-  deps list <task>         List dependencies
-  deps ready               Show tasks ready to start
-  deps graph               Show dependency graph
-  deps setup               Interactive setup wizard
-
-GITHUB ACTIONS:
-  gh status                Show workflow status
-  gh trigger <workflow>    Trigger workflow run
-  gh watch <run-id>        Watch workflow run
-  gh logs <run-id>         View workflow logs
-  gh create-workflow <name> Create new workflow
-  gh setup                 Configure GitHub integration
-
-TEMPLATES:
-  template list            List available templates
-  template create <tmpl> <name>  Create task from template
-  template show <template>  Show template details
-  template save <task> <tmpl>  Save task as template
-  template new             Create custom template
-
-TOOL CREATION:
-  tool list                Show custom tools
-  tool create <name>       Create a new tool
-
-SELF-UPDATE:
-  update check             Check for updates from GitHub
-  update apply             Apply latest update
-
-NOTIFICATIONS:
-  notify status            Check email notification status
-  notify setup             Configure email notifications
-  notify test              Send test email
-
-DATABASE:
-  db init                  Initialize database (SQLite)
-  db status                Show database status
-  db sync-to-db            Sync JSON tasks to database
-  db sync-from-db          Export database to JSON files
-  db setup                 Configure database backend
-
-API AUTH:
-  api-auth generate        Generate new API token
-  api-auth validate        Validate a token
-  api-auth list            List all tokens
-  api-auth revoke          Revoke a token
-  api-auth status          Show rate limit status
-  api-auth setup           Interactive setup wizard
-
-MONITORING:
-  status                   Show workstation status and limits
-  logs                     View activity logs
-  heartbeat recent         Show recent heartbeat activity
-  heartbeat stats          Show heartbeat statistics
-  check-updates            Check for available updates
-
-CAPABILITIES (New):
-  vm <command> [args]      VM integration (processes, services, docker, etc.)
-                           Commands: process_list, service_status, docker_ps,
-                           cpu, memory, disk, network_connections, etc.
-  watcher <cmd> [args]     File watching and auto-trigger
-                           Commands: add, remove, list, check, daemon_start
-  diagnostic <cmd> [args]  Self-diagnostics and repair
-                           Commands: health, repair, system
-  execute <cmd> [args]     Enhanced task execution
-                           Commands: retry, async, parallel, timeout
-  log <cmd> [args]         Intelligent logging
-                           Commands: query, tail, stats, errors, rotate
-  plugin <cmd> [args]      Plugin system
-                           Commands: list, load, create, discover
-
-UTILITIES:
-  wizard                   Interactive configuration wizard
-  alias list               List command aliases
-  alias add <name> <cmd>   Add command alias
-  alias remove <name>      Remove command alias
-  version                  Show version
-
-EXAMPLES:
-  autonomy go "Build a REST API for user management"
-  autonomy go "Fix all the bugs in src/ and write tests"
-  autonomy go                    # activate, AI decides what to do
-  autonomy work "Build a system to track my daily token usage"
-  autonomy work "Research best practices for memory management"
-  autonomy spawn "Analyze the codebase for security issues"
-  autonomy schedule add 1h "Check for new emails"
-  autonomy alias add st "status"
-  autonomy wizard
-
-HARD LIMITS (Safety):
-  • Max $(get_config '.agentic_config.hard_limits.max_concurrent_tasks') concurrent tasks
-  • Max $(get_config '.agentic_config.hard_limits.max_sub_agents') sub-agents
-  • Max $(get_config '.agentic_config.hard_limits.max_schedules') schedules
-  • $(get_config '.agentic_config.hard_limits.daily_token_budget') daily token budget
-  • Some actions require approval
-EOF
 }
 
 # Main dispatch
-case "${1:-status}" in
-    onboard)
-        shift
-        "$AUTONOMY_DIR/onboard" "$@"
-        ;;
-    status)
-        show_agentic_status
-        ;;
-    on)
-        cmd_on
-        ;;
-    off)
-        cmd_off
-        ;;
-    go)
-        shift
-        cmd_go "$@"
-        ;;
-    work)
-        shift
-        cmd_work "$@"
-        ;;
-    task)
-        shift
+cmd="${1:-help}"
+shift 2>/dev/null || true
+
+case "$cmd" in
+    task|tasks)
         cmd_task "$@"
         ;;
-    spawn)
-        shift
-        cmd_spawn "$@"
+    gh|github)
+        cmd_gh "$@"
         ;;
-    schedule)
-        shift
-        cmd_schedule "$@"
+    vm|system)
+        cmd_vm "$@"
         ;;
-    deps)
-        shift
-        "$AUTONOMY_DIR/deps" "$@"
-        ;;
-    gh)
-        shift
-        "$AUTONOMY_DIR/gh" "$@"
-        ;;
-    tool)
-        shift
-        cmd_tool "$@"
-        ;;
-    update)
-        shift
-        cmd_update "$@"
-        ;;
-    daemon)
-        shift
-        "$AUTONOMY_DIR/daemon.sh" "$@"
-        ;;
-    install)
-        shift
-        cmd_install "$@"
-        ;;
-    level)
-        shift
-        cmd_level "$@"
-        ;;
-    logs)
-        tail -20 "$LOGS_DIR/agentic.jsonl" 2>/dev/null || echo "No logs yet"
-        ;;
-    wizard)
-        cmd_wizard
-        ;;
-    alias)
-        shift
-        cmd_alias "$@"
-        ;;
-    notify)
-        shift
-        "$AUTONOMY_DIR/lib/notify.sh" "$@"
-        ;;
-    db)
-        shift
-        "$AUTONOMY_DIR/db" "$@"
-        ;;
-    template)
-        shift
-        "$AUTONOMY_DIR/template" "$@"
-        ;;
-    api-auth)
-        shift
-        "$AUTONOMY_DIR/api-auth" "$@"
-        ;;
-    heartbeat)
-        shift
-        "$AUTONOMY_DIR/heartbeat" "$@"
-        ;;
-    vm)
-        shift
-        "$AUTONOMY_DIR/capabilities/vm-integration.sh" "$@"
-        ;;
-    watcher)
-        shift
-        "$AUTONOMY_DIR/capabilities/file-watcher.sh" "$@"
-        ;;
-    diagnostic|diag)
-        shift
-        "$AUTONOMY_DIR/capabilities/diagnostics.sh" "$@"
-        ;;
-    execute|exec)
-        shift
-        "$AUTONOMY_DIR/capabilities/task-executor.sh" "$@"
-        ;;
-    log|logs)
-        shift
-        "$AUTONOMY_DIR/capabilities/intelligent-logger.sh" "$@"
-        ;;
-    plugin|plugins)
-        shift
-        "$AUTONOMY_DIR/capabilities/plugin-system.sh" "$@"
-        ;;
-    version|-v|--version)
-        echo "Autonomy v$(get_config '.version // "2.0.0"')"
+    check)
+        cmd_check "$@"
         ;;
     help|--help|-h)
-        show_help
+        echo "Autonomy v2 — OpenClaw-Native Task Management"
+        echo ""
+        echo "Commands:"
+        echo "  task {create|list|work|complete|delete}  Task management"
+        echo "  gh {prs|reviews|ci-status|notifications}   GitHub integration"
+        echo "  vm {process_list|health|docker_ps|...}     System monitoring"
+        echo "  check [--notify]                           Check for issues"
+        echo ""
+        echo "Examples:"
+        echo "  autonomy task create 'fix-auth' 'Fix login bug'"
+        echo "  autonomy gh prs"
+        echo "  autonomy vm health"
         ;;
     *)
-        # Check if it's an alias
-        if [[ -f "$AUTONOMY_DIR/state/aliases" ]]; then
-            alias_cmd=$(grep "^$1=" "$AUTONOMY_DIR/state/aliases" | cut -d= -f2-)
-            if [[ -n "$alias_cmd" ]]; then
-                echo "Running alias: $1 -> $alias_cmd"
-                bash "$AUTONOMY_DIR/autonomy" $alias_cmd "${@:2}"
-                exit 0
-            fi
-        fi
-        echo "Unknown command: $1"
+        error "Unknown command: $cmd"
         echo "Run 'autonomy help' for usage"
         exit 1
         ;;
