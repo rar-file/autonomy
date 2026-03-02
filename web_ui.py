@@ -462,7 +462,7 @@ def save_personality():
 
 @app.route("/api/personality/suggest", methods=["POST"])
 def suggest_personality():
-    """Submit a suggestion for personality changes"""
+    """Submit a suggestion for personality changes - triggers immediate OpenClaw action"""
     data = request.json
     filename = data.get("file", "")
     suggestion = data.get("suggestion", "")
@@ -474,22 +474,52 @@ def suggest_personality():
     if filename not in safe_files:
         return jsonify({"success": False, "error": "Invalid file"})
     
+    workspace = Path("/root/.openclaw/workspace")
+    fpath = workspace / filename
+    
     try:
-        # Save suggestion to a pending file
-        pending_dir = Path("/root/.openclaw/workspace/pending_personality_changes")
-        pending_dir.mkdir(exist_ok=True)
+        # Read current content
+        current_content = ""
+        if fpath.exists():
+            with open(fpath) as f:
+                current_content = f.read()
+        
+        # Create the prompt for OpenClaw
+        prompt = f"""[AUTONOMY SUGGESTION] Update personality file
+
+File: {filename}
+User Suggestion: {suggestion}
+
+Current Content:
+```
+{current_content[:3000]}{"..." if len(current_content) > 3000 else ""}
+```
+
+Please review this suggestion and update the file accordingly. Apply the changes directly using your file editing tools.
+"""
+        
+        # Write to a trigger file that OpenClaw monitors
+        trigger_dir = workspace / ".autonomy_triggers"
+        trigger_dir.mkdir(exist_ok=True)
         
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        suggestion_file = pending_dir / f"{filename}_{timestamp}.txt"
+        trigger_file = trigger_dir / f"suggestion_{timestamp}.txt"
         
-        with open(suggestion_file, 'w') as f:
-            f.write(f"Target File: {filename}\n")
-            f.write(f"Submitted: {datetime.now().isoformat()}\n")
-            f.write(f"Status: pending\n")
-            f.write("-" * 50 + "\n\n")
-            f.write(suggestion)
+        with open(trigger_file, 'w') as f:
+            f.write(prompt)
         
-        return jsonify({"success": True, "message": "Suggestion saved for review"})
+        # Also save for record
+        pending_dir = workspace / "pending_personality_changes"
+        pending_dir.mkdir(exist_ok=True)
+        record_file = pending_dir / f"{filename}_{timestamp}.txt"
+        with open(record_file, 'w') as f:
+            f.write(f"File: {filename}\nSuggestion: {suggestion}\nTimestamp: {timestamp}\n")
+        
+        return jsonify({
+            "success": True, 
+            "message": f"Suggestion sent to OpenClaw for {filename}",
+            "trigger": str(trigger_file)
+        })
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 

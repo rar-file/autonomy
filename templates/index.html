@@ -1930,7 +1930,7 @@
             }
             
             btn.disabled = true;
-            status.innerHTML = '<span style="color:var(--info)">⏳ Submitting...</span>';
+            status.innerHTML = '<span style="color:var(--info)">🤖 Sending to OpenClaw...</span>';
             
             try {
                 const response = await fetch('/api/personality/suggest', {
@@ -1942,10 +1942,10 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    status.innerHTML = '<span style="color:var(--success)">✅ Submitted!</span>';
+                    status.innerHTML = '<span style="color:var(--success)">✅ Sent to OpenClaw!</span>';
                     document.getElementById('suggestion-text').value = '';
-                    showToast('Suggestion submitted for ' + file, 'success');
-                    setTimeout(() => { status.innerHTML = ''; }, 3000);
+                    showToast('OpenClaw is updating ' + file, 'success');
+                    setTimeout(() => { status.innerHTML = ''; }, 4000);
                 } else {
                     status.innerHTML = '<span style="color:var(--danger)">❌ Failed: ' + escapeHtml(data.error || 'Unknown') + '</span>';
                 }
