@@ -74,42 +74,102 @@ def get_skills():
         for skill_dir in SKILLS_DIR.iterdir():
             if skill_dir.is_dir():
                 skill_file = skill_dir / "SKILL.md"
+                readme_file = skill_dir / "README.md"
                 if skill_file.exists():
                     try:
                         with open(skill_file) as f:
                             content = f.read()
-                            # Parse basic info from SKILL.md
                             name = skill_dir.name
                             desc = ""
-                            for line in content.split("\n")[:10]:
+                            version = "1.0.0"
+                            # Parse SKILL.md
+                            for line in content.split("\n")[:20]:
                                 if line.startswith("description:") or line.startswith("_"):
                                     desc = line.split(":", 1)[1].strip() if ":" in line else line.strip("_ ")
-                                    break
+                                if "version" in line.lower() and ":" in line:
+                                    version = line.split(":", 1)[1].strip().strip('"').strip("'")
+                            
+                            # Check for enabled/disabled state
+                            config_file = skill_dir / ".disabled"
+                            enabled = not config_file.exists()
+                            
                             skills.append({
                                 "name": name,
                                 "description": desc or "No description",
                                 "path": str(skill_dir),
-                                "active": True
+                                "version": version,
+                                "enabled": enabled,
+                                "icon": "⚡"
                             })
                     except:
                         pass
     return skills
 
+def get_skill_detail(name):
+    """Get detailed info about a specific skill"""
+    skill_dir = SKILLS_DIR / name
+    if not skill_dir.exists():
+        return None
+    
+    result = {
+        "name": name,
+        "description": "",
+        "version": "1.0.0",
+        "commands": [],
+        "files": [],
+        "readme": "",
+        "enabled": True
+    }
+    
+    # Parse SKILL.md
+    skill_file = skill_dir / "SKILL.md"
+    if skill_file.exists():
+        with open(skill_file) as f:
+            content = f.read()
+            result["skill_md"] = content
+            for line in content.split("\n")[:30]:
+                if line.startswith("description:") or line.startswith("_"):
+                    result["description"] = line.split(":", 1)[1].strip() if ":" in line else line.strip("_ ")
+                if "version" in line.lower() and ":" in line:
+                    result["version"] = line.split(":", 1)[1].strip().strip('"').strip("'")
+    
+    # Parse README.md
+    readme_file = skill_dir / "README.md"
+    if readme_file.exists():
+        with open(readme_file) as f:
+            result["readme"] = f.read()
+    
+    # List files
+    for f in skill_dir.iterdir():
+        if f.is_file():
+            result["files"].append({
+                "name": f.name,
+                "size": f.stat().st_size
+            })
+    
+    # Check if enabled
+    result["enabled"] = not (skill_dir / ".disabled").exists()
+    
+    return result
+
 def get_personality_files():
     files = []
     workspace = Path("/root/.openclaw/workspace")
-    personality_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md"]
+    personality_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md"]
     
     for fname in personality_files:
         fpath = workspace / fname
         if fpath.exists():
             try:
                 stat = fpath.stat()
+                with open(fpath) as f:
+                    content = f.read()
                 files.append({
                     "name": fname,
                     "path": str(fpath),
                     "size": stat.st_size,
-                    "modified": datetime.fromtimestamp(stat.st_mtime).isoformat()
+                    "modified": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    "content": content[:5000]  # First 5000 chars
                 })
             except:
                 pass
@@ -315,6 +375,36 @@ def complete_task(task_id):
             json.dump(task, f, indent=2)
         return jsonify({"success": True})
     return jsonify({"success": False, "error": "Task not found"}), 404
+
+@app.route("/api/skills/<name>")
+def skill_detail(name):
+    """Get detailed info about a specific skill"""
+    detail = get_skill_detail(name)
+    if detail:
+        return jsonify(detail)
+    return jsonify({"error": "Skill not found"}), 404
+
+@app.route("/api/skills/<name>/toggle", methods=["POST"])
+def toggle_skill(name):
+    """Enable/disable a skill"""
+    skill_dir = SKILLS_DIR / name
+    if not skill_dir.exists():
+        return jsonify({"success": False, "error": "Skill not found"}), 404
+    
+    data = request.json
+    enabled = data.get("enabled", True)
+    
+    disabled_file = skill_dir / ".disabled"
+    
+    if enabled:
+        # Enable: remove .disabled file if exists
+        if disabled_file.exists():
+            disabled_file.unlink()
+    else:
+        # Disable: create .disabled file
+        disabled_file.touch()
+    
+    return jsonify({"success": True, "enabled": enabled})
 
 @app.route("/api/skills/install", methods=["POST"])
 def install_skill():

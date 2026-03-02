@@ -837,6 +837,135 @@
             color: var(--text-muted);
         }
         
+        /* Skill Detail Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            animation: modalSlide 0.3s ease;
+        }
+        
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(90deg, var(--bg-tertiary) 0%, transparent 100%);
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-height: calc(80vh - 80px);
+        }
+        
+        .skill-detail-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .skill-detail-meta span {
+            background: var(--bg-tertiary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .skill-detail-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .skill-detail-section h4 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+        
+        .skill-detail-readme {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+        
+        .skill-detail-files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .skill-detail-file {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
         /* Logs */
         .log-container {
             background: var(--bg-secondary);
@@ -1366,8 +1495,29 @@
         async function fetchData() {
             try {
                 const response = await fetch('/api/status');
-                currentData = await response.json();
-                updateAllPages();
+                const newData = await response.json();
+                
+                // Check if we're on skills or personality page with modal open
+                const skillModal = document.getElementById('skill-modal');
+                const isModalOpen = skillModal?.classList.contains('active');
+                const currentPage = document.querySelector('.page.active')?.id;
+                
+                // Merge data instead of full refresh to preserve UI state
+                if (currentData) {
+                    currentData = { ...currentData, ...newData };
+                } else {
+                    currentData = newData;
+                }
+                
+                // Only update the current page's content
+                if (currentPage) {
+                    const pageName = currentPage.replace('page-', '');
+                    updatePageContent(pageName);
+                }
+                
+                // Always update dashboard stats
+                updateDashboard(currentData);
+                
             } catch (error) {
                 console.error('Failed to fetch:', error);
             }
@@ -1539,7 +1689,7 @@
                 container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔧</div><div class="empty-title">No skills installed</div><div style="color:var(--text-secondary)">Visit the Workshop to install or create skills</div></div>';
             } else {
                 container.innerHTML = skills.map((s, i) => 
-                    '<div class="skill-item ' + (s.enabled === false ? 'disabled' : '') + '" style="animation: slideIn 0.3s ease ' + (i * 0.05) + 's both">' +
+                    '<div class="skill-item ' + (s.enabled === false ? 'disabled' : '') + '" style="animation: slideIn 0.3s ease ' + (i * 0.05) + 's both;cursor:pointer;" onclick="viewSkill('" + s.name + '"')" title="Click to view details">' +
                     '<div class="skill-header">' +
                     '<div style="display:flex;align-items:center;gap:0.75rem">' +
                     '<div style="width:40px;height:40px;border-radius:10px;background:var(--accent-bg);display:flex;align-items:center;justify-content:center;font-size:1.25rem">' + (s.icon || '⚡') + '</div>' +
@@ -1830,5 +1980,18 @@
         fetchData();
         setInterval(fetchData, 30000);
     </script>
+    
+    <!-- Skill Detail Modal -->
+    <div class="modal-overlay" id="skill-modal" onclick="closeSkillModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title" id="skill-modal-title">Skill Detail</span>
+                <button class="modal-close" onclick="closeSkillModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="skill-modal-body">
+                <div class="empty-state">Loading...</div>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
