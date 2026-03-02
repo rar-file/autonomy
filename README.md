@@ -1,4 +1,4 @@
-# Autonomy 🤖
+# Agentic Autonomy for OpenClaw
 
 <p align="center">
   <img src="assets/logo-banner.svg" alt="Autonomy" width="600">
@@ -7,40 +7,31 @@
 <p align="center">
   <img src="https://img.shields.io/badge/version-3.0.0-blue.svg" alt="Version 3.0.0">
   <img src="https://img.shields.io/badge/mode-agentic-green.svg" alt="Mode: Agentic">
-  <img src="https://img.shields.io/badge/OpenClaw-native-8A2BE2.svg" alt="OpenClaw Native">
   <img src="https://img.shields.io/badge/status-active-brightgreen.svg" alt="Status: Active">
 </p>
 
 <p align="center">
   <b>AI-driven self-improving autonomy system for OpenClaw.</b><br>
-  The AI decides what to do, creates tasks, and improves itself — using OpenClaw's native tools.
+  The AI decides what to do, creates its own tasks, and improves itself — with safety guards to prevent runaway usage.
 </p>
 
 ---
 
-<p align="center">
-  <img src="assets/diagram-workflow.svg" alt="Workflow" width="700">
-</p>
-
----
-
-## ✨ What's New in v3
+## What's New in v3
 
 **Complete rewrite using OpenClaw native tools:**
 
-| Feature | v1 (Old) | v3 (This) |
-|---------|----------|-----------|
-| Sub-agents | Custom bash spawning | ✅ `sessions_spawn` tool |
-| Memory | Custom JSON system | ✅ `memory_search` / `memory_get` |
-| Heartbeat | Overwrites HEARTBEAT.md | ✅ Respects your file |
-| Scheduling | Bash daemon | ✅ OpenClaw cron |
-| Token tracking | Custom counting | ✅ OpenClaw status API |
-| Lines of code | ~23,000 | ✅ ~500 (focused) |
-| Web UI | Heavy Flask app | ✅ Lightweight dashboard |
+| v1 (Old) | v3 (This) |
+|----------|-----------|
+| Custom sub-agent spawning | ✅ `sessions_spawn` tool |
+| Custom memory system | ✅ `memory_search` / `memory_get` |
+| Overwrites HEARTBEAT.md | ✅ Respects your file |
+| Bash daemon (5 min loop) | ✅ OpenClaw cron |
+| ~23k lines of bash | ✅ ~500 lines, focused |
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Clone to your OpenClaw skills directory
@@ -51,7 +42,7 @@ git clone https://github.com/rar-file/autonomy.git
 cd autonomy
 bash install.sh
 
-# Activate and start using
+# Start using
 autonomy task create "my-first-task" "Explore the autonomy system"
 autonomy task list
 
@@ -62,7 +53,7 @@ python3 web_ui.py
 
 ---
 
-## 📋 Commands
+## Commands
 
 ### Core Commands
 
@@ -82,8 +73,6 @@ python3 web_ui.py
 | `autonomy gh reviews` | PRs waiting for review |
 | `autonomy gh ci-status` | CI status on default branch |
 | `autonomy gh notifications` | Unread notifications |
-| `autonomy gh issues` | Your open issues |
-| `autonomy gh status` | Quick overview |
 
 ### System Monitoring
 
@@ -92,34 +81,20 @@ python3 web_ui.py
 | `autonomy vm health` | System health overview |
 | `autonomy vm process_list` | List all processes |
 | `autonomy vm top_cpu` | Top CPU consumers |
-| `autonomy vm top_memory` | Top memory consumers |
 | `autonomy vm docker_ps` | Docker containers |
-| `autonomy vm service_status <svc>` | Check service status |
-
-### Health Check
-
-| Command | Description |
-|---------|-------------|
-| `autonomy check` | Check for pending tasks/issues |
-| `autonomy check --notify` | Check and output for notifications |
 
 ---
 
-## 🌐 Web Dashboard
+## Web Dashboard
 
 Beautiful real-time dashboard at `http://localhost:8767`:
 
-<p align="center">
-  <img src="assets/dashboard-preview.png" alt="Dashboard" width="700">
-</p>
-
 **Features:**
-- 📋 **Live task list** with status badges
-- 📊 **Token usage** pulled from OpenClaw API
-- 💻 **System health** monitoring (CPU, memory, disk, load)
-- 🎨 **Dark theme** with custom SVG assets
-- 🔄 **Auto-refresh** every 30 seconds
-- ⚡ **Lightweight** — no heavy dependencies
+- 📋 Live task list with status badges
+- 📊 Token usage pulled from OpenClaw API
+- 💻 System health monitoring (CPU, memory, disk, load)
+- 🎨 Dark theme with custom SVG assets
+- 🔄 Auto-refresh every 30 seconds
 
 **Start the dashboard:**
 ```bash
@@ -129,7 +104,7 @@ AUTONOMY_WEB_PORT=8080 python3 web_ui.py  # Custom port
 
 ---
 
-## 🔧 OpenClaw Integration
+## OpenClaw Integration
 
 ### Native Sub-Agents
 
@@ -166,16 +141,11 @@ Use OpenClaw cron instead of a bash daemon:
 openclaw cron add --name autonomy-check \
   --schedule "*/30 * * * *" \
   --command "autonomy check --notify"
-
-# Daily GitHub summary
-openclaw cron add --name gh-daily \
-  --schedule "0 9 * * *" \
-  --command "autonomy gh status"
 ```
 
 ---
 
-## 🛡️ Safety Guards
+## Safety Guards
 
 | Guard | Implementation |
 |-------|----------------|
@@ -187,7 +157,7 @@ openclaw cron add --name gh-daily \
 
 ---
 
-## 📁 Architecture
+## Architecture
 
 ```
 autonomy/
@@ -204,13 +174,12 @@ autonomy/
 │   └── index.html        # Dashboard HTML
 └── assets/               # Visual assets
     ├── logo.svg          # Main logo
-    ├── logo-banner.svg   # README banner
-    └── diagram-workflow.svg  # Workflow diagram
+    └── logo-banner.svg   # README banner
 ```
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 Edit `config.json`:
 
@@ -234,7 +203,7 @@ Edit `config.json`:
 
 ---
 
-## 🔄 Example Session
+## Example Session
 
 ```bash
 # User creates a task
@@ -253,39 +222,11 @@ $ autonomy task list
 # User checks status
 $ autonomy task list
   [completed] fix-auth: Fix OAuth login bug
-
-# User checks web dashboard
-$ python3 web_ui.py
-# Opens browser to http://localhost:8767
 ```
 
 ---
 
-## 🎯 Use Cases
-
-### 1. Coding Project Management
-- Track bugs, features, refactors as tasks
-- AI spawns sub-agents to research solutions
-- GitHub integration shows PR status
-
-### 2. System Monitoring
-- VM health checks via dashboard
-- Docker container monitoring
-- Service status alerts
-
-### 3. GitHub Workflow
-- See PRs needing review
-- Track CI failures
-- Monitor notifications
-
-### 4. Autonomous Improvement
-- AI creates tasks for improvements
-- Spawns research sub-agents
-- Updates based on findings
-
----
-
-## 🆚 Migration from v1
+## Migration from v1
 
 If you were using Autonomy v1:
 
@@ -297,19 +238,7 @@ If you were using Autonomy v1:
 
 ---
 
-## 🤝 Contributing
-
-This is an OpenClaw skill. Install it, use it, improve it.
-
-```bash
-# Install for development
-cd ~/.openclaw/workspace/skills
-ln -s /path/to/autonomy autonomy-dev
-```
-
----
-
-## 📄 License
+## License
 
 MIT License — Built for OpenClaw
 
