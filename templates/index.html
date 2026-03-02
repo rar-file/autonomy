@@ -1689,7 +1689,7 @@
                 container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔧</div><div class="empty-title">No skills installed</div><div style="color:var(--text-secondary)">Visit the Workshop to install or create skills</div></div>';
             } else {
                 container.innerHTML = skills.map((s, i) => 
-                    '<div class="skill-item ' + (s.enabled === false ? 'disabled' : '') + '" style="animation: slideIn 0.3s ease ' + (i * 0.05) + 's both;cursor:pointer;" onclick="viewSkill('" + s.name + '"')" title="Click to view details">' +
+                    '<div class="skill-item ' + (s.enabled === false ? 'disabled' : '') + '" style="animation: slideIn 0.3s ease ' + (i * 0.05) + 's both;cursor:pointer;" onclick="viewSkill(\'' + s.name + '\')" title="Click to view details">' +
                     '<div class="skill-header">' +
                     '<div style="display:flex;align-items:center;gap:0.75rem">' +
                     '<div style="width:40px;height:40px;border-radius:10px;background:var(--accent-bg);display:flex;align-items:center;justify-content:center;font-size:1.25rem">' + (s.icon || '⚡') + '</div>' +
