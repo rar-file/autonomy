@@ -3,906 +3,526 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Autonomy — AI Agent Dashboard</title>
+    <title>Autonomy Dashboard</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
         :root {
             --bg-primary: #0a0a0f;
             --bg-secondary: #12121a;
             --bg-tertiary: #1a1a25;
-            --bg-hover: #252533;
             --border: #2a2a3a;
-            --border-hover: #3a3a4f;
             --text-primary: #f0f0f5;
             --text-secondary: #a0a0b0;
             --text-muted: #606070;
             --accent: #e94560;
-            --accent-light: #ff6b6b;
-            --accent-glow: rgba(233, 69, 96, 0.3);
             --success: #00d9a3;
             --warning: #ffb800;
             --danger: #ff4757;
             --info: #00d0ff;
         }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        *::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        
-        *::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-        }
-        
-        *::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
-        }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
-            overflow-x: hidden;
         }
-        
-        .app {
-            display: flex;
-            min-height: 100vh;
-        }
-        
-        /* Sidebar */
-        .sidebar {
-            width: 280px;
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            position: fixed;
-            height: 100vh;
-            z-index: 100;
-            transition: transform 0.3s ease;
-        }
-        
-        .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .brand-icon {
-            width: 40px;
-            height: 40px;
-        }
-        
-        .brand-text {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-        
-        .brand-version {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-        
-        .nav {
-            flex: 1;
-            padding: 1rem 0;
-            overflow-y: auto;
-        }
-        
-        .nav-section {
-            margin-bottom: 1.5rem;
-        }
-        
-        .nav-label {
-            padding: 0 1.5rem;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
-        }
-        
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1.5rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border-left: 3px solid transparent;
-        }
-        
-        .nav-item:hover {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-        
-        .nav-item.active {
-            background: var(--bg-tertiary);
-            color: var(--accent);
-            border-left-color: var(--accent);
-        }
-        
-        .nav-icon {
-            width: 20px;
-            height: 20px;
-            opacity: 0.7;
-        }
-        
-        .nav-item.active .nav-icon {
-            opacity: 1;
-        }
-        
-        .nav-badge {
-            margin-left: auto;
-            background: var(--accent);
-            color: white;
-            font-size: 0.7rem;
-            padding: 0.15rem 0.5rem;
-            border-radius: 10px;
-            font-weight: 600;
-        }
-        
-        .sidebar-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid var(--border);
-        }
-        
-        .connection-status {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-        
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-            box-shadow: 0 0 8px var(--success);
-            animation: pulse 2s infinite;
-        }
-        
-        .status-dot.offline {
-            background: var(--danger);
-            box-shadow: 0 0 8px var(--danger);
-        }
-        
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        
-        /* Main Content */
-        .main {
-            flex: 1;
-            margin-left: 280px;
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .header {
-            height: 64px;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 2rem;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-        }
-        
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 0.5rem;
-        }
-        
-        .header-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-        }
-        
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: var(--accent-light);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px var(--accent-glow);
-        }
-        
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-secondary);
-            border: 1px solid var(--border);
-        }
-        
-        .btn-secondary:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-        }
-        
-        .btn-icon {
-            width: 36px;
-            height: 36px;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .content {
-            flex: 1;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-        
-        .page {
-            display: none;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .page.active {
-            display: block;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .page-header {
-            margin-bottom: 2rem;
-        }
-        
-        .page-title {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        
-        .page-subtitle {
-            color: var(--text-secondary);
-            font-size: 0.95rem;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .stat-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.2s ease;
-        }
-        
-        .stat-card:hover {
-            border-color: var(--border-hover);
-            transform: translateY(-2px);
-        }
-        
-        .stat-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1rem;
-        }
-        
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-        
-        .stat-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(233, 69, 96, 0.15);
-            color: var(--accent);
-        }
-        
-        .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-        
-        .card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 1.5rem;
-        }
-        
-        .card-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1.25rem 1.5rem;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .card-title {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-        
-        .card-actions {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .card-body {
-            padding: 1.5rem;
-        }
-        
-        .table-container {
-            overflow-x: auto;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        th {
-            text-align: left;
-            padding: 0.75rem 1rem;
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-muted);
-            background: var(--bg-tertiary);
-        }
-        
-        td {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
-        }
-        
-        tr:hover td {
-            background: var(--bg-tertiary);
-        }
-        
-        tr:last-child td {
-            border-bottom: none;
-        }
-        
-        tr.completed td {
-            text-decoration: line-through;
-            opacity: 0.6;
-            color: var(--text-muted);
-        }
-        
-        tr.completed .task-status {
-            text-decoration: none;
-        }
-        
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        
-        .badge-success {
-            background: rgba(0, 217, 163, 0.15);
-            color: var(--success);
-        }
-        
-        .badge-warning {
-            background: rgba(255, 184, 0, 0.15);
-            color: var(--warning);
-        }
-        
-        .badge-danger {
-            background: rgba(255, 71, 87, 0.15);
-            color: var(--danger);
-        }
-        
-        .badge-info {
-            background: rgba(0, 208, 255, 0.15);
-            color: var(--info);
-        }
-        
-        .badge-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-secondary);
-        }
-        
-        .progress-bar {
-            height: 6px;
-            background: var(--bg-tertiary);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-top: 0.5rem;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: var(--accent);
-            border-radius: 3px;
-            transition: width 0.3s ease;
-        }
-        
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1.5rem;
-        }
-        
-        .grid-3 {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-        }
-        
-        .skeleton {
-            background: linear-gradient(90deg, var(--bg-tertiary) 25%, var(--bg-hover) 50%, var(--bg-tertiary) 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 4px;
-        }
-        
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: var(--text-muted);
-        }
-        
-        .empty-icon {
-            width: 64px;
-            height: 64px;
-            margin-bottom: 1rem;
-            opacity: 0.3;
-            color: var(--text-muted);
-        }
-        
-        .task-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .task-item:last-child {
-            border-bottom: none;
-        }
-        
-        .task-status {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            background: var(--bg-tertiary);
-        }
-        
-        .task-name {
-            flex: 1;
-            font-weight: 500;
-        }
-        
-        .task-desc {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-        }
-        
-        .task-date {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-        
-        .skill-card {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .skill-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-        
-        .skill-name {
-            font-weight: 600;
-        }
-        
-        .skill-desc {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.75rem;
-        }
-        
-        .skill-meta {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-        
-        .log-entry {
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 0.8rem;
-            padding: 0.5rem;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .log-entry:last-child {
-            border-bottom: none;
-        }
-        
-        .log-time {
-            color: var(--text-muted);
-            white-space: nowrap;
-        }
-        
-        .log-level {
-            padding: 0 0.5rem;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-        }
-        
-        .log-level.info { background: rgba(0, 208, 255, 0.15); color: var(--info); }
-        .log-level.warn { background: rgba(255, 184, 0, 0.15); color: var(--warning); }
-        .log-level.error { background: rgba(255, 71, 87, 0.15); color: var(--danger); }
-        
-        .log-message {
-            flex: 1;
-        }
-        
-        .personality-section {
-            margin-bottom: 2rem;
-        }
-        
-        .personality-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .file-card {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .file-card:hover {
-            border-color: var(--accent);
-        }
-        
-        .file-name {
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-        
-        .file-path {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-        
-        .textarea {
-            width: 100%;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 1rem;
-            color: var(--text-primary);
-            font-family: inherit;
-            font-size: 0.9rem;
-            resize: vertical;
-            min-height: 120px;
-        }
-        
-        .textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        
-        .alert-card {
-            background: rgba(255, 184, 0, 0.1);
-            border: 1px solid var(--warning);
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        
-        .alert-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--warning);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--bg-primary);
-        }
-        
-        .alert-content {
-            flex: 1;
-        }
-        
-        .alert-title {
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-        
-        .alert-desc {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-        }
-        
-        @media (max-width: 1024px) {
-            .grid-2, .grid-3 {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            
-            .main {
-                margin-left: 0;
-            }
-            
-            .menu-toggle {
-                display: block;
-            }
-        }
+        .app { display: flex; min-height: 100vh; }
+        .sidebar { width: 260px; background: var(--bg-secondary); border-right: 1px solid var(--border); position: fixed; height: 100vh; z-index: 100; }
+        .brand { padding: 1.5rem; display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid var(--border); }
+        .brand-icon { width: 40px; height: 40px; }
+        .brand-text { font-size: 1.25rem; font-weight: 700; color: var(--accent); }
+        .nav { padding: 1rem 0; }
+        .nav-label { padding: 0 1.25rem; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); margin: 1rem 0 0.5rem; }
+        .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 1.25rem; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem; cursor: pointer; border-left: 3px solid transparent; }
+        .nav-item:hover, .nav-item.active { background: var(--bg-tertiary); color: var(--text-primary); }
+        .nav-item.active { border-left-color: var(--accent); color: var(--accent); }
+        .nav-icon { width: 18px; height: 18px; }
+        .nav-badge { margin-left: auto; background: var(--accent); color: white; font-size: 0.7rem; padding: 0.1rem 0.4rem; border-radius: 10px; }
+        .main { flex: 1; margin-left: 260px; }
+        .header { height: 60px; background: var(--bg-secondary); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; }
+        .header-title { font-size: 1.1rem; font-weight: 600; }
+        .btn { padding: 0.5rem 1rem; border-radius: 6px; font-size: 0.85rem; font-weight: 500; cursor: pointer; border: none; }
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-secondary { background: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border); }
+        .content { padding: 2rem; }
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .page-header { margin-bottom: 2rem; }
+        .page-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .page-subtitle { color: var(--text-secondary); }
+        .card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 1.5rem; }
+        .card-header { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .card-title { font-weight: 600; }
+        .card-body { padding: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 0.875rem 1rem; text-align: left; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        th { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); background: var(--bg-tertiary); }
+        tr:hover td { background: var(--bg-tertiary); }
+        tr.completed td { text-decoration: line-through; opacity: 0.5; color: var(--text-muted); }
+        .badge { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .badge-success { background: rgba(0,217,163,0.15); color: var(--success); }
+        .badge-warning { background: rgba(255,184,0,0.15); color: var(--warning); }
+        .badge-danger { background: rgba(255,71,87,0.15); color: var(--danger); }
+        .badge-info { background: rgba(0,208,255,0.15); color: var(--info); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--accent); }
+        .stat-label { color: var(--text-secondary); font-size: 0.875rem; }
+        .skill-card, .file-card { background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; }
+        .skill-card:hover, .file-card:hover { border-color: var(--accent); cursor: pointer; }
+        .textarea { width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; color: var(--text-primary); min-height: 120px; font-family: inherit; }
+        .textarea:focus { outline: none; border-color: var(--accent); }
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); }
+        .tab { padding: 0.75rem 1.25rem; cursor: pointer; border-bottom: 2px solid transparent; color: var(--text-secondary); }
+        .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+        @media (max-width: 1024px) { .grid-2 { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div class="app">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="brand">
-                    <svg class="brand-icon" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="100" cy="100" r="90" fill="#1a1a2e" stroke="#16213e" stroke-width="4"/>
-                        <circle cx="100" cy="100" r="80" fill="none" stroke="#0f3460" stroke-width="2"/>
-                        <circle cx="100" cy="50" r="15" fill="#e94560"/>
-                        <circle cx="100" cy="50" r="8" fill="#1a1a2e"/>
-                        <circle cx="55" cy="130" r="15" fill="#e94560"/>
-                        <circle cx="55" cy="130" r="8" fill="#1a1a2e"/>
-                        <circle cx="145" cy="130" r="15" fill="#e94560"/>
-                        <circle cx="145" cy="130" r="8" fill="#1a1a2e"/>
-                        <line x1="100" y1="65" x2="65" y2="118" stroke="#e94560" stroke-width="3"/>
-                        <line x1="100" y1="65" x2="135" y2="118" stroke="#e94560" stroke-width="3"/>
-                        <line x1="70" y1="130" x2="130" y2="130" stroke="#e94560" stroke-width="3"/>
-                        <circle cx="100" cy="100" r="20" fill="#16213e" stroke="#e94560" stroke-width="3"/>
-                        <circle cx="100" cy="100" r="8" fill="#e94560">
-                            <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
-                        </circle>
-                    </svg>
-                    <div>
-                        <div class="brand-text">Autonomy</div>
-                        <div class="brand-version">v3.0.0</div>
+        <aside class="sidebar">
+            <div class="brand">
+                <svg class="brand-icon" viewBox="0 0 200 200">
+                    <circle cx="100" cy="100" r="90" fill="#1a1a2e" stroke="#16213e" stroke-width="4"/>
+                    <circle cx="100" cy="100" r="80" fill="none" stroke="#0f3460" stroke-width="2"/>
+                    <circle cx="100" cy="50" r="15" fill="#e94560"/>
+                    <circle cx="100" cy="50" r="8" fill="#1a1a2e"/>
+                    <circle cx="55" cy="130" r="15" fill="#e94560"/>
+                    <circle cx="55" cy="130" r="8" fill="#1a1a2e"/>
+                    <circle cx="145" cy="130" r="15" fill="#e94560"/>
+                    <circle cx="145" cy="130" r="8" fill="#1a1a2e"/>
+                    <line x1="100" y1="65" x2="65" y2="118" stroke="#e94560" stroke-width="3"/>
+                    <line x1="100" y1="65" x2="135" y2="118" stroke="#e94560" stroke-width="3"/>
+                    <line x1="70" y1="130" x2="130" y2="130" stroke="#e94560" stroke-width="3"/>
+                    <circle cx="100" cy="100" r="20" fill="#16213e" stroke="#e94560" stroke-width="3"/>
+                    <circle cx="100" cy="100" r="8" fill="#e94560"/>
+                </svg>
+                <div>
+                    <div class="brand-text">Autonomy</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted)">v3.0.0</div>
+                </div>
+            </div>
+            <nav class="nav">
+                <div class="nav-label">Overview</div>
+                <a class="nav-item active" onclick="showPage('dashboard',this)">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                    Dashboard
+                </a>
+                <a class="nav-item" onclick="showPage('tasks',this)">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                    Tasks
+                    <span class="nav-badge" id="nav-task-count">0</span>
+                </a>
+                <a class="nav-item" onclick="showPage('alerts',this)">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+                    Alerts
+                    <span class="nav-badge" id="nav-alert-count" style="display:none">0</span>
+                </a>
+                <div class="nav-label">Configuration</div>
+                <a class="nav-item" onclick="showPage('skills',this)">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                    Skills
+                </a>
+                <a class="nav-item" onclick="showPage('personality',this)">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    Personality
+                </a>
+                <div class="nav-label">System</div>
+                <a class="nav-item" onclick="showPage('logs',this)">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Logs
+                </a>
+                <a class="nav-item" onclick="showPage('system',this)">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    System
+                </a>
+                <a class="nav-item" onclick="showPage('github',this)">
+                    <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.11.8-.26.8-.58v-2c-3.34.72-4.04-1.42-4.04-1.42-.55-1.4-1.34-1.76-1.34-1.76-1.1-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.8 1.3 3.48 1 .1-.78.42-1.3.76-1.6C7.36 16.7 4.6 15.67 4.6 11.7c0-1.13.4-2.05 1.05-2.77-.1-.26-.46-1.28.1-2.67 0 0 .86-.27 2.8 1.03.8-.22 1.7-.34 2.56-.34.86 0 1.74.12 2.57.34 1.96-1.3 2.83-1.03 2.83-1.03.56 1.4.2 2.4.1 2.67.66.72 1.05 1.64 1.05 2.77 0 3.93-2.4 4.8-4.7 5.05.37.32.7.94.7 1.9v2.8c0 .32.2.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                    GitHub
+                </a>
+            </nav>
+        </aside>
+        <main class="main">
+            <header class="header">
+                <span class="header-title" id="page-title">Dashboard</span>
+                <div>
+                    <button class="btn btn-secondary" onclick="refreshData()">Refresh</button>
+                    <button class="btn btn-primary" style="margin-left:0.5rem" onclick="createTask()">+ New Task</button>
+                </div>
+            </header>
+            <div class="content">
+                <div class="page active" id="page-dashboard">
+                    <div class="page-header">
+                        <h1 class="page-title">Dashboard</h1>
+                        <p class="page-subtitle">Overview of your autonomous workspace</p>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card"><div class="stat-value" id="stat-tasks">-</div><div class="stat-label">Active Tasks</div></div>
+                        <div class="stat-card"><div class="stat-value" id="stat-skills">-</div><div class="stat-label">Installed Skills</div></div>
+                        <div class="stat-card"><div class="stat-value" id="stat-notifs">-</div><div class="stat-label">GitHub Notifications</div></div>
+                        <div class="stat-card"><div class="stat-value" id="stat-cpu">-</div><div class="stat-label">CPU Usage</div></div>
+                    </div>
+                    <div class="grid-2">
+                        <div class="card"><div class="card-header"><span class="card-title">Recent Tasks</span></div><div class="card-body" id="dashboard-tasks"><div class="empty-state">Loading...</div></div></div>
+                        <div class="card"><div class="card-header"><span class="card-title">Active Alerts</span></div><div class="card-body" id="dashboard-alerts"><div class="empty-state">No alerts</div></div></div>
+                    </div>
+                </div>
+                <div class="page" id="page-tasks">
+                    <div class="page-header">
+                        <h1 class="page-title">Tasks</h1>
+                        <p class="page-subtitle">All tasks. Completed tasks shown with strikethrough.</p>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="tabs">
+                                <div class="tab active" onclick="showTab('tasks-all',this)">All</div>
+                                <div class="tab" onclick="showTab('tasks-pending',this)">Pending</div>
+                                <div class="tab" onclick="showTab('tasks-completed',this)">Completed</div>
+                            </div>
+                            <div id="tasks-table-container"><div class="empty-state">Loading...</div></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="page" id="page-alerts">
+                    <div class="page-header"><h1 class="page-title">Alerts & Reminders</h1><p class="page-subtitle">Important notifications</p></div>
+                    <div id="alerts-container"><div class="empty-state">No alerts</div></div>
+                </div>
+                <div class="page" id="page-skills">
+                    <div class="page-header"><h1 class="page-title">Skills</h1><p class="page-subtitle">Manage installed skills</p></div>
+                    <div class="tabs">
+                        <div class="tab active" onclick="showTab('skills-installed',this)">Installed</div>
+                        <div class="tab" onclick="showTab('skills-clawhub',this)">ClawHub</div>
+                        <div class="tab" onclick="showTab('skills-workshop',this)">Workshop</div>
+                    </div>
+                    <div class="tab-content active" id="skills-installed">
+                        <div class="card"><div class="card-header"><span class="card-title">Installed Skills</span></div><div class="card-body" id="skills-list"><div class="empty-state">Loading...</div></div></div>
+                    </div>
+                    <div class="tab-content" id="skills-clawhub">
+                        <div class="card"><div class="card-header"><span class="card-title">Install from ClawHub</span></div><div class="card-body">
+                            <p style="margin-bottom:1rem;color:var(--text-secondary)">Enter skill repository:</p>
+                            <input type="text" id="skill-repo" class="textarea" style="min-height:40px;margin-bottom:1rem" placeholder="owner/repo-name">
+                            <button class="btn btn-primary" onclick="installSkill()">Install</button>
+                        </div></div>
+                    </div>
+                    <div class="tab-content" id="skills-workshop">
+                        <div class="card"><div class="card-header"><span class="card-title">Skill Workshop</span></div><div class="card-body">
+                            <p style="margin-bottom:1rem;color:var(--text-secondary)">Describe a skill for OpenClaw to build:</p>
+                            <textarea id="skill-description" class="textarea" placeholder="I need a skill that..."></textarea>
+                            <button class="btn btn-primary" style="margin-top:1rem" onclick="requestSkill()">Request</button>
+                        </div></div>
+                    </div>
+                </div>
+                <div class="page" id="page-personality">
+                    <div class="page-header"><h1 class="page-title">Personality</h1><p class="page-subtitle">Configure AI behavior</p></div>
+                    <div class="grid-2">
+                        <div class="card"><div class="card-header"><span class="card-title">Personality Files</span></div><div class="card-body" id="personality-files"><div class="empty-state">Loading...</div></div></div>
+                        <div class="card"><div class="card-header"><span class="card-title">Suggest Changes</span></div><div class="card-body">
+                            <select id="personality-file-select" class="textarea" style="min-height:40px;margin-bottom:1rem">
+                                <option value="">Select file...</option>
+                                <option value="SOUL.md">SOUL.md</option>
+                                <option value="IDENTITY.md">IDENTITY.md</option>
+                                <option value="USER.md">USER.md</option>
+                                <option value="AGENTS.md">AGENTS.md</option>
+                                <option value="TOOLS.md">TOOLS.md</option>
+                            </select>
+                            <textarea id="personality-suggestion" class="textarea" placeholder="I think the personality should..."></textarea>
+                            <button class="btn btn-primary" style="margin-top:1rem" onclick="submitPersonalitySuggestion()">Submit</button>
+                        </div></div>
+                    </div>
+                </div>
+                <div class="page" id="page-logs">
+                    <div class="page-header"><h1 class="page-title">Logs</h1><p class="page-subtitle">System logs</p></div>
+                    <div class="card"><div class="card-body" id="logs-container"><div class="empty-state">No logs</div></div></div>
+                </div>
+                <div class="page" id="page-system">
+                    <div class="page-header"><h1 class="page-title">System Health</h1><p class="page-subtitle">Monitor resources</p></div>
+                    <div class="grid-2">
+                        <div class="card"><div class="card-header"><span class="card-title">Top Processes</span></div><div class="card-body" id="system-processes"><div class="empty-state">Loading...</div></div></div>
+                        <div class="card"><div class="card-header"><span class="card-title">Docker</span></div><div class="card-body" id="system-docker"><div class="empty-state">No containers</div></div></div>
+                    </div>
+                </div>
+                <div class="page" id="page-github">
+                    <div class="page-header"><h1 class="page-title">GitHub</h1><p class="page-subtitle">Pull requests and notifications</p></div>
+                    <div class="stats-grid">
+                        <div class="stat-card"><div class="stat-value" id="github-notifs">-</div><div class="stat-label">Notifications</div></div>
+                        <div class="stat-card"><div class="stat-value" id="github-prs">-</div><div class="stat-label">My PRs</div></div>
+                        <div class="stat-card"><div class="stat-value" id="github-reviews">-</div><div class="stat-label">Reviews</div></div>
                     </div>
                 </div>
             </div>
-            
-            <nav class="nav">
-                <div class="nav-section">
-                    <div class="nav-label">Overview</div>
-                    
-                    <a href="#" class="nav-item active" onclick="showPage('dashboard', this)">
-                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="7" height="7"/>
-                            <rect x="14" y="3" width="7" height="7"/>
-                            <rect x="14" y="14" width="7" height="7"/>
-                            <rect x="3" y="14" width="7" height="7"/>
-                        </svg>
-                        Dashboard
-                    </a>
-                    
-                    <a href="#" class="nav-item" onclick="showPage('tasks', this)">
-                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M9 11l3 3L22 4"/>
-                            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
-                        </svg>
-                        Tasks
-                        <span class="nav-badge" id="nav-task-count">0</span>
-                    </a>
-                    
-                    <a href="#" class="nav-item" onclick="showPage('alerts', this)">
-                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                            <path d="M13.73 21a2 2 0 01-3.46 0"/>
-                        </svg>
-                        Alerts & Reminders
-                        <span class="nav-badge" id="nav-alert-count" style="display: none;">0</span>
-                    </a>
-                </div>
-                
-                <div class="nav-section">
-                    <div class="nav-label">Configuration</div>
-                    
-                    <a href="#" class="nav-item" onclick="showPage('skills', this)">
-                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="12 2 2 7 12 12 22 7 12 2"/>
-                            <polyline points="2 17 12 22 22 17"/>
-                            <polyline points="2 12 12 17 22 12"/>
-                        </svg>
-                        Skills
-                    </a>
-                    
-                    <a href="#" class="nav-item" onclick="showPage('personality', this)">
-                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                            <circle cx="12" cy="7" r="4"/>
-                        </svg>
-                        Personality
-                    </a>
-                </div>
-                
-                <div class="nav-section">
-                    <div class="nav-label">System</div>
-                    
-                    <a href="#" class="nav-item" onclick="showPage('logs', this)">
-                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
-                            <polyline points="14 2 14 8 20 8"/>
-                            <line x1="16" y1="13" x2="8" y2="13"/>
-                            <line x1="16" y1="17" x2="8" y2="17"/>
-                            <polyline points="10 9 9 9 8 9"/>
-                        </svg>
-                        Logs
-                    </a>
-                    
-                    <a href="#" class="nav-item" onclick="showPage('system', this)">
-                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                            <line x1="8" y1="21" x2="16" y2="21"/>
-                            <line x1="12" y1="17" x2="12" y2="21"/>
-                        </svg>
-                        System Health
-                    </a>
-                    
-                    <a href="#" class="nav-item" onclick="showPage('github', this)">
-                        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                        </svg>
-                        GitHub
-                    </a>
-                </div>
-            </nav>
-            
-            <div class="sidebar-footer">
-                <div class="connection-status">
-                    <span class="status-dot" id="status-dot"></span>
-                    <span id="connection-text">Connected</span>
-                </div>
-            </div>
-        </aside>
-
-        <script>
-        // Navigation
+        </main>
+    </div>
+    <script>
+        let currentData = null;
         function showPage(pageName, element) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            
             document.getElementById('page-' + pageName).classList.add('active');
-            
             if (element) element.classList.add('active');
             else {
                 document.querySelectorAll('.nav-item').forEach(n => {
                     if (n.getAttribute('onclick')?.includes("'" + pageName + "'")) n.classList.add('active');
                 });
             }
-            
             const titles = {
-                'dashboard': 'Dashboard', 'tasks': 'Tasks', 'alerts': 'Alerts & Reminders',
+                'dashboard': 'Dashboard', 'tasks': 'Tasks', 'alerts': 'Alerts',
                 'skills': 'Skills', 'personality': 'Personality', 'logs': 'Logs',
-                'system': 'System Health', 'github': 'GitHub'
+                'system': 'System', 'github': 'GitHub'
             };
             document.getElementById('page-title').textContent = titles[pageName] || pageName;
         }
-        
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
+        function showTab(tabName, element) {
+            const parent = element.closest('.card, .page');
+            parent.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            element.classList.add('active');
         }
-        
-        // Initialize
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/status');
+                currentData = await response.json();
+                updateAllPages();
+            } catch (error) {
+                console.error('Failed:', error);
+            }
+        }
+        function updateAllPages() {
+            const data = currentData;
+            const tasks = data.tasks || [];
+            const activeTasks = tasks.filter(t => t.status !== 'completed').length;
+            document.getElementById('stat-tasks').textContent = activeTasks;
+            document.getElementById('nav-task-count').textContent = activeTasks;
+            document.getElementById('stat-skills').textContent = (data.skills || []).length;
+            document.getElementById('stat-notifs').textContent = (data.github || {}).notifications || 0;
+            document.getElementById('stat-cpu').textContent = (data.health || {}).cpu || '-';
+            updateDashboard(data);
+            updateTasks(data);
+            updateAlerts(data);
+            updateSkills(data);
+            updatePersonality(data);
+            updateLogs(data);
+            updateSystem(data);
+            const gh = data.github || {};
+            document.getElementById('github-notifs').textContent = gh.notifications || 0;
+            document.getElementById('github-prs').textContent = gh.my_prs || 0;
+            document.getElementById('github-reviews').textContent = gh.reviews || 0;
+        }
+        function updateDashboard(data) {
+            const tasks = (data.tasks || []).slice(0, 5);
+            const container = document.getElementById('dashboard-tasks');
+            if (tasks.length === 0) {
+                container.innerHTML = '<div class="empty-state">No tasks</div>';
+            } else {
+                container.innerHTML = '<table><tbody>' + tasks.map(t => \`
+                    <tr class="${t.status}">
+                        <td><span class="badge badge-${t.status === 'completed' ? 'success' : t.status === 'in_progress' ? 'info' : 'warning'}">${t.status}</span></td>
+                        <td>${escapeHtml(t.name)}</td>
+                        <td style="color:var(--text-muted)">${formatDate(t.created_at)}</td>
+                    </tr>
+                \`).join('') + '</tbody></table>';
+            }
+            const alerts = data.alerts || [];
+            const alertContainer = document.getElementById('dashboard-alerts');
+            const badge = document.getElementById('nav-alert-count');
+            badge.textContent = alerts.length;
+            badge.style.display = alerts.length > 0 ? 'block' : 'none';
+            if (alerts.length === 0) {
+                alertContainer.innerHTML = '<div class="empty-state">No alerts</div>';
+            } else {
+                alertContainer.innerHTML = alerts.slice(0, 3).map(a => \`
+                    <div style="padding:1rem;background:rgba(255,184,0,0.1);border:1px solid var(--warning);border-radius:8px;margin-bottom:0.75rem">
+                        <div style="font-weight:600">${escapeHtml(a.title)}</div>
+                        <div style="font-size:0.85rem;color:var(--text-secondary)">${escapeHtml(a.message)}</div>
+                    </div>
+                \`).join('');
+            }
+        }
+        function updateTasks(data) {
+            const tasks = data.tasks || [];
+            const container = document.getElementById('tasks-table-container');
+            const renderTable = (filterFn) => {
+                const filtered = tasks.filter(filterFn);
+                if (filtered.length === 0) return '<div class="empty-state">No tasks</div>';
+                return '<table><thead><tr><th>Status</th><th>Name</th><th>Description</th><th>Created</th><th></th></tr></thead><tbody>' +
+                    filtered.map(t => \`
+                        <tr class="${t.status}">
+                            <td><span class="badge badge-${t.status === 'completed' ? 'success' : t.status === 'in_progress' ? 'info' : 'warning'}">${t.status}</span></td>
+                            <td>${escapeHtml(t.name)}</td>
+                            <td>${escapeHtml(t.description || '-')}</td>
+                            <td>${formatDate(t.created_at)}</td>
+                            <td>${t.status !== 'completed' ? \`<button class="btn btn-secondary" onclick="completeTask('${t.name}')">Complete</button>\` : '<span style="color:var(--success)">Done</span>'}</td>
+                        </tr>
+                    \`).join('') + '</tbody></table>';
+            };
+            container.innerHTML = renderTable(() => true);
+        }
+        function updateAlerts(data) {
+            const alerts = data.alerts || [];
+            const container = document.getElementById('alerts-container');
+            if (alerts.length === 0) {
+                container.innerHTML = '<div class="empty-state">No alerts</div>';
+            } else {
+                container.innerHTML = alerts.map(a => \`
+                    <div style="padding:1rem;background:rgba(255,184,0,0.1);border:1px solid var(--warning);border-radius:8px;margin-bottom:0.75rem;display:flex;align-items:center;gap:1rem">
+                        <div style="width:40px;height:40px;border-radius:50%;background:var(--warning);display:flex;align-items:center;justify-content:center;color:var(--bg-primary);font-weight:bold">!</div>
+                        <div>
+                            <div style="font-weight:600">${escapeHtml(a.title)}</div>
+                            <div style="font-size:0.9rem;color:var(--text-secondary)">${escapeHtml(a.message)}</div>
+                        </div>
+                    </div>
+                \`).join('');
+            }
+        }
+        function updateSkills(data) {
+            const skills = data.skills || [];
+            const container = document.getElementById('skills-list');
+            if (skills.length === 0) {
+                container.innerHTML = '<div class="empty-state">No skills</div>';
+            } else {
+                container.innerHTML = skills.map(s => \`
+                    <div class="skill-card">
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem">
+                            <span style="font-weight:600">${escapeHtml(s.name)}</span>
+                            <span class="badge badge-success">Active</span>
+                        </div>
+                        <div style="font-size:0.85rem;color:var(--text-secondary)">${escapeHtml(s.description)}</div>
+                    </div>
+                \`).join('');
+            }
+        }
+        function updatePersonality(data) {
+            const files = data.personality || [];
+            const container = document.getElementById('personality-files');
+            if (files.length === 0) {
+                container.innerHTML = '<div class="empty-state">No files</div>';
+            } else {
+                container.innerHTML = files.map(f => \`
+                    <div class="file-card">
+                        <div style="font-weight:600">${escapeHtml(f.name)}</div>
+                        <div style="font-size:0.8rem;color:var(--text-muted)">${escapeHtml(f.path)}</div>
+                        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem">Modified: ${formatDate(f.modified)}</div>
+                    </div>
+                \`).join('');
+            }
+        }
+        function updateLogs(data) {
+            const logs = data.logs || [];
+            const container = document.getElementById('logs-container');
+            if (logs.length === 0) {
+                container.innerHTML = '<div class="empty-state">No logs</div>';
+            } else {
+                container.innerHTML = '<div style="font-family:monospace;font-size:0.85rem">' +
+                    logs.map(l => \`
+                        <div style="padding:0.5rem;border-bottom:1px solid var(--border)">
+                            <span style="color:var(--text-muted)">${l.time}</span>
+                            <span class="badge badge-${l.level}" style="margin:0 0.5rem">${l.level}</span>
+                            ${escapeHtml(l.message)}
+                        </div>
+                    \`).join('') + '</div>';
+            }
+        }
+        function updateSystem(data) {
+            const processes = data.processes || {};
+            const cpuProcs = processes.cpu || [];
+            const procContainer = document.getElementById('system-processes');
+            if (cpuProcs.length === 0) {
+                procContainer.innerHTML = '<div class="empty-state">No data</div>';
+            } else {
+                procContainer.innerHTML = '<table><thead><tr><th>Process</th><th>CPU</th><th>Mem</th></tr></thead><tbody>' +
+                    cpuProcs.map(p => \`<tr><td>${escapeHtml(p.cmd)}</td><td>${p.cpu}%</td><td>${p.mem}%</td></tr>\`).join('') + '</tbody></table>';
+            }
+            const docker = data.docker || [];
+            const dockerContainer = document.getElementById('system-docker');
+            if (docker.length === 0) {
+                dockerContainer.innerHTML = '<div class="empty-state">No containers</div>';
+            } else {
+                dockerContainer.innerHTML = docker.map(c => \`
+                    <div style="padding:0.75rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between">
+                        <span>${escapeHtml(c.name)}</span>
+                        <span style="color:var(--text-muted);font-size:0.85rem">${escapeHtml(c.status)}</span>
+                    </div>
+                \`).join('');
+            }
+        }
+        async function createTask() {
+            const name = prompt('Task name:');
+            if (!name) return;
+            const description = prompt('Description:') || '';
+            try {
+                const response = await fetch('/api/task/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, description })
+                });
+                const data = await response.json();
+                if (data.success) fetchData();
+                else alert('Error: ' + data.error);
+            } catch (e) {
+                alert('Failed: ' + e.message);
+            }
+        }
+        async function completeTask(name) {
+            const proof = prompt('Proof:');
+            if (!proof) return;
+            try {
+                await fetch('/api/tasks/' + name + '/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ proof })
+                });
+                fetchData();
+            } catch (e) {
+                alert('Failed: ' + e.message);
+            }
+        }
+        async function installSkill() {
+            const repo = document.getElementById('skill-repo').value;
+            if (!repo) return alert('Enter repo');
+            try {
+                const response = await fetch('/api/skills/install', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ repo })
+                });
+                const data = await response.json();
+                alert(data.success ? 'Installed!' : 'Failed: ' + data.error);
+                if (data.success) fetchData();
+            } catch (e) {
+                alert('Failed: ' + e.message);
+            }
+        }
+        function requestSkill() {
+            const desc = document.getElementById('skill-description').value;
+            if (!desc) return alert('Describe skill');
+            alert('Request saved!');
+            document.getElementById('skill-description').value = '';
+        }
+        function submitPersonalitySuggestion() {
+            const file = document.getElementById('personality-file-select').value;
+            const suggestion = document.getElementById('personality-suggestion').value;
+            if (!file || !suggestion) return alert('Fill all fields');
+            alert('Suggestion saved!');
+            document.getElementById('personality-suggestion').value = '';
+        }
+        function refreshData() { fetchData(); }
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        function formatDate(iso) {
+            if (!iso) return '-';
+            return new Date(iso).toLocaleDateString();
+        }
         fetchData();
         setInterval(fetchData, 30000);
-        </script>
+    </script>
 </body>
 </html>
