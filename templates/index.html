@@ -1129,37 +1129,28 @@
             margin-bottom: 0.5rem;
         }
         
-        /* Animations */
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateX(-10px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        
-        .animate-in {
-            animation: slideIn 0.3s ease;
-        }
-        
         /* Loading Spinner */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
         .spinner {
             display: inline-block;
             width: 16px;
             height: 16px;
             border: 2px solid var(--border);
-            border-top-color: var(--accent);
+            border-top: 2px solid var(--accent);
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             vertical-align: middle;
-            margin-right: 0.5rem;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+            flex-shrink: 0;
         }
         
         .btn-loading {
             position: relative;
             pointer-events: none;
-            opacity: 0.8;
+            opacity: 0.7;
         }
         
         .btn-loading::after {
@@ -1168,11 +1159,21 @@
             width: 14px;
             height: 14px;
             border: 2px solid rgba(255,255,255,0.3);
-            border-top-color: white;
+            border-top: 2px solid white;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             margin-left: 0.5rem;
             vertical-align: middle;
+        }
+        
+        /* Animations */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .animate-in {
+            animation: slideIn 0.3s ease;
         }
         
         /* Responsive */
@@ -1951,7 +1952,6 @@
             const text = document.getElementById('suggestion-text').value.trim();
             const status = document.getElementById('suggestion-status');
             const btn = document.getElementById('suggestion-btn');
-            const originalBtnContent = btn.innerHTML;
             
             const file = currentFile;
             
@@ -1965,11 +1965,13 @@
                 return;
             }
             
-            // Show loading state
+            // Show loading state - save original text
+            const originalText = btn.querySelector('span:last-child')?.textContent || 'Submit Suggestion';
             btn.disabled = true;
             btn.classList.add('btn-loading');
-            btn.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;gap:0.5rem"><span class="spinner"></span><span>Running OpenClaw...</span></span>';
-            status.innerHTML = '<span style="color:var(--info)"><span class="spinner"></span> Spawning agent and waiting for completion...</span>';
+            btn.innerHTML = '<span class="spinner"></span> <span>Running OpenClaw...</span>';
+            
+            status.innerHTML = '<span style="color:var(--info);display:flex;align-items:center;justify-content:center;gap:0.5rem"><span class="spinner"></span><span>Spawning agent and waiting...</span></span>';
             
             try {
                 const response = await fetch('/api/personality/suggest', {
@@ -1984,7 +1986,6 @@
                     status.innerHTML = '<span style="color:var(--success)">✅ ' + data.message + '</span>';
                     document.getElementById('suggestion-text').value = '';
                     showToast(data.message, 'success');
-                    // Refresh the file content after a moment
                     setTimeout(() => fetchData(), 1500);
                 } else {
                     status.innerHTML = '<span style="color:var(--danger)">❌ ' + escapeHtml(data.error || 'Failed') + '</span>';
@@ -1995,7 +1996,7 @@
                 // Restore button state
                 btn.disabled = false;
                 btn.classList.remove('btn-loading');
-                btn.innerHTML = originalBtnContent;
+                btn.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;gap:0.5rem"><span>✨</span><span>' + originalText + '</span></span>';
             }
         }
         
