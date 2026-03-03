@@ -462,7 +462,7 @@ def save_personality():
 
 @app.route("/api/personality/suggest", methods=["POST"])
 def suggest_personality():
-    """Submit a suggestion for personality changes - triggers immediate OpenClaw action"""
+    """Submit a suggestion for personality changes - spawns OpenClaw agent instantly"""
     data = request.json
     filename = data.get("file", "")
     suggestion = data.get("suggestion", "")
@@ -484,71 +484,59 @@ def suggest_personality():
             with open(fpath) as f:
                 current_content = f.read()
         
-        # Create the prompt for OpenClaw
-        prompt = f"""[PERSONALITY UPDATE REQUEST]
+        # Build the prompt for OpenClaw agent
+        prompt = f"""Update the personality file {filename} based on this user suggestion:
 
-The user wants to update {filename} with the following suggestion:
-"{suggestion}"
+SUGGESTION: {suggestion}
 
-Please read the current content of {filename} and apply the user's suggestion. Edit the file directly using the edit tool.
+CURRENT CONTENT:
+```
+{current_content}
+```
 
-Current content preview (first 2000 chars):
-{current_content[:2000]}
-{"..." if len(current_content) > 2000 else ""}
-"""
+Please apply the suggestion by editing {fpath} directly. Keep the existing structure and style, just incorporate the requested changes."""
         
-        # Write to trigger file
-        trigger_dir = workspace / ".autonomy_triggers"
-        trigger_dir.mkdir(exist_ok=True)
-        
-        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        trigger_file = trigger_dir / f"suggestion_{timestamp}.txt"
-        
-        with open(trigger_file, 'w') as f:
-            f.write(prompt)
-        
-        # INSTANT ACTION: Spawn OpenClaw agent via subprocess
-        # This creates a detached process that runs immediately
-        spawn_script = f"""#!/usr/bin/env python3
-import subprocess
-import sys
-import json
-
-# Read the trigger file
-with open('{trigger_file}') as f:
-    prompt = f.read()
-
-# Call openclaw to run the task immediately
-try:
-    result = subprocess.run(
-        ["openclaw", "run", "--inline", prompt],
-        capture_output=True, text=True, timeout=60
-    )
-    # Also write completion marker
-    with open('{trigger_file}.done', 'w') as f:
-        f.write('completed')
-except Exception as e:
-    with open('{trigger_file}.error', 'w') as f:
-        f.write(str(e))
-"""
-        
-        spawn_path = trigger_dir / f"spawn_{timestamp}.py"
-        with open(spawn_path, 'w') as f:
-            f.write(spawn_script)
-        
-        # Execute immediately in background
-        subprocess.Popen(
-            [sys.executable, str(spawn_path)],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            start_new_session=True
+        # Spawn OpenClaw agent to handle this immediately
+        # Uses --local to run without needing external channels
+        result = subprocess.run(
+            [
+                "openclaw", "agent", 
+                "--local",
+                "--message", prompt,
+                "--thinking", "low",
+                "--timeout", "120"
+            ],
+            capture_output=True,
+            text=True,
+            timeout=130  # Slightly longer than agent timeout
         )
         
-        return jsonify({
-            "success": True, 
-            "message": f"OpenClaw is now updating {filename}",
-            "trigger": str(trigger_file)
-        })
+        # Log the result for debugging
+        log_dir = workspace / ".autonomy_logs"
+        log_dir.mkdir(exist_ok=True)
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        
+        with open(log_dir / f"suggestion_{timestamp}.log", 'w') as f:
+            f.write(f"File: {filename}\n")
+            f.write(f"Suggestion: {suggestion}\n")
+            f.write(f"Return code: {result.returncode}\n")
+            f.write(f"Stdout:\n{result.stdout}\n")
+            f.write(f"Stderr:\n{result.stderr}\n")
+        
+        if result.returncode == 0:
+            return jsonify({
+                "success": True, 
+                "message": f"✅ OpenClaw updated {filename}",
+                "output": result.stdout[-500:] if len(result.stdout) > 500 else result.stdout
+            })
+        else:
+            return jsonify({
+                "success": False, 
+                "error": f"Agent failed: {result.stderr[-200:] if result.stderr else 'Unknown error'}"
+            })
+            
+    except subprocess.TimeoutExpired:
+        return jsonify({"success": False, "error": "Agent timed out (took too long)"})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
 

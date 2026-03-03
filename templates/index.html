@@ -1916,11 +1916,10 @@
             const status = document.getElementById('suggestion-status');
             const btn = document.getElementById('suggestion-btn');
             
-            // Use current file instead of dropdown
             const file = currentFile;
             
             if (!file) {
-                status.innerHTML = '<span style="color:var(--danger)">❌ Please select a file first</span>';
+                status.innerHTML = '<span style="color:var(--danger)">❌ Select a file first</span>';
                 return;
             }
             
@@ -1930,7 +1929,7 @@
             }
             
             btn.disabled = true;
-            status.innerHTML = '<span style="color:var(--info)">🤖 Sending to OpenClaw...</span>';
+            status.innerHTML = '<span style="color:var(--info)">🤖 OpenClaw is updating ' + file + '...</span>';
             
             try {
                 const response = await fetch('/api/personality/suggest', {
@@ -1942,12 +1941,13 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    status.innerHTML = '<span style="color:var(--success)">✅ Sent to OpenClaw!</span>';
+                    status.innerHTML = '<span style="color:var(--success)">' + data.message + '</span>';
                     document.getElementById('suggestion-text').value = '';
-                    showToast('OpenClaw is updating ' + file, 'success');
-                    setTimeout(() => { status.innerHTML = ''; }, 4000);
+                    showToast(data.message, 'success');
+                    // Refresh the file content after a moment
+                    setTimeout(() => fetchData(), 2000);
                 } else {
-                    status.innerHTML = '<span style="color:var(--danger)">❌ Failed: ' + escapeHtml(data.error || 'Unknown') + '</span>';
+                    status.innerHTML = '<span style="color:var(--danger)">❌ ' + escapeHtml(data.error || 'Failed') + '</span>';
                 }
             } catch (e) {
                 status.innerHTML = '<span style="color:var(--danger)">❌ Network error</span>';
