@@ -1451,14 +1451,25 @@
                                 <div style="margin-bottom:1.5rem">
                                     <h4 style="margin-bottom:0.75rem;color:var(--text-secondary);font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em">Install from ClawHub</h4>
                                     <input type="text" id="skill-repo" class="workshop-input" style="min-height:44px;margin-bottom:0.75rem" placeholder="owner/repo-name">
-                                    <button class="btn btn-primary" onclick="installSkill()" style="width:100%">Install Skill</button>
+                                    <button class="btn btn-primary" id="install-skill-btn" onclick="installSkill()" style="width:100%">Install Skill</button>
+                                    <div id="install-skill-status" style="margin-top:0.75rem;font-size:0.8rem;text-align:center"></div>
                                 </div>
                                 
                                 <div style="border-top:1px solid var(--border);padding-top:1.5rem;margin-top:1.5rem">
                                     <h4 style="margin-bottom:0.75rem;color:var(--text-secondary);font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em">Request Custom Skill</h4>
                                     <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem">Describe what you need and OpenClaw will build it</p>
-                                    <textarea id="skill-description" class="workshop-input" placeholder="I need a skill that can..."></textarea>
-                                    <button class="btn btn-secondary" onclick="requestSkill()" style="width:100%;margin-top:0.75rem">Submit Request</button>
+                                    <textarea id="skill-description" class="workshop-input" placeholder="I need a skill that can..." style="min-height:120px"></textarea>
+                                    <button class="btn btn-secondary" id="request-skill-btn" onclick="requestSkill()" style="width:100%;margin-top:0.75rem">Submit Request</button>
+                                    
+                                    <!-- Mini Chat Response Area -->
+                                    <div id="skill-chat-response" style="margin-top:1rem;display:none">
+                                        <div style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:12px;padding:1rem">
+                                            <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em">OpenClaw says</div>
+                                            <div id="skill-chat-content" style="font-size:0.875rem;line-height:1.6;color:var(--text-secondary)"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="request-skill-status" style="margin-top:0.75rem;font-size:0.8rem;text-align:center"></div>
                                 </div>
                             </div>
                         </div>
@@ -1965,13 +1976,12 @@
                 return;
             }
             
-            // Show loading state - save original text
-            const originalText = btn.querySelector('span:last-child')?.textContent || 'Submit Suggestion';
+            // Show loading state - use btn-loading class only (adds ::after spinner)
             btn.disabled = true;
             btn.classList.add('btn-loading');
-            btn.innerHTML = '<span class="spinner"></span> <span>Running OpenClaw...</span>';
+            btn.innerHTML = '<span>Running OpenClaw...</span>';
             
-            status.innerHTML = '<span style="color:var(--info);display:flex;align-items:center;justify-content:center;gap:0.5rem"><span class="spinner"></span><span>Spawning agent and waiting...</span></span>';
+            status.innerHTML = '<span style="color:var(--info)">⏳ Spawning agent and waiting...</span>';
             
             try {
                 const response = await fetch('/api/personality/suggest', {
@@ -1996,7 +2006,7 @@
                 // Restore button state
                 btn.disabled = false;
                 btn.classList.remove('btn-loading');
-                btn.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;gap:0.5rem"><span>✨</span><span>' + originalText + '</span></span>';
+                btn.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;gap:0.5rem"><span>✨</span><span>Submit Suggestion</span></span>';
             }
         }
         
@@ -2140,7 +2150,19 @@
         
         async function installSkill() {
             const repo = document.getElementById('skill-repo').value.trim();
-            if (!repo) return showToast('Please enter a repository', 'warning');
+            const btn = document.getElementById('install-skill-btn');
+            const status = document.getElementById('install-skill-status');
+            
+            if (!repo) {
+                status.innerHTML = '<span style="color:var(--warning)">⚠️ Please enter a repository</span>';
+                return;
+            }
+            
+            // Show loading state
+            btn.disabled = true;
+            btn.classList.add('btn-loading');
+            btn.innerHTML = '<span>Installing...</span>';
+            status.innerHTML = '<span style="color:var(--info)">⏳ Installing skill from ClawHub...</span>';
             
             try {
                 const response = await fetch('/api/skills/install', {
@@ -2151,23 +2173,68 @@
                 const data = await response.json();
                 if (data.success) {
                     fetchData();
+                    status.innerHTML = '<span style="color:var(--success)">✅ Skill installed!</span>';
                     showToast('Skill installed successfully!', 'success');
                     document.getElementById('skill-repo').value = '';
+                    setTimeout(() => status.innerHTML = '', 3000);
                 } else {
+                    status.innerHTML = '<span style="color:var(--danger)">❌ Failed: ' + escapeHtml(data.error || 'Unknown error') + '</span>';
                     showToast('Failed to install: ' + data.error, 'error');
                 }
             } catch (e) {
+                status.innerHTML = '<span style="color:var(--danger)">❌ Network error</span>';
                 showToast('Installation failed', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+                btn.innerHTML = 'Install Skill';
             }
         }
         
-        function requestSkill() {
+        async function requestSkill() {
             const desc = document.getElementById('skill-description').value.trim();
-            if (!desc) return showToast('Please describe the skill', 'warning');
+            const btn = document.getElementById('request-skill-btn');
+            const status = document.getElementById('request-skill-status');
+            const chatResponse = document.getElementById('skill-chat-response');
+            const chatContent = document.getElementById('skill-chat-content');
             
-            // Save to pending
-            showToast('Skill request submitted! OpenClaw will review it.', 'success');
-            document.getElementById('skill-description').value = '';
+            if (!desc) {
+                status.innerHTML = '<span style="color:var(--warning)">⚠️ Please describe the skill</span>';
+                return;
+            }
+            
+            // Show loading state
+            btn.disabled = true;
+            btn.classList.add('btn-loading');
+            btn.innerHTML = '<span>Asking OpenClaw...</span>';
+            status.innerHTML = '<span style="color:var(--info)">⏳ Getting mini response...</span>';
+            chatResponse.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/skills/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ description: desc })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show the mini chat response
+                    chatContent.innerHTML = escapeHtml(data.response);
+                    chatResponse.style.display = 'block';
+                    status.innerHTML = '<span style="color:var(--success)">✅ Response received!</span>';
+                    showToast('OpenClaw responded!', 'success');
+                } else {
+                    status.innerHTML = '<span style="color:var(--danger)">❌ ' + escapeHtml(data.error || 'Failed') + '</span>';
+                }
+            } catch (e) {
+                status.innerHTML = '<span style="color:var(--danger)">❌ Network error</span>';
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+                btn.innerHTML = 'Submit Request';
+            }
         }
         
         function savePersonality() {

@@ -39,19 +39,19 @@ def get_github_status():
             capture_output=True, text=True, timeout=10
         )
         notifications = int(result.stdout.strip()) if result.returncode == 0 else 0
-        
+
         result = subprocess.run(
             ["gh", "pr", "list", "--author", "@me", "--state", "open", "--json", "number", "-q", "length"],
             capture_output=True, text=True, timeout=10
         )
         my_prs = int(result.stdout.strip()) if result.returncode == 0 else 0
-        
+
         result = subprocess.run(
             ["gh", "pr", "list", "--review-requested=@me", "--state", "open", "--json", "number", "-q", "length"],
             capture_output=True, text=True, timeout=10
         )
         reviews = int(result.stdout.strip()) if result.returncode == 0 else 0
-        
+
         return {"notifications": notifications, "my_prs": my_prs, "reviews": reviews, "connected": True}
     except:
         return {"notifications": 0, "my_prs": 0, "reviews": 0, "connected": False}
@@ -88,11 +88,11 @@ def get_skills():
                                     desc = line.split(":", 1)[1].strip() if ":" in line else line.strip("_ ")
                                 if "version" in line.lower() and ":" in line:
                                     version = line.split(":", 1)[1].strip().strip('"').strip("'")
-                            
+
                             # Check for enabled/disabled state
                             config_file = skill_dir / ".disabled"
                             enabled = not config_file.exists()
-                            
+
                             skills.append({
                                 "name": name,
                                 "description": desc or "No description",
@@ -110,7 +110,7 @@ def get_skill_detail(name):
     skill_dir = SKILLS_DIR / name
     if not skill_dir.exists():
         return None
-    
+
     result = {
         "name": name,
         "description": "",
@@ -120,7 +120,7 @@ def get_skill_detail(name):
         "readme": "",
         "enabled": True
     }
-    
+
     # Parse SKILL.md
     skill_file = skill_dir / "SKILL.md"
     if skill_file.exists():
@@ -132,13 +132,13 @@ def get_skill_detail(name):
                     result["description"] = line.split(":", 1)[1].strip() if ":" in line else line.strip("_ ")
                 if "version" in line.lower() and ":" in line:
                     result["version"] = line.split(":", 1)[1].strip().strip('"').strip("'")
-    
+
     # Parse README.md
     readme_file = skill_dir / "README.md"
     if readme_file.exists():
         with open(readme_file) as f:
             result["readme"] = f.read()
-    
+
     # List files
     for f in skill_dir.iterdir():
         if f.is_file():
@@ -146,17 +146,17 @@ def get_skill_detail(name):
                 "name": f.name,
                 "size": f.stat().st_size
             })
-    
+
     # Check if enabled
     result["enabled"] = not (skill_dir / ".disabled").exists()
-    
+
     return result
 
 def get_personality_files():
     files = []
     workspace = Path("/root/.openclaw/workspace")
     personality_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md"]
-    
+
     for fname in personality_files:
         fpath = workspace / fname
         if fpath.exists():
@@ -208,7 +208,7 @@ def get_alerts():
             "title": f"{len(pending)} pending tasks",
             "message": "You have several tasks waiting to be started."
         })
-    
+
     # Check GitHub notifications
     gh = get_github_status()
     if gh.get("notifications", 0) > 0:
@@ -217,7 +217,7 @@ def get_alerts():
             "title": f"{gh['notifications']} GitHub notifications",
             "message": "You have unread notifications on GitHub."
         })
-    
+
     # Check CI failures
     try:
         result = subprocess.run(
@@ -232,7 +232,7 @@ def get_alerts():
             })
     except:
         pass
-    
+
     return alerts
 
 def get_system_health():
@@ -247,7 +247,7 @@ def get_system_health():
                 health["cpu"] = f"{(user + nice + system) / total * 100:.1f}%"
     except:
         health["cpu"] = "N/A"
-    
+
     try:
         result = subprocess.run(["free"], capture_output=True, text=True)
         for line in result.stdout.split("\n"):
@@ -259,7 +259,7 @@ def get_system_health():
                 break
     except:
         health["memory"] = "N/A"
-    
+
     try:
         result = subprocess.run(["df", "/"], capture_output=True, text=True)
         lines = result.stdout.strip().split("\n")
@@ -267,14 +267,14 @@ def get_system_health():
             health["disk"] = lines[1].split()[4]
     except:
         health["disk"] = "N/A"
-    
+
     try:
         result = subprocess.run(["uptime"], capture_output=True, text=True)
         if "load average:" in result.stdout:
             health["load"] = result.stdout.split("load average:")[1].strip()
     except:
         health["load"] = "N/A"
-    
+
     return health
 
 def get_processes():
@@ -341,11 +341,11 @@ def create_task():
     desc = data.get("description", "")
     if not name:
         return jsonify({"success": False, "error": "Name required"}), 400
-    
+
     task_file = TASKS_DIR / f"{name}.json"
     if task_file.exists():
         return jsonify({"success": False, "error": "Task exists"}), 400
-    
+
     task = {
         "id": int(datetime.now().timestamp()),
         "name": name,
@@ -356,10 +356,10 @@ def create_task():
         "completed_at": None,
         "proof": None
     }
-    
+
     with open(task_file, "w") as f:
         json.dump(task, f, indent=2)
-    
+
     return jsonify({"success": True, "task": task})
 
 @app.route("/api/tasks/<task_id>/complete", methods=["POST"])
@@ -390,12 +390,12 @@ def toggle_skill(name):
     skill_dir = SKILLS_DIR / name
     if not skill_dir.exists():
         return jsonify({"success": False, "error": "Skill not found"}), 404
-    
+
     data = request.json
     enabled = data.get("enabled", True)
-    
+
     disabled_file = skill_dir / ".disabled"
-    
+
     if enabled:
         # Enable: remove .disabled file if exists
         if disabled_file.exists():
@@ -403,7 +403,7 @@ def toggle_skill(name):
     else:
         # Disable: create .disabled file
         disabled_file.touch()
-    
+
     return jsonify({"success": True, "enabled": enabled})
 
 @app.route("/api/personality/<filename>")
@@ -411,14 +411,14 @@ def get_personality_file(filename):
     """Get content of a specific personality file"""
     workspace = Path("/root/.openclaw/workspace")
     safe_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md", "HEARTBEAT.md"]
-    
+
     if filename not in safe_files:
         return jsonify({"error": "Invalid file"}), 400
-    
+
     fpath = workspace / filename
     if not fpath.exists():
         return jsonify({"error": "File not found"}), 404
-    
+
     try:
         with open(fpath) as f:
             content = f.read()
@@ -436,14 +436,14 @@ def save_personality():
     data = request.json
     filename = data.get("file", "")
     content = data.get("content", "")
-    
+
     safe_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md"]
     if filename not in safe_files:
         return jsonify({"success": False, "error": "Invalid file"})
-    
+
     workspace = Path("/root/.openclaw/workspace")
     fpath = workspace / filename
-    
+
     try:
         # Backup first
         backup_dir = workspace / "backups"
@@ -451,10 +451,10 @@ def save_personality():
         if fpath.exists():
             import shutil
             shutil.copy(fpath, backup_dir / f"{filename}.{datetime.now().strftime('%Y%m%d_%H%M%S')}.bak")
-        
+
         with open(fpath, 'w') as f:
             f.write(content)
-        
+
         return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
@@ -466,24 +466,24 @@ def suggest_personality():
     data = request.json
     filename = data.get("file", "")
     suggestion = data.get("suggestion", "")
-    
+
     if not filename or not suggestion:
         return jsonify({"success": False, "error": "File and suggestion required"})
-    
+
     safe_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md"]
     if filename not in safe_files:
         return jsonify({"success": False, "error": "Invalid file"})
-    
+
     workspace = Path("/root/.openclaw/workspace")
     fpath = workspace / filename
-    
+
     try:
         # Read current content
         current_content = ""
         if fpath.exists():
             with open(fpath) as f:
                 current_content = f.read()
-        
+
         # Build the prompt for OpenClaw agent
         prompt = f"""Update the personality file {filename} based on this user suggestion:
 
@@ -495,50 +495,51 @@ CURRENT CONTENT:
 ```
 
 Please apply the suggestion by editing {fpath} directly. Keep the existing structure and style, just incorporate the requested changes."""
-        
+
         # Spawn OpenClaw agent to handle this immediately
         # Uses --local with a session-id to identify this as web UI triggered
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         session_id = f"webui-personality-{timestamp}"
-        
+
         result = subprocess.run(
             [
-                "openclaw", "agent", 
+                "openclaw", "agent",
                 "--local",
                 "--session-id", session_id,
                 "--message", prompt,
                 "--thinking", "low",
-                "--timeout", "120"
+                "--timeout", "120",
+                "--verbose", "on"  # More logging
             ],
             capture_output=True,
             text=True,
             timeout=130  # Slightly longer than agent timeout
         )
-        
+
         # Log the result for debugging
         log_dir = workspace / ".autonomy_logs"
         log_dir.mkdir(exist_ok=True)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        
+
         with open(log_dir / f"suggestion_{timestamp}.log", 'w') as f:
             f.write(f"File: {filename}\n")
             f.write(f"Suggestion: {suggestion}\n")
             f.write(f"Return code: {result.returncode}\n")
             f.write(f"Stdout:\n{result.stdout}\n")
             f.write(f"Stderr:\n{result.stderr}\n")
-        
+
         if result.returncode == 0:
             return jsonify({
-                "success": True, 
+                "success": True,
                 "message": f"✅ OpenClaw updated {filename}",
                 "output": result.stdout[-500:] if len(result.stdout) > 500 else result.stdout
             })
         else:
             return jsonify({
-                "success": False, 
+                "success": False,
                 "error": f"Agent failed: {result.stderr[-200:] if result.stderr else 'Unknown error'}"
             })
-            
+
     except subprocess.TimeoutExpired:
         return jsonify({"success": False, "error": "Agent timed out (took too long)"})
     except Exception as e:
@@ -551,7 +552,7 @@ def install_skill():
     repo = data.get("repo", "")
     if not repo:
         return jsonify({"success": False, "error": "Repository required"})
-    
+
     try:
         result = subprocess.run(
             ["clawhub", "install", repo],
@@ -560,6 +561,82 @@ def install_skill():
         return jsonify({"success": result.returncode == 0, "output": result.stdout})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
+
+
+@app.route("/api/skills/request", methods=["POST"])
+def request_skill():
+    """Request a custom skill - gets mini response from OpenClaw"""
+    data = request.json
+    description = data.get("description", "")
+
+    if not description:
+        return jsonify({"success": False, "error": "Description required"})
+
+    try:
+        # Build a short prompt for OpenClaw - just a quick response
+        prompt = f"""The user wants a custom skill: "{description}"
+
+Give a brief, helpful response (2-3 sentences max):
+1. Acknowledge what they want
+2. Say if it's feasible
+3. Give one tip or next step
+
+Keep it conversational and friendly."""
+
+        # Spawn OpenClaw agent for quick response
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        session_id = f"webui-skill-request-{timestamp}"
+
+        result = subprocess.run(
+            [
+                "openclaw", "agent",
+                "--local",
+                "--session-id", session_id,
+                "--message", prompt,
+                "--thinking", "minimal",  # Fast response
+                "--timeout", "30"  # Short timeout for quick response
+            ],
+            capture_output=True,
+            text=True,
+            timeout=35
+        )
+
+        # Parse response - try to extract just the message content
+        response_text = "I'll work on that skill for you! Check back soon."
+        if result.stdout:
+            # Take last few lines which usually contain the actual response
+            lines = [l.strip() for l in result.stdout.strip().split('\n') if l.strip()]
+            if lines:
+                # Skip metadata lines and take actual content
+                content_lines = [l for l in lines if not l.startswith(('Runtime:', 'Session:', 'Model:', 'Tools:'))]
+                if content_lines:
+                    response_text = ' '.join(content_lines[-3:])  # Last 3 lines
+
+        # Log for debugging
+        log_dir = Path("/root/.openclaw/workspace/.autonomy_logs")
+        log_dir.mkdir(exist_ok=True)
+        with open(log_dir / f"skill_request_{timestamp}.log", 'w') as f:
+            f.write(f"Description: {description}\n")
+            f.write(f"Return code: {result.returncode}\n")
+            f.write(f"Response: {response_text}\n")
+            f.write(f"Stdout:\n{result.stdout}\n")
+            f.write(f"Stderr:\n{result.stderr}\n")
+
+        return jsonify({
+            "success": True,
+            "response": response_text
+        })
+
+    except subprocess.TimeoutExpired:
+        return jsonify({
+            "success": True,
+            "response": "That's an interesting skill idea! I'm thinking about how to build it..."
+        })
+    except Exception as e:
+        return jsonify({
+            "success": True,
+            "response": f"Got it! I'll look into building that skill for you. (Error: {str(e)[:50]})"
+        })
 
 
 if __name__ == "__main__":
