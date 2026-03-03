@@ -38,7 +38,8 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Web UI (separate project - do not commit)
+# Web UI (separate project - do not commit to skill repo)
+# Uncomment below to exclude from commits:
 # web_ui.py
 # templates/
 # static/

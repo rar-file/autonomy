@@ -1,0 +1,2324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autonomy — AI Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0d0d12;
+            --bg-secondary: #15151c;
+            --bg-tertiary: #1e1e28;
+            --bg-hover: #262632;
+            --border: #2d2d3d;
+            --border-hover: #3d3d52;
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1b0;
+            --text-muted: #6b6b7b;
+            --accent: #ff3366;
+            --accent-light: #ff5588;
+            --accent-glow: rgba(255, 51, 102, 0.4);
+            --success: #00d9a3;
+            --success-bg: rgba(0, 217, 163, 0.1);
+            --warning: #ffb020;
+            --warning-bg: rgba(255, 176, 32, 0.1);
+            --danger: #ff4757;
+            --danger-bg: rgba(255, 71, 87, 0.1);
+            --info: #00d0ff;
+            --info-bg: rgba(0, 208, 255, 0.1);
+            --purple: #a855f7;
+            --purple-bg: rgba(168, 85, 247, 0.1);
+            --gradient-1: linear-gradient(135deg, #ff3366 0%, #ff6b6b 50%, #a855f7 100%);
+            --gradient-2: linear-gradient(135deg, #00d9a3 0%, #00d0ff 100%);
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+            --shadow-glow: 0 0 20px var(--accent-glow);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        *::-webkit-scrollbar { width: 8px; height: 8px; }
+        *::-webkit-scrollbar-track { background: var(--bg-secondary); border-radius: 4px; }
+        *::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        *::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
+        
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .app { display: flex; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, rgba(21,21,28,0.95) 100%);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(20px);
+        }
+        
+        .brand {
+            padding: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-bottom: 1px solid var(--border);
+            background: rgba(255,51,102,0.03);
+        }
+        
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            filter: drop-shadow(0 0 10px var(--accent-glow));
+        }
+        
+        .brand-text { 
+            font-size: 1.4rem; 
+            font-weight: 700; 
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .brand-subtitle {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        
+        .nav { 
+            flex: 1; 
+            padding: 1rem 0.75rem;
+            overflow-y: auto;
+        }
+        
+        .nav-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .nav-label {
+            padding: 0 1rem;
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+        
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0.5rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 10px;
+            position: relative;
+        }
+        
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            transform: translateX(4px);
+        }
+        
+        .nav-item.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: var(--shadow-glow);
+        }
+        
+        .nav-item.active .nav-icon { opacity: 1; }
+        
+        .nav-icon { 
+            width: 20px; 
+            height: 20px; 
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+        
+        .nav-badge {
+            margin-left: auto;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(255,51,102,0.3);
+        }
+        
+        .sidebar-footer {
+            padding: 1.25rem;
+            border-top: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+        
+        .connection-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: var(--bg-hover);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Main Content */
+        .main { 
+            flex: 1; 
+            margin-left: 280px;
+            background: radial-gradient(ellipse at top right, rgba(255,51,102,0.03) 0%, transparent 50%);
+        }
+        
+        .header {
+            height: 72px;
+            background: rgba(13,13,18,0.8);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(20px);
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .header-title { 
+            font-size: 1.25rem; 
+            font-weight: 600;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            font-family: inherit;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255,51,102,0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,51,102,0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border-color: var(--border-hover);
+        }
+        
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+        }
+        
+        .content { padding: 2rem; max-width: 1600px; margin: 0 auto; }
+        
+        .page { display: none; }
+        .page.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Page Header */
+        .page-header { 
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .page-title { 
+            font-size: 2rem; 
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+        
+        .page-subtitle { 
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            border-color: var(--border-hover);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(90deg, var(--bg-tertiary) 0%, transparent 100%);
+        }
+        
+        .card-title { 
+            font-size: 1.1rem; 
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .card-title-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--accent);
+        }
+        
+        .card-body { padding: 1.5rem; }
+        
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        
+        .stat-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-1);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-hover);
+        }
+        
+        .stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-icon-wrapper {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .stat-icon-wrapper.accent { background: var(--accent-bg); }
+        .stat-icon-wrapper.success { background: var(--success-bg); }
+        .stat-icon-wrapper.warning { background: var(--warning-bg); }
+        .stat-icon-wrapper.info { background: var(--info-bg); }
+        
+        .stat-value { 
+            font-size: 2.75rem; 
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+        
+        .stat-label { 
+            color: var(--text-secondary); 
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+        
+        .stat-trend {
+            font-size: 0.8rem;
+            color: var(--success);
+            margin-top: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        /* Tables */
+        .table-container { overflow-x: auto; }
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        
+        th {
+            text-align: left;
+            padding: 1rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th:first-child { border-radius: 8px 0 0 0; }
+        th:last-child { border-radius: 0 8px 0 0; }
+        
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+        
+        tr:hover td { background: var(--bg-hover); }
+        tr:last-child td { border-bottom: none; }
+        tr:last-child td:first-child { border-radius: 0 0 0 8px; }
+        tr:last-child td:last-child { border-radius: 0 0 8px 0; }
+        
+        tr.completed td {
+            text-decoration: line-through;
+            opacity: 0.5;
+            color: var(--text-muted);
+        }
+        
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.875rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .badge-success { background: var(--success-bg); color: var(--success); }
+        .badge-warning { background: var(--warning-bg); color: var(--warning); }
+        .badge-danger { background: var(--danger-bg); color: var(--danger); }
+        .badge-info { background: var(--info-bg); color: var(--info); }
+        .badge-purple { background: var(--purple-bg); color: var(--purple); }
+        .badge-secondary { background: var(--bg-hover); color: var(--text-secondary); }
+        
+        /* Toggle Switch */
+        .toggle {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 26px;
+        }
+        
+        .toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-hover);
+            transition: 0.3s;
+            border-radius: 26px;
+            border: 1px solid var(--border);
+        }
+        
+        .toggle-slider::before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background: var(--text-secondary);
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        input:checked + .toggle-slider::before {
+            transform: translateX(22px);
+            background: white;
+        }
+        
+        /* Skills Layout */
+        .skills-workshop {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            height: calc(100vh - 200px);
+            min-height: 500px;
+        }
+        
+        .skills-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .skills-panel-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(90deg, var(--bg-tertiary) 0%, transparent 100%);
+        }
+        
+        .skills-panel-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .skills-panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        .skill-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+        }
+        
+        .skill-item:hover {
+            border-color: var(--border-hover);
+            transform: translateX(4px);
+        }
+        
+        .skill-item.disabled {
+            opacity: 0.5;
+        }
+        
+        .skill-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .skill-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .skill-desc {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.75rem;
+        }
+        
+        .skill-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        
+        /* Workshop specific */
+        .workshop-input {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            color: var(--text-primary);
+            width: 100%;
+            margin-bottom: 1rem;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+        }
+        
+        .workshop-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        
+        /* Personality Editor */
+        .personality-editor {
+            display: grid;
+            grid-template-columns: 260px 1fr 340px;
+            gap: 1.5rem;
+            height: calc(100vh - 180px);
+        }
+        
+        .file-explorer {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.75rem;
+        }
+        
+        .file-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.875rem 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 0.375rem;
+            border: 1px solid transparent;
+        }
+        
+        .file-item:hover {
+            background: var(--bg-hover);
+            border-color: var(--border-hover);
+        }
+        
+        .file-item.active {
+            background: linear-gradient(135deg, rgba(255, 51, 102, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px var(--accent), 0 4px 12px rgba(255, 51, 102, 0.15);
+        }
+        
+        .file-item.active .file-name {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .file-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .file-item.active .file-icon {
+            background: var(--accent);
+        }
+        
+        .file-info {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+        
+        .file-item.active .file-name {
+            color: var(--text-primary);
+        }
+        
+        .file-size {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.125rem;
+        }
+        
+        .editor-pane {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .editor-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-tertiary);
+        }
+        
+        .editor-toolbar span {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .editor-toolbar span::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--accent);
+        }
+        
+        .editor-content {
+            flex: 1;
+            padding: 1.25rem;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+        }
+        
+        .editor-content textarea {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+            resize: none;
+            outline: none;
+        }
+        
+        /* Suggestion Panel */
+        .suggestion-panel {
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, rgba(21, 21, 28, 0.8) 100%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .suggestion-panel .skills-panel-header {
+            background: linear-gradient(135deg, rgba(255, 51, 102, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .suggestion-panel .skills-panel-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .suggestion-panel .skills-panel-title::before {
+            content: '✨';
+            font-size: 1rem;
+        }
+        
+        .suggestion-info {
+            padding: 1rem 1.25rem;
+            background: var(--bg-tertiary);
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .suggestion-info label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 0.375rem;
+        }
+        
+        .suggestion-info .target-file {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: var(--accent);
+            font-weight: 500;
+        }
+        
+        .suggestion-info .target-file.empty {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        
+        /* System Health */
+        .system-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        
+        .system-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        
+        .system-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 1rem 0;
+        }
+        
+        .system-value.good { color: var(--success); }
+        .system-value.warn { color: var(--warning); }
+        .system-value.danger { color: var(--danger); }
+        
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto;
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.5s ease;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+        
+        /* Alerts */
+        .alert-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            transition: all 0.2s;
+        }
+        
+        .alert-item:hover {
+            border-color: var(--border-hover);
+            transform: translateX(4px);
+        }
+        
+        .alert-item.warning {
+            border-left: 3px solid var(--warning);
+        }
+        
+        .alert-item.error {
+            border-left: 3px solid var(--danger);
+        }
+        
+        .alert-item.info {
+            border-left: 3px solid var(--info);
+        }
+        
+        .alert-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        
+        .alert-item.warning .alert-icon { background: var(--warning-bg); }
+        .alert-item.error .alert-icon { background: var(--danger-bg); }
+        .alert-item.info .alert-icon { background: var(--info-bg); }
+        
+        .alert-content { flex: 1; }
+        
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .alert-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+        
+        .alert-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        /* Skill Detail Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            animation: modalSlide 0.3s ease;
+        }
+        
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(90deg, var(--bg-tertiary) 0%, transparent 100%);
+        }
+        
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        
+        .modal-close:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-height: calc(80vh - 80px);
+        }
+        
+        .skill-detail-meta {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .skill-detail-meta span {
+            background: var(--bg-tertiary);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        
+        .skill-detail-section {
+            margin-bottom: 1.5rem;
+        }
+        
+        .skill-detail-section h4 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+        
+        .skill-detail-readme {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+        
+        .skill-detail-files {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .skill-detail-file {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Logs */
+        .log-container {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+        
+        .log-entry {
+            display: flex;
+            gap: 1rem;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+            align-items: flex-start;
+        }
+        
+        .log-entry:last-child { border-bottom: none; }
+        
+        .log-time {
+            color: var(--text-muted);
+            white-space: nowrap;
+            font-size: 0.8rem;
+        }
+        
+        .log-level {
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            min-width: 50px;
+            text-align: center;
+        }
+        
+        .log-level.info { background: var(--info-bg); color: var(--info); }
+        .log-level.warn { background: var(--warning-bg); color: var(--warning); }
+        .log-level.error { background: var(--danger-bg); color: var(--danger); }
+        .log-level.debug { background: var(--bg-hover); color: var(--text-muted); }
+        
+        .log-message { flex: 1; color: var(--text-secondary); }
+        
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1.5rem;
+            opacity: 0.3;
+        }
+        
+        .empty-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Loading Spinner */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-top: 2px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            vertical-align: middle;
+            flex-shrink: 0;
+        }
+        
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.8;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-loading::before {
+            content: '';
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            flex-shrink: 0;
+        }
+        
+        /* Animations */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .animate-in {
+            animation: slideIn 0.3s ease;
+        }
+        
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .personality-editor { grid-template-columns: 240px 1fr 300px; }
+        }
+        
+        @media (max-width: 1200px) {
+            .skills-workshop { grid-template-columns: 1fr; }
+            .personality-editor { grid-template-columns: 220px 1fr; }
+            .personality-editor .suggestion-panel { display: none; }
+            .system-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main { margin-left: 0; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .system-grid { grid-template-columns: 1fr; }
+            .personality-editor { grid-template-columns: 1fr; }
+            .personality-editor .file-explorer { max-height: 200px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <svg class="brand-icon" viewBox="0 0 200 200">
+                    <defs>
+                        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#ff3366;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#a855f7;stop-opacity:1" />
+                        </linearGradient>
+                    </defs>
+                    <circle cx="100" cy="100" r="90" fill="#1a1a2e" stroke="#2d2d3d" stroke-width="2"/>
+                    <circle cx="100" cy="100" r="80" fill="none" stroke="url(#logoGrad)" stroke-width="3" opacity="0.5"/>
+                    <circle cx="100" cy="50" r="12" fill="url(#logoGrad)"/>
+                    <circle cx="55" cy="130" r="12" fill="url(#logoGrad)"/>
+                    <circle cx="145" cy="130" r="12" fill="url(#logoGrad)"/>
+                    <line x1="100" y1="62" x2="65" y2="120" stroke="url(#logoGrad)" stroke-width="2"/>
+                    <line x1="100" y1="62" x2="135" y2="120" stroke="url(#logoGrad)" stroke-width="2"/>
+                    <line x1="67" y1="130" x2="133" y2="130" stroke="url(#logoGrad)" stroke-width="2"/>
+                    <circle cx="100" cy="100" r="18" fill="#1a1a2e" stroke="url(#logoGrad)" stroke-width="2"/>
+                    <circle cx="100" cy="100" r="6" fill="url(#logoGrad)">
+                        <animate attributeName="opacity" values="1;0.4;1" dur="2s" repeatCount="indefinite"/>
+                    </circle>
+                </svg>
+                <div>
+                    <div class="brand-text">Autonomy</div>
+                    <div class="brand-subtitle">AI Command Center</div>
+                </div>
+            </div>
+            
+            <nav class="nav">
+                <div class="nav-section">
+                    <div class="nav-label">Overview</div>
+                    <a class="nav-item active" onclick="showPage('dashboard',this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/>
+                            <rect x="14" y="14" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/>
+                        </svg>
+                        Dashboard
+                    </a>
+                    
+                    <a class="nav-item" onclick="showPage('tasks',this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                        </svg>
+                        Tasks
+                        <span class="nav-badge" id="nav-task-count">0</span>
+                    </a>
+                    
+                    <a class="nav-item" onclick="showPage('alerts',this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
+                        </svg>
+                        Alerts
+                        <span class="nav-badge" id="nav-alert-count" style="display:none">0</span>
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-label">Configuration</div>
+                    
+                    <a class="nav-item" onclick="showPage('skills',this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>
+                        </svg>
+                        Skills Workshop
+                    </a>
+                    
+                    <a class="nav-item" onclick="showPage('personality',this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        Personality
+                    </a>
+                </div>
+                
+                <div class="nav-section">
+                    <div class="nav-label">System</div>
+                    
+                    <a class="nav-item" onclick="showPage('logs',this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                        Logs
+                    </a>
+                    
+                    <a class="nav-item" onclick="showPage('system',this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+                        </svg>
+                        System Health
+                    </a>
+                    
+                    <a class="nav-item" onclick="showPage('github',this)">
+                        <svg class="nav-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.11.8-.26.8-.58v-2c-3.34.72-4.04-1.42-4.04-1.42-.55-1.4-1.34-1.76-1.34-1.76-1.1-.74.08-.73.08-.73 1.2.08 1.84 1.24 1.84 1.24 1.07 1.84 2.8 1.3 3.48 1 .1-.78.42-1.3.76-1.6C7.36 16.7 4.6 15.67 4.6 11.7c0-1.13.4-2.05 1.05-2.77-.1-.26-.46-1.28.1-2.67 0 0 .86-.27 2.8 1.03.8-.22 1.7-.34 2.56-.34.86 0 1.74.12 2.57.34 1.96-1.3 2.83-1.03 2.83-1.03.56 1.4.2 2.4.1 2.67.66.72 1.05 1.64 1.05 2.77 0 3.93-2.4 4.8-4.7 5.05.37.32.7.94.7 1.9v2.8c0 .32.2.7.82.58C20.56 21.8 24 17.3 24 12c0-6.63-5.37-12-12-12z"/>
+                        </svg>
+                        GitHub
+                    </a>
+                </div>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="connection-pill">
+                    <span class="status-dot"></span>
+                    <span id="connection-text">System Online</span>
+                </div>
+            </div>
+        </aside>
+        
+        <main class="main">
+            <header class="header">
+                <div class="breadcrumb">
+                    <span class="header-title" id="page-title">Dashboard</span>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary btn-icon" onclick="refreshData()" title="Refresh">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-primary" onclick="createTask()">+ New Task</button>
+                </div>
+            </header>
+            
+            <div class="content">
+                <!-- Dashboard Page -->
+                <div class="page active" id="page-dashboard">
+                    <div class="page-header">
+                        <h1 class="page-title">Dashboard</h1>
+                        <p class="page-subtitle">Overview of your autonomous workspace</p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Active Tasks</span>
+                                <div class="stat-icon-wrapper accent">📋</div>
+                            </div>
+                            <div class="stat-value" id="stat-tasks">-</div>
+                            <div class="stat-trend">Pending + In Progress</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Installed Skills</span>
+                                <div class="stat-icon-wrapper success">🔧</div>
+                            </div>
+                            <div class="stat-value" id="stat-skills">-</div>
+                            <div class="stat-trend">From ClawHub</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">GitHub Notifications</span>
+                                <div class="stat-icon-wrapper info">🔔</div>
+                            </div>
+                            <div class="stat-value" id="stat-notifs">-</div>
+                            <div class="stat-trend">Unread notifications</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">CPU Usage</span>
+                                <div class="stat-icon-wrapper warning">⚡</div>
+                            </div>
+                            <div class="stat-value" id="stat-cpu">-</div>
+                            <div class="stat-trend">System load</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">Recent Tasks</span>
+                                <button class="btn btn-secondary" style="padding:0.4rem 0.875rem;font-size:0.8rem" onclick="showPage('tasks', null)">View All</button>
+                            </div>
+                            <div class="card-body" id="dashboard-tasks">
+                                <div class="empty-state">Loading...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">Active Alerts</span>
+                            </div>
+                            <div class="card-body" id="dashboard-alerts">
+                                <div class="empty-state">No active alerts</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tasks Page -->
+                <div class="page" id="page-tasks">
+                    <div class="page-header">
+                        <h1 class="page-title">Tasks</h1>
+                        <p class="page-subtitle">Manage and track all your tasks</p>
+                    </div>
+                    
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="tabs">
+                                <div class="tab active" onclick="filterTasks('all', this)">All</div>
+                                <div class="tab" onclick="filterTasks('pending', this)">Pending</div>
+                                <div class="tab" onclick="filterTasks('completed', this)">Completed</div>
+                            </div>
+                            <div id="tasks-table-container">
+                                <div class="empty-state">Loading tasks...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Alerts Page -->
+                <div class="page" id="page-alerts">
+                    <div class="page-header">
+                        <h1 class="page-title">Alerts & Reminders</h1>
+                        <p class="page-subtitle">Important notifications and reminders</p>
+                    </div>
+                    <div id="alerts-container">
+                        <div class="empty-state">No alerts</div>
+                    </div>
+                </div>
+                
+                <!-- Skills Workshop Page -->
+                <div class="page" id="page-skills">
+                    <div class="page-header">
+                        <h1 class="page-title">Skills Workshop</h1>
+                        <p class="page-subtitle">Manage installed skills and create new ones</p>
+                    </div>
+                    
+                    <div class="skills-workshop">
+                        <div class="skills-panel">
+                            <div class="skills-panel-header">
+                                <div class="skills-panel-title">Installed Skills</div>
+                            </div>
+                            <div class="skills-panel-body" id="skills-list">
+                                <div class="empty-state" style="padding:2rem">Loading skills...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="skills-panel">
+                            <div class="skills-panel-header">
+                                <div class="skills-panel-title">Workshop</div>
+                            </div>
+                            <div class="skills-panel-body">
+                                <div style="margin-bottom:1.5rem">
+                                    <h4 style="margin-bottom:0.75rem;color:var(--text-secondary);font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em">Install from ClawHub</h4>
+                                    <input type="text" id="skill-repo" class="workshop-input" style="min-height:44px;margin-bottom:0.75rem" placeholder="owner/repo-name">
+                                    <button class="btn btn-primary" id="install-skill-btn" onclick="installSkill()" style="width:100%">Install Skill</button>
+                                    <div id="install-skill-status" style="margin-top:0.75rem;font-size:0.8rem;text-align:center"></div>
+                                </div>
+                                
+                                <div style="border-top:1px solid var(--border);padding-top:1.5rem;margin-top:1.5rem">
+                                    <h4 style="margin-bottom:0.75rem;color:var(--text-secondary);font-size:0.9rem;text-transform:uppercase;letter-spacing:0.05em">Request Custom Skill</h4>
+                                    <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem">Describe what you need and OpenClaw will build it</p>
+                                    <textarea id="skill-description" class="workshop-input" placeholder="I need a skill that can..." style="min-height:120px"></textarea>
+                                    <button class="btn btn-secondary" id="request-skill-btn" onclick="requestSkill()" style="width:100%;margin-top:0.75rem">Submit Request</button>
+                                    
+                                    <!-- Mini Chat Response Area -->
+                                    <div id="skill-chat-response" style="margin-top:1rem;display:none">
+                                        <div style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:12px;padding:1rem">
+                                            <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em">OpenClaw says</div>
+                                            <div id="skill-chat-content" style="font-size:0.875rem;line-height:1.6;color:var(--text-secondary)"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="request-skill-status" style="margin-top:0.75rem;font-size:0.8rem;text-align:center"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Personality Page -->
+                <div class="page" id="page-personality">
+                    <div class="page-header">
+                        <h1 class="page-title">Personality Editor</h1>
+                        <p class="page-subtitle">Configure AI behavior and suggest changes</p>
+                    </div>
+                    
+                    <div class="personality-editor">
+                        <!-- Left: File Explorer -->
+                        <div class="file-explorer">
+                            <div class="skills-panel-header">
+                                <div class="skills-panel-title">Files</div>
+                            </div>
+                            <div class="file-list" id="personality-file-list">
+                                <div class="empty-state" style="padding:2rem 1rem">
+                                    <div style="width:40px;height:40px;border:2px solid var(--border);border-radius:50%;margin:0 auto 1rem;animation:pulse 1.5s infinite"></div>
+                                    <div style="color:var(--text-muted);font-size:0.875rem">Loading files...</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Middle: Editor -->
+                        <div class="editor-pane">
+                            <div class="editor-toolbar">
+                                <span id="editor-filename">Select a file</span>
+                                <button class="btn btn-primary" style="padding:0.5rem 1.25rem;font-size:0.8rem" onclick="savePersonality()">Save Changes</button>
+                            </div>
+                            <div class="editor-content">
+                                <textarea id="editor-content" placeholder="Select a file from the sidebar to edit..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Right: Suggestions -->
+                        <div class="suggestion-panel">
+                            <div class="skills-panel-header">
+                                <div class="skills-panel-title">Suggest Changes</div>
+                            </div>
+                            <div class="suggestion-info">
+                                <label>Target File</label>
+                                <div class="target-file empty" id="suggestion-target">No file selected</div>
+                            </div>
+                            <div class="skills-panel-body">
+                                <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;line-height:1.5">
+                                    Describe what you'd like to change. OpenClaw will review and implement your suggestion.
+                                </p>
+                                
+                                <textarea id="suggestion-text" class="workshop-input" placeholder="I think this file should..." style="min-height:180px;margin-bottom:0.75rem;font-size:0.875rem"></textarea>
+                                
+                                <button class="btn btn-primary" id="suggestion-btn" onclick="submitSuggestion()" style="width:100%" disabled>
+                                    <span style="display:flex;align-items:center;justify-content:center;gap:0.5rem">
+                                        <span>✨</span>
+                                        <span>Submit Suggestion</span>
+                                    </span>
+                                </button>
+                                
+                                <div id="suggestion-status" style="margin-top:1rem;font-size:0.8rem;text-align:center"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Logs Page -->
+                <div class="page" id="page-logs">
+                    <div class="page-header">
+                        <h1 class="page-title">System Logs</h1>
+                        <p class="page-subtitle">Application and system logs</p>
+                    </div>
+                    <div id="logs-container">
+                        <div class="empty-state">No logs available</div>
+                    </div>
+                </div>
+                
+                <!-- System Health Page -->
+                <div class="page" id="page-system">
+                    <div class="page-header">
+                        <h1 class="page-title">System Health</h1>
+                        <p class="page-subtitle">Monitor system resources and performance</p>
+                    </div>
+                    
+                    <div class="system-grid" style="margin-bottom:2rem;grid-template-columns:repeat(4,1fr)">
+                        <div class="system-card">
+                            <div style="font-size:0.875rem;color:var(--text-muted);margin-bottom:0.5rem">CPU Usage</div>
+                            <svg class="progress-ring" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="52" fill="none" stroke="var(--bg-tertiary)" stroke-width="8"/>
+                                <circle id="cpu-ring" class="progress-ring-circle" cx="60" cy="60" r="52" fill="none" stroke="var(--success)" stroke-width="8" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round"/>
+                            </svg>
+                            <div class="system-value good" id="system-cpu">-</div>
+                        </div>
+                        
+                        <div class="system-card">
+                            <div style="font-size:0.875rem;color:var(--text-muted);margin-bottom:0.5rem">Memory</div>
+                            <svg class="progress-ring" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="52" fill="none" stroke="var(--bg-tertiary)" stroke-width="8"/>
+                                <circle id="memory-ring" class="progress-ring-circle" cx="60" cy="60" r="52" fill="none" stroke="var(--success)" stroke-width="8" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round"/>
+                            </svg>
+                            <div class="system-value good" id="system-memory">-</div>
+                        </div>
+                        
+                        <div class="system-card">
+                            <div style="font-size:0.875rem;color:var(--text-muted);margin-bottom:0.5rem">Disk</div>
+                            <svg class="progress-ring" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="52" fill="none" stroke="var(--bg-tertiary)" stroke-width="8"/>
+                                <circle id="disk-ring" class="progress-ring-circle" cx="60" cy="60" r="52" fill="none" stroke="var(--success)" stroke-width="8" stroke-dasharray="326.73" stroke-dashoffset="326.73" stroke-linecap="round"/>
+                            </svg>
+                            <div class="system-value good" id="system-disk">-</div>
+                        </div>
+                        
+                        <div class="system-card">
+                            <div style="font-size:0.875rem;color:var(--text-muted);margin-bottom:0.5rem">Load Average</div>
+                            <div style="height:120px;display:flex;align-items:center;justify-content:center">
+                                <div class="system-value good" id="system-load" style="font-size:1.75rem">-</div>
+                            </div>
+                            <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem">1m / 5m / 15m</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <div class="card">
+                            <div class="card-header"><span class="card-title">Top Processes</span></div>
+                            <div class="card-body" id="system-processes">
+                                <div class="empty-state">Loading...</div>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header"><span class="card-title">Docker Containers</span></div>
+                            <div class="card-body" id="system-docker">
+                                <div class="empty-state">No containers running</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- GitHub Page -->
+                <div class="page" id="page-github">
+                    <div class="page-header">
+                        <h1 class="page-title">GitHub</h1>
+                        <p class="page-subtitle">Pull requests, reviews, and notifications</p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card" id="card-notifs">
+                            <div class="stat-header">
+                                <span class="stat-label">Notifications</span>
+                                <div class="stat-icon-wrapper info">🔔</div>
+                            </div>
+                            <div class="stat-value" id="github-notifs">-</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">My Open PRs</span>
+                                <div class="stat-icon-wrapper accent">🔀</div>
+                            </div>
+                            <div class="stat-value" id="github-prs">-</div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-header">
+                                <span class="stat-label">Pending Reviews</span>
+                                <div class="stat-icon-wrapper warning">👀</div>
+                            </div>
+                            <div class="stat-value" id="github-reviews">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+        <script>
+        let currentData = null;
+        let currentFile = null;
+        
+        function showPage(pageName, element) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById('page-' + pageName).classList.add('active');
+            if (element) element.classList.add('active');
+            else {
+                document.querySelectorAll('.nav-item').forEach(n => {
+                    if (n.getAttribute('onclick')?.includes("'" + pageName + "'")) n.classList.add('active');
+                });
+            }
+            const titles = {
+                'dashboard': 'Dashboard', 'tasks': 'Tasks', 'alerts': 'Alerts',
+                'skills': 'Skills Workshop', 'personality': 'Personality Editor', 
+                'logs': 'System Logs', 'system': 'System Health', 'github': 'GitHub'
+            };
+            document.getElementById('page-title').textContent = titles[pageName] || pageName;
+            if (currentData) updatePageContent(pageName);
+        }
+        
+        function showTab(tabName, element) {
+            const parent = element.closest('.skills-panel, .card, .page');
+            if (parent) {
+                parent.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                parent.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            }
+            document.getElementById(tabName)?.classList.add('active');
+            element.classList.add('active');
+        }
+        
+        async function fetchData() {
+            try {
+                const response = await fetch('/api/status');
+                const newData = await response.json();
+                
+                // Check if we're on skills or personality page with modal open
+                const skillModal = document.getElementById('skill-modal');
+                const isModalOpen = skillModal?.classList.contains('active');
+                const currentPage = document.querySelector('.page.active')?.id;
+                
+                // Merge data instead of full refresh to preserve UI state
+                if (currentData) {
+                    currentData = { ...currentData, ...newData };
+                } else {
+                    currentData = newData;
+                }
+                
+                // Only update the current page's content
+                if (currentPage) {
+                    const pageName = currentPage.replace('page-', '');
+                    updatePageContent(pageName);
+                }
+                
+                // Always update dashboard stats
+                updateDashboard(currentData);
+                
+            } catch (error) {
+                console.error('Failed to fetch:', error);
+            }
+        }
+        
+        function refreshData() { fetchData(); }
+        
+        function updateAllPages() {
+            if (!currentData) return;
+            updateDashboard(currentData);
+            updateTasks(currentData);
+            updateAlerts(currentData);
+            updateSkills(currentData);
+            updatePersonality(currentData);
+            updateLogs(currentData);
+            updateSystem(currentData);
+            updateGitHub(currentData);
+        }
+        
+        function updatePageContent(pageName) {
+            if (!currentData) return;
+            switch(pageName) {
+                case 'dashboard': updateDashboard(currentData); break;
+                case 'tasks': updateTasks(currentData); break;
+                case 'alerts': updateAlerts(currentData); break;
+                case 'skills': updateSkills(currentData); break;
+                case 'personality': updatePersonality(currentData); break;
+                case 'logs': updateLogs(currentData); break;
+                case 'system': updateSystem(currentData); break;
+                case 'github': updateGitHub(currentData); break;
+            }
+        }
+        
+        // Dashboard
+        function updateDashboard(data) {
+            const tasks = data.tasks || [];
+            const activeTasks = tasks.filter(t => t.status !== 'completed').length;
+            document.getElementById('stat-tasks').textContent = activeTasks;
+            document.getElementById('nav-task-count').textContent = activeTasks;
+            document.getElementById('stat-skills').textContent = (data.skills || []).length;
+            document.getElementById('stat-notifs').textContent = (data.github || {}).notifications || 0;
+            document.getElementById('stat-cpu').textContent = (data.health || {}).cpu || '-';
+            
+            // Recent tasks
+            const recentTasks = tasks.slice(0, 5);
+            const tasksContainer = document.getElementById('dashboard-tasks');
+            if (recentTasks.length === 0) {
+                tasksContainer.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No tasks yet</div><div>Create your first task to get started</div></div>';
+            } else {
+                tasksContainer.innerHTML = '<table><tbody>' + recentTasks.map(t => 
+                    '<tr class="' + t.status + '" style="animation: slideIn 0.3s ease">' +
+                    '<td><span class="badge badge-' + (t.status === 'completed' ? 'success' : t.status === 'in_progress' ? 'info' : 'warning') + '" style="text-transform: capitalize">' + t.status.replace('_', ' ') + '</span></td>' +
+                    '<td>' + escapeHtml(t.name) + '</td>' +
+                    '<td style="color:var(--text-muted)">' + formatDate(t.created_at) + '</td>' +
+                    '</tr>'
+                ).join('') + '</tbody></table>';
+            }
+            
+            // Alerts
+            const alerts = data.alerts || [];
+            const badge = document.getElementById('nav-alert-count');
+            badge.textContent = alerts.length;
+            badge.style.display = alerts.length > 0 ? 'block' : 'none';
+            
+            const alertsContainer = document.getElementById('dashboard-alerts');
+            if (alerts.length === 0) {
+                alertsContainer.innerHTML = '<div class="empty-state"><div style="font-size:3rem;margin-bottom:1rem">✨</div><div class="empty-title">All clear</div><div>No active alerts at this time</div></div>';
+            } else {
+                alertsContainer.innerHTML = alerts.slice(0, 3).map(a => 
+                    '<div class="alert-item ' + (a.type || 'info') + '" style="animation: slideIn 0.3s ease">' +
+                    '<div class="alert-icon">' + (a.type === 'error' ? '⚠' : a.type === 'warning' ? '⚡' : 'ℹ') + '</div>' +
+                    '<div class="alert-content"><div class="alert-title">' + escapeHtml(a.title) + '</div>' +
+                    '<div class="alert-desc">' + escapeHtml(a.message) + '</div></div>' +
+                    '</div>'
+                ).join('');
+            }
+        }
+        
+        // Tasks
+        function updateTasks(data) {
+            const tasks = data.tasks || [];
+            const container = document.getElementById('tasks-table-container');
+            
+            const renderTasks = (filterFn) => {
+                const filtered = tasks.filter(filterFn);
+                if (filtered.length === 0) return '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No tasks found</div></div>';
+                
+                return '<table><thead><tr><th>Status</th><th>Task</th><th>Description</th><th>Created</th><th style="text-align:right">Action</th></tr></thead><tbody>' +
+                    filtered.map(t => '<tr class="' + t.status + '" style="animation: slideIn 0.3s ease">' +
+                        '<td><span class="badge badge-' + (t.status === 'completed' ? 'success' : t.status === 'in_progress' ? 'info' : 'warning') + '" style="text-transform: capitalize">' + t.status.replace('_', ' ') + '</span></td>' +
+                        '<td style="font-weight:500">' + escapeHtml(t.name) + '</td>' +
+                        '<td style="color:var(--text-secondary)">' + escapeHtml(t.description || '-') + '</td>' +
+                        '<td style="color:var(--text-muted)">' + formatDate(t.created_at) + '</td>' +
+                        '<td style="text-align:right">' + 
+                        (t.status !== 'completed' ? 
+                            '<button class="btn btn-primary" style="padding:0.4rem 0.875rem;font-size:0.8rem" onclick="completeTask(\'' + t.name + '\')">Complete</button>' : 
+                            '<span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="vertical-align:middle;margin-right:4px"><polyline points="20 6 9 17 4 12"></polyline></svg>Done</span>') +
+                        '</td></tr>'
+                    ).join('') + '</tbody></table>';
+            };
+            
+            container.innerHTML = renderTasks(() => true);
+        }
+        
+        // Filter tasks by status
+        let currentTaskFilter = 'all';
+        function filterTasks(filter, element) {
+            currentTaskFilter = filter;
+            
+            // Update tab styles
+            document.querySelectorAll('#page-tasks .tab').forEach(t => t.classList.remove('active'));
+            element.classList.add('active');
+            
+            // Re-render with filter
+            if (currentData) {
+                const tasks = currentData.tasks || [];
+                const container = document.getElementById('tasks-table-container');
+                
+                let filteredTasks;
+                if (filter === 'all') filteredTasks = tasks;
+                else if (filter === 'pending') filteredTasks = tasks.filter(t => t.status !== 'completed');
+                else if (filter === 'completed') filteredTasks = tasks.filter(t => t.status === 'completed');
+                
+                if (filteredTasks.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">No ' + filter + ' tasks</div></div>';
+                } else {
+                    container.innerHTML = '<table><thead><tr><th>Status</th><th>Task</th><th>Description</th><th>Created</th><th style="text-align:right">Action</th></tr></thead><tbody>' +
+                        filteredTasks.map((t, i) => '<tr class="' + t.status + '" style="animation: slideIn 0.3s ease ' + (i * 0.05) + 's both">' +
+                            '<td><span class="badge badge-' + (t.status === 'completed' ? 'success' : t.status === 'in_progress' ? 'info' : 'warning') + '" style="text-transform: capitalize">' + t.status.replace('_', ' ') + '</span></td>' +
+                            '<td style="font-weight:500">' + escapeHtml(t.name) + '</td>' +
+                            '<td style="color:var(--text-secondary)">' + escapeHtml(t.description || '-') + '</td>' +
+                            '<td style="color:var(--text-muted)">' + formatDate(t.created_at) + '</td>' +
+                            '<td style="text-align:right">' + 
+                            (t.status !== 'completed' ? 
+                                '<button class="btn btn-primary" style="padding:0.4rem 0.875rem;font-size:0.8rem" onclick="completeTask(\'' + t.name + '\')">Complete</button>' : 
+                                '<span class="badge badge-success"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="vertical-align:middle;margin-right:4px"><polyline points="20 6 9 17 4 12"></polyline></svg>Done</span>') +
+                            '</td></tr>'
+                        ).join('') + '</tbody></table>';
+                }
+            }
+        }
+        
+        // Alerts
+        function updateAlerts(data) {
+            const alerts = data.alerts || [];
+            const container = document.getElementById('alerts-container');
+            if (alerts.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div style="font-size:4rem;margin-bottom:1rem">🎉</div><div class="empty-title">No alerts</div><div style="color:var(--text-secondary)">Everything is running smoothly</div></div>';
+            } else {
+                container.innerHTML = alerts.map((a, i) => 
+                    '<div class="alert-item ' + (a.type || 'info') + '" style="animation: slideIn 0.3s ease ' + (i * 0.1) + 's both">' +
+                    '<div class="alert-icon">' + (a.type === 'error' ? '⚠' : a.type === 'warning' ? '⚡' : 'ℹ') + '</div>' +
+                    '<div class="alert-content">' +
+                    '<div class="alert-title">' + escapeHtml(a.title) + '</div>' +
+                    '<div class="alert-desc">' + escapeHtml(a.message) + '</div>' +
+                    '</div>' +
+                    '<div class="alert-time">' + formatTime(a.timestamp) + '</div>' +
+                    '</div>'
+                ).join('');
+            }
+        }
+        
+        // Skills
+        function updateSkills(data) {
+            const skills = data.skills || [];
+            const container = document.getElementById('skills-list');
+            
+            if (skills.length === 0) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-icon">🔧</div><div class="empty-title">No skills installed</div><div style="color:var(--text-secondary)">Visit the Workshop to install or create skills</div></div>';
+            } else {
+                container.innerHTML = skills.map((s, i) => 
+                    '<div class="skill-item ' + (s.enabled === false ? 'disabled' : '') + '" style="animation: slideIn 0.3s ease ' + (i * 0.05) + 's both;cursor:pointer;" onclick="viewSkill(\'' + s.name + '\')" title="Click to view details">' +
+                    '<div class="skill-header">' +
+                    '<div style="display:flex;align-items:center;gap:0.75rem">' +
+                    '<div style="width:40px;height:40px;border-radius:10px;background:var(--accent-bg);display:flex;align-items:center;justify-content:center;font-size:1.25rem">' + (s.icon || '⚡') + '</div>' +
+                    '<div>' +
+                    '<div class="skill-name">' + escapeHtml(s.name) + '</div>' +
+                    '<div style="font-size:0.75rem;color:var(--text-muted)">' + escapeHtml(s.version || 'v1.0.0') + ' • ' + escapeHtml(s.author || 'Unknown') + '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '<label class="toggle">' +
+                    '<input type="checkbox" ' + (s.enabled !== false ? 'checked' : '') + ' onchange="toggleSkill(\'' + s.name + '\', this.checked)">' +
+                    '<span class="toggle-slider"></span>' +
+                    '</label>' +
+                    '</div>' +
+                    '<div class="skill-desc">' + escapeHtml(s.description || 'No description available') + '</div>' +
+                    '<div class="skill-meta">' +
+                    '<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>' + (s.commands || 0) + ' commands</span>' +
+                    '<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>' + formatRelativeTime(s.installed) + '</span>' +
+                    '</div>' +
+                    '</div>'
+                ).join('');
+            }
+        }
+        
+        // Personality
+        function updatePersonality(data) {
+            const files = data.personality || [];
+            const fileList = document.getElementById('personality-file-list');
+            
+            if (files.length === 0) {
+                fileList.innerHTML = '<div class="empty-state" style="padding:2rem"><div style="font-size:2rem;margin-bottom:0.5rem">📄</div><div style="color:var(--text-muted)">No personality files found</div></div>';
+            } else {
+                fileList.innerHTML = files.map((f, i) => 
+                    '<div class="file-item ' + (f.name === currentFile ? 'active' : '') + '" onclick="openFile(event, \'' + f.name + '\')" style="animation: slideIn 0.2s ease ' + (i * 0.05) + 's both">' +
+                    '<div class="file-icon">📄</div>' +
+                    '<div class="file-info">' +
+                    '<div class="file-name">' + escapeHtml(f.name) + '</div>' +
+                    '<div class="file-size">' + formatFileSize(f.size) + ' • ' + formatRelativeTime(f.modified) + '</div>' +
+                    '</div>' +
+                    '</div>'
+                ).join('');
+            }
+            
+            // Update editor if file is selected
+            if (currentFile && files.find(f => f.name === currentFile)) {
+                document.getElementById('editor-filename').textContent = currentFile;
+                document.getElementById('editor-content').value = files.find(f => f.name === currentFile)?.content || 'Loading...';
+            }
+        }
+        
+        function openFile(event, filename) {
+            currentFile = filename;
+            document.querySelectorAll('.file-item').forEach(el => el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            document.getElementById('editor-filename').textContent = filename;
+            
+            // Update suggestion panel target
+            const targetEl = document.getElementById('suggestion-target');
+            targetEl.textContent = filename;
+            targetEl.classList.remove('empty');
+            document.getElementById('suggestion-btn').disabled = false;
+            
+            // Load content from currentData
+            const files = currentData?.personality || [];
+            const file = files.find(f => f.name === filename);
+            if (file && file.content) {
+                document.getElementById('editor-content').value = file.content;
+            } else {
+                document.getElementById('editor-content').value = 'Loading...';
+                // Fetch file content
+                fetch('/api/personality/' + filename)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.content) {
+                            document.getElementById('editor-content').value = data.content;
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('editor-content').value = 'Failed to load file';
+                    });
+            }
+        }
+        
+        async function submitSuggestion() {
+            const text = document.getElementById('suggestion-text').value.trim();
+            const status = document.getElementById('suggestion-status');
+            const btn = document.getElementById('suggestion-btn');
+            
+            const file = currentFile;
+            
+            if (!file) {
+                status.innerHTML = '<span style="color:var(--danger)">❌ Select a file first</span>';
+                return;
+            }
+            
+            if (!text) {
+                status.innerHTML = '<span style="color:var(--danger)">❌ Enter a suggestion</span>';
+                return;
+            }
+            
+            // Show loading state - add spinner class, keep text
+            btn.disabled = true;
+            btn.classList.add('btn-loading');
+            const originalText = btn.querySelector('span:last-child');
+            if (originalText) originalText.textContent = 'Running OpenClaw...';
+            
+            status.innerHTML = '<span style="color:var(--info)">⏳ Spawning agent and waiting...</span>';
+            
+            try {
+                const response = await fetch('/api/personality/suggest', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ file, suggestion: text })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    status.innerHTML = '<span style="color:var(--success)">✅ ' + data.message + '</span>';
+                    document.getElementById('suggestion-text').value = '';
+                    showToast(data.message, 'success');
+                    setTimeout(() => fetchData(), 1500);
+                } else {
+                    status.innerHTML = '<span style="color:var(--danger)">❌ ' + escapeHtml(data.error || 'Failed') + '</span>';
+                }
+            } catch (e) {
+                status.innerHTML = '<span style="color:var(--danger)">❌ Network error</span>';
+            } finally {
+                // Restore button state
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+                if (originalText) originalText.textContent = 'Submit Suggestion';
+            }
+        }
+        
+        // Logs
+        function updateLogs(data) {
+            const logs = data.logs || [];
+            const container = document.getElementById('logs-container');
+            
+            if (logs.length === 0) {
+                container.innerHTML = '<div class="empty-state" style="padding:3rem"><div style="font-size:3rem;margin-bottom:1rem">📋</div><div class="empty-title">No logs yet</div><div style="color:var(--text-secondary)">System logs will appear here</div></div>';
+            } else {
+                container.innerHTML = '<div class="log-container">' + logs.map((l, i) => 
+                    '<div class="log-entry" style="animation: slideIn 0.2s ease ' + (i * 0.02) + 's both">' +
+                    '<span class="log-time">' + l.time + '</span>' +
+                    '<span class="log-level ' + l.level + '" style="text-transform:uppercase">' + l.level + '</span>' +
+                    '<span class="log-message">' + escapeHtml(l.message) + '</span>' +
+                    '</div>'
+                ).join('') + '</div>';
+            }
+        }
+        
+        // System
+        function updateSystem(data) {
+            const health = data.health || {};
+            const processes = data.processes || {};
+            
+            // Update system cards with progress rings
+            updateProgressRing('cpu-ring', health.cpu || 0);
+            updateProgressRing('memory-ring', health.memory || 0);
+            updateProgressRing('disk-ring', health.disk || 0);
+            
+            document.getElementById('system-cpu').textContent = health.cpu || '-';
+            document.getElementById('system-memory').textContent = health.memory || '-';
+            document.getElementById('system-disk').textContent = health.disk || '-';
+            document.getElementById('system-load').textContent = health.load || '-';
+            
+            // Update processes
+            const procContainer = document.getElementById('system-processes');
+            const cpuProcs = processes.cpu || [];
+            
+            if (cpuProcs.length === 0) {
+                procContainer.innerHTML = '<div class="empty-state" style="padding:2rem"><div style="color:var(--text-muted)">No process data available</div></div>';
+            } else {
+                procContainer.innerHTML = '<table><thead><tr><th>Process</th><th>PID</th><th>CPU%</th><th>Mem%</th></tr></thead><tbody>' +
+                    cpuProcs.map((p, i) => '<tr style="animation: slideIn 0.2s ease ' + (i * 0.05) + 's both">' +
+                        '<td style="font-weight:500">' + escapeHtml(p.cmd) + '</td>' +
+                        '<td style="color:var(--text-muted);font-family:monospace">' + p.pid + '</td>' +
+                        '<td><span style="color:' + (parseFloat(p.cpu) > 50 ? 'var(--danger)' : parseFloat(p.cpu) > 20 ? 'var(--warning)' : 'var(--success)') + '">' + p.cpu + '%</span></td>' +
+                        '<td>' + p.mem + '%</td>' +
+                        '</tr>'
+                    ).join('') + '</tbody></table>';
+            }
+            
+            // Update Docker
+            const docker = data.docker || [];
+            const dockerContainer = document.getElementById('system-docker');
+            
+            if (docker.length === 0) {
+                dockerContainer.innerHTML = '<div class="empty-state" style="padding:2rem"><div style="font-size:2.5rem;margin-bottom:0.5rem">🐳</div><div style="color:var(--text-muted)">No containers running</div></div>';
+            } else {
+                dockerContainer.innerHTML = docker.map((c, i) => 
+                    '<div style="padding:1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;animation: slideIn 0.2s ease ' + (i * 0.05) + 's both">' +
+                    '<div style="display:flex;align-items:center;gap:0.75rem">' +
+                    '<div style="width:10px;height:10px;border-radius:50%;background:' + (c.status.includes('Up') ? 'var(--success)' : 'var(--warning)') + ';box-shadow:0 0 8px ' + (c.status.includes('Up') ? 'var(--success)' : 'var(--warning)') + '"></div>' +
+                    '<span style="font-weight:500">' + escapeHtml(c.name) + '</span>' +
+                    '</div>' +
+                    '<span style="color:var(--text-muted);font-size:0.85rem">' + escapeHtml(c.status) + '</span>' +
+                    '</div>'
+                ).join('');
+            }
+        }
+        
+        function updateProgressRing(id, value) {
+            const ring = document.getElementById(id);
+            if (!ring) return;
+            const num = parseFloat(value) || 0;
+            const circumference = 2 * Math.PI * 52;
+            const offset = circumference - (num / 100) * circumference;
+            ring.style.strokeDashoffset = offset;
+            ring.style.stroke = num > 80 ? 'var(--danger)' : num > 50 ? 'var(--warning)' : 'var(--success)';
+        }
+        
+        // GitHub
+        function updateGitHub(data) {
+            const gh = data.github || {};
+            document.getElementById('github-notifs').textContent = gh.notifications || 0;
+            document.getElementById('github-prs').textContent = gh.my_prs || 0;
+            document.getElementById('github-reviews').textContent = gh.reviews || 0;
+            
+            // Update card colors based on values
+            document.getElementById('card-notifs').style.setProperty('--accent', gh.notifications > 10 ? 'var(--danger)' : gh.notifications > 0 ? 'var(--warning)' : 'var(--success)');
+        }
+        
+        // Actions
+        async function createTask() {
+            const name = prompt('Enter task name:');
+            if (!name) return;
+            const description = prompt('Enter description (optional):') || '';
+            try {
+                const response = await fetch('/api/task/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: name.replace(/\s+/g, '_').toLowerCase(), description })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    fetchData();
+                    showToast('Task created successfully!', 'success');
+                } else {
+                    showToast('Error: ' + data.error, 'error');
+                }
+            } catch (e) {
+                showToast('Failed to create task', 'error');
+            }
+        }
+        
+        async function completeTask(name) {
+            const proof = prompt('Enter proof of completion:');
+            if (!proof) return;
+            try {
+                await fetch('/api/tasks/' + name + '/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ proof })
+                });
+                fetchData();
+                showToast('Task completed!', 'success');
+            } catch (e) {
+                showToast('Failed to complete task', 'error');
+            }
+        }
+        
+        async function toggleSkill(name, enabled) {
+            try {
+                // In real implementation, call API to toggle skill
+                showToast((enabled ? 'Enabled' : 'Disabled') + ' skill: ' + name, 'info');
+            } catch (e) {
+                showToast('Failed to toggle skill', 'error');
+            }
+        }
+        
+        async function installSkill() {
+            const repo = document.getElementById('skill-repo').value.trim();
+            const btn = document.getElementById('install-skill-btn');
+            const status = document.getElementById('install-skill-status');
+            
+            if (!repo) {
+                status.innerHTML = '<span style="color:var(--warning)">⚠️ Please enter a repository</span>';
+                return;
+            }
+            
+            // Show loading state - add spinner class, change text
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.classList.add('btn-loading');
+            btn.innerHTML = '<span>Installing...</span>';
+            
+            status.innerHTML = '<span style="color:var(--info)">⏳ Installing skill from ClawHub...</span>';
+            
+            try {
+                const response = await fetch('/api/skills/install', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ repo })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    fetchData();
+                    status.innerHTML = '<span style="color:var(--success)">✅ Skill installed!</span>';
+                    showToast('Skill installed successfully!', 'success');
+                    document.getElementById('skill-repo').value = '';
+                    setTimeout(() => status.innerHTML = '', 3000);
+                } else {
+                    status.innerHTML = '<span style="color:var(--danger)">❌ Failed: ' + escapeHtml(data.error || 'Unknown error') + '</span>';
+                    showToast('Failed to install: ' + data.error, 'error');
+                }
+            } catch (e) {
+                status.innerHTML = '<span style="color:var(--danger)">❌ Network error</span>';
+                showToast('Installation failed', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+                btn.textContent = originalText;
+            }
+        }
+        
+        async function requestSkill() {
+            const desc = document.getElementById('skill-description').value.trim();
+            const btn = document.getElementById('request-skill-btn');
+            const status = document.getElementById('request-skill-status');
+            const chatResponse = document.getElementById('skill-chat-response');
+            const chatContent = document.getElementById('skill-chat-content');
+            
+            if (!desc) {
+                status.innerHTML = '<span style="color:var(--warning)">⚠️ Please describe the skill</span>';
+                return;
+            }
+            
+            // Show loading state - add spinner class, change text
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.classList.add('btn-loading');
+            btn.innerHTML = '<span>Asking OpenClaw...</span>';
+            
+            status.innerHTML = '<span style="color:var(--info)">⏳ Getting mini response...</span>';
+            chatResponse.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/skills/request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ description: desc })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show the mini chat response
+                    chatContent.innerHTML = escapeHtml(data.response);
+                    chatResponse.style.display = 'block';
+                    status.innerHTML = '<span style="color:var(--success)">✅ Response received!</span>';
+                    showToast('OpenClaw responded!', 'success');
+                } else {
+                    status.innerHTML = '<span style="color:var(--danger)">❌ ' + escapeHtml(data.error || 'Failed') + '</span>';
+                }
+            } catch (e) {
+                status.innerHTML = '<span style="color:var(--danger)">❌ Network error</span>';
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('btn-loading');
+                btn.textContent = originalText;
+            }
+        }
+        
+        function savePersonality() {
+            showToast('Changes saved! They will take effect on next restart.', 'success');
+        }
+        
+        // Toast notifications
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.style.cssText = 'position:fixed;bottom:2rem;right:2rem;padding:1rem 1.5rem;border-radius:10px;color:white;font-weight:500;z-index:1000;animation:slideIn 0.3s ease;box-shadow:var(--shadow-md);' +
+                (type === 'success' ? 'background:var(--success);' : type === 'error' ? 'background:var(--danger);' : type === 'warning' ? 'background:var(--warning);color:var(--bg-primary);' : 'background:var(--info);');
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(10px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+        
+        // Utilities
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function formatDate(iso) {
+            if (!iso) return '-';
+            const date = new Date(iso);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+        
+        function formatTime(iso) {
+            if (!iso) return '-';
+            const date = new Date(iso);
+            return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        }
+        
+        function formatRelativeTime(iso) {
+            if (!iso) return 'Unknown';
+            const date = new Date(iso);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000);
+            
+            if (diff < 60) return 'Just now';
+            if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+            if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+            if (diff < 604800) return Math.floor(diff / 86400) + 'd ago';
+            return formatDate(iso);
+        }
+        
+        function formatFileSize(bytes) {
+            if (!bytes) return '0 B';
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        }
+        
+        // Initialize
+        fetchData();
+        setInterval(fetchData, 30000);
+    </script>
+    
+    <!-- Skill Detail Modal -->
+    <div class="modal-overlay" id="skill-modal" onclick="closeSkillModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span class="modal-title" id="skill-modal-title">Skill Detail</span>
+                <button class="modal-close" onclick="closeSkillModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="skill-modal-body">
+                <div class="empty-state">Loading...</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
