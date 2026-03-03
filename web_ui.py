@@ -5,9 +5,13 @@ Complete dashboard with Skills, Personality, Logs, Alerts
 """
 
 import os
+import re
 import json
 import subprocess
 import glob
+import platform
+import shutil
+import difflib
 from datetime import datetime, timedelta
 from pathlib import Path
 from flask import Flask, render_template, jsonify, request
@@ -18,7 +22,167 @@ AUTONOMY_DIR = Path(__file__).parent
 TASKS_DIR = AUTONOMY_DIR / "tasks"
 LOGS_DIR = AUTONOMY_DIR / "logs"
 CONFIG_FILE = AUTONOMY_DIR / "config.json"
-SKILLS_DIR = Path("/root/.openclaw/workspace/skills")
+OPENCLAW_HOME = Path(os.environ.get("OPENCLAW_HOME", str(Path.home() / ".openclaw")))
+WORKSPACE_DIR = OPENCLAW_HOME / "workspace"
+SKILLS_DIR = WORKSPACE_DIR / "skills"
+STATE_FILE = AUTONOMY_DIR / "state.json"
+HISTORY_FILE = AUTONOMY_DIR / "history.json"
+DIGESTS_DIR = AUTONOMY_DIR / "digests"
+ABTESTS_DIR = AUTONOMY_DIR / "ab_tests"
+
+MODEL_CONTEXT_LIMITS = {
+    "claude-4-opus": 200000, "claude-3.5-sonnet": 200000, "claude-3-haiku": 200000,
+    "claude-3-opus": 200000, "claude-3.7-sonnet": 200000,
+    "gpt-4o": 128000, "gpt-4-turbo": 128000, "gpt-4": 128000, "gpt-3.5-turbo": 16385,
+    "gemini-2.0-flash": 1000000, "gemini-1.5-pro": 1000000, "gemini-1.5-flash": 1000000,
+    "o1": 200000, "o1-mini": 128000, "o3-mini": 200000,
+}
+
+# ── Task Templates ──
+TASK_TEMPLATES = [
+    {"id": "review-pr", "name": "Review PR", "description": "Review pull request and provide feedback", "priority": "high", "tags": ["github", "review"], "estimated_minutes": 30},
+    {"id": "fix-bug", "name": "Fix Bug", "description": "Investigate and fix reported bug", "priority": "high", "tags": ["bugfix", "code"], "estimated_minutes": 60},
+    {"id": "write-tests", "name": "Write Tests", "description": "Write unit/integration tests for feature", "priority": "medium", "tags": ["testing", "quality"], "estimated_minutes": 45},
+    {"id": "deploy", "name": "Deploy", "description": "Deploy latest changes to environment", "priority": "critical", "tags": ["devops", "deploy"], "estimated_minutes": 20},
+    {"id": "docs-update", "name": "Update Docs", "description": "Update documentation for recent changes", "priority": "low", "tags": ["docs"], "estimated_minutes": 30},
+    {"id": "security-audit", "name": "Security Audit", "description": "Review code for security vulnerabilities", "priority": "critical", "tags": ["security", "audit"], "estimated_minutes": 90},
+    {"id": "refactor", "name": "Refactor Code", "description": "Refactor and improve code quality", "priority": "medium", "tags": ["refactor", "code"], "estimated_minutes": 60},
+    {"id": "monitor-check", "name": "System Check", "description": "Check system health and resolve issues", "priority": "medium", "tags": ["monitoring", "ops"], "estimated_minutes": 15},
+]
+
+
+def sync_tasks_to_workspace():
+    """Write current tasks to ~/.openclaw/workspace/TASKS.md so the AI agent can see them.
+    This is THE critical bridge — OpenClaw reads workspace files in every conversation."""
+    tasks = get_all_tasks()
+    tasks_md = WORKSPACE_DIR / "TASKS.md"
+    try:
+        WORKSPACE_DIR.mkdir(parents=True, exist_ok=True)
+        lines = ["# Autonomy Tasks\n"]
+        lines.append(f"*Auto-synced at {datetime.now().strftime('%Y-%m-%d %H:%M')}*\n")
+        lines.append(f"**{len([t for t in tasks if t.get('status') == 'pending'])}** pending · "
+                     f"**{len([t for t in tasks if t.get('status') == 'in_progress'])}** in progress · "
+                     f"**{len([t for t in tasks if t.get('status') == 'completed'])}** completed\n")
+
+        # Active tasks first (pending + in_progress)
+        active = [t for t in tasks if t.get("status") in ("pending", "in_progress")]
+        if active:
+            lines.append("\n## Active Tasks\n")
+            for t in active:
+                status_icon = "🔄" if t.get("status") == "in_progress" else "⏳"
+                priority_icon = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🟢"}.get(t.get("priority", "medium"), "⚪")
+                line = f"- {status_icon} {priority_icon} **{t['name']}** — {t.get('description', 'No description')}"
+                if t.get("due_date"):
+                    line += f" (due: {t['due_date']})"
+                if t.get("tags"):
+                    line += f" [{', '.join(t['tags'])}]"
+                lines.append(line)
+                # Include subtasks
+                for sub in t.get("subtasks", []):
+                    check = "✅" if sub.get("completed") else "⬜"
+                    lines.append(f"  - {check} {sub['name']}")
+                # Include latest note
+                notes = t.get("notes", [])
+                if notes:
+                    lines.append(f"  > Latest note: {notes[-1].get('text', '')}")
+
+        # Blocked tasks
+        blocked = [t for t in tasks if t.get("status") == "blocked"]
+        if blocked:
+            lines.append("\n## Blocked Tasks\n")
+            for t in blocked:
+                lines.append(f"- 🚫 **{t['name']}** — {t.get('description', '')}")
+                if t.get("blocked_reason"):
+                    lines.append(f"  > Blocked: {t['blocked_reason']}")
+
+        # Recently completed
+        completed = [t for t in tasks if t.get("status") == "completed"][:5]
+        if completed:
+            lines.append("\n## Recently Completed\n")
+            for t in completed:
+                lines.append(f"- ✅ ~~{t['name']}~~ — {t.get('proof', 'completed')}")
+
+        lines.append("\n---\n")
+        lines.append("*Managed by [autonomy](autonomy/) skill. Use `autonomy task` CLI or web dashboard at localhost:8767.*\n")
+
+        with open(tasks_md, "w") as f:
+            f.write("\n".join(lines))
+        return True
+    except Exception as e:
+        print(f"[autonomy] Failed to sync tasks to workspace: {e}")
+        return False
+
+
+def inject_tasks_into_heartbeat():
+    """Append task summary to HEARTBEAT.md so the heartbeat checks tasks every 30 min.
+    OpenClaw's heartbeat reads HEARTBEAT.md and decides what needs attention."""
+    heartbeat_path = WORKSPACE_DIR / "HEARTBEAT.md"
+    tasks = get_all_tasks()
+    active = [t for t in tasks if t.get("status") in ("pending", "in_progress")]
+
+    try:
+        # Read existing HEARTBEAT.md
+        existing = ""
+        if heartbeat_path.exists():
+            with open(heartbeat_path) as f:
+                existing = f.read()
+
+        # Remove any previous autonomy section
+        marker_start = "<!-- AUTONOMY-TASKS-START -->"
+        marker_end = "<!-- AUTONOMY-TASKS-END -->"
+        if marker_start in existing:
+            before = existing[:existing.index(marker_start)]
+            after = existing[existing.index(marker_end) + len(marker_end):] if marker_end in existing else ""
+            existing = before.rstrip() + "\n" + after.lstrip()
+
+        # Build task section
+        section_lines = [marker_start]
+        section_lines.append(f"\n## Autonomy Tasks ({len(active)} active)")
+        if active:
+            overdue = [t for t in active if t.get("due_date") and t["due_date"] < datetime.now().strftime("%Y-%m-%d")]
+            if overdue:
+                section_lines.append(f"\n⚠️ **{len(overdue)} OVERDUE task(s)** — check these first!")
+            for t in active[:10]:  # Max 10 in heartbeat to keep it concise
+                priority_icon = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🟢"}.get(t.get("priority", "medium"), "⚪")
+                line = f"- [ ] {priority_icon} **{t['name']}**: {t.get('description', '')[:80]}"
+                if t.get("due_date"):
+                    line += f" (due: {t['due_date']})"
+                section_lines.append(line)
+            if len(active) > 10:
+                section_lines.append(f"- ...and {len(active) - 10} more (see TASKS.md)")
+        else:
+            section_lines.append("\n✅ No active tasks. All clear!")
+        section_lines.append(f"\n*Last synced: {datetime.now().strftime('%Y-%m-%d %H:%M')}*")
+        section_lines.append(marker_end)
+
+        # Append to heartbeat
+        content = existing.rstrip() + "\n\n" + "\n".join(section_lines) + "\n"
+        with open(heartbeat_path, "w") as f:
+            f.write(content)
+        return True
+    except Exception as e:
+        print(f"[autonomy] Failed to inject tasks into heartbeat: {e}")
+        return False
+
+
+def sync_all_tasks():
+    """Sync tasks to both workspace TASKS.md and HEARTBEAT.md."""
+    s1 = sync_tasks_to_workspace()
+    s2 = inject_tasks_into_heartbeat()
+    return s1 and s2
+
+
+def estimate_tokens(text):
+    """Rough token estimate: ~4 chars per token for English text."""
+    return len(text) // 4
+
+def calculate_progress(task):
+    """Calculate task progress percentage from subtasks."""
+    subtasks = task.get("subtasks", [])
+    if not subtasks:
+        return 100 if task.get("status") == "completed" else 0
+    completed = sum(1 for s in subtasks if s.get("completed"))
+    return round(completed / len(subtasks) * 100)
 
 def get_openclaw_status():
     try:
@@ -154,7 +318,7 @@ def get_skill_detail(name):
 
 def get_personality_files():
     files = []
-    workspace = Path("/root/.openclaw/workspace")
+    workspace = WORKSPACE_DIR
     personality_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md"]
 
     for fname in personality_files:
@@ -337,30 +501,52 @@ def api_tasks():
 @app.route("/api/task/create", methods=["POST"])
 def create_task():
     data = request.json
-    name = data.get("name", "").replace(" ", "_").lower()
+    name = data.get("name", "").strip().replace(" ", "_").lower()
+    name = re.sub(r'[^a-z0-9_-]', '', name)  # Sanitize
     desc = data.get("description", "")
     if not name:
         return jsonify({"success": False, "error": "Name required"}), 400
 
+    TASKS_DIR.mkdir(exist_ok=True)
     task_file = TASKS_DIR / f"{name}.json"
     if task_file.exists():
-        return jsonify({"success": False, "error": "Task exists"}), 400
+        return jsonify({"success": False, "error": "Task already exists"}), 400
+
+    priority = data.get("priority", "medium")
+    if priority not in ("critical", "high", "medium", "low"):
+        priority = "medium"
 
     task = {
         "id": int(datetime.now().timestamp()),
         "name": name,
         "description": desc,
         "status": "pending",
+        "priority": priority,
+        "depends_on": data.get("depends_on", []),
+        "tags": data.get("tags", []),
+        "due_date": data.get("due_date", None),
+        "estimated_minutes": data.get("estimated_minutes", None),
+        "execution_mode": data.get("execution_mode", "manual"),  # manual | agent | cron
+        "notes": [],
+        "subtasks": [],
         "created_at": datetime.now().isoformat(),
         "updated_at": datetime.now().isoformat(),
         "completed_at": None,
-        "proof": None
+        "proof": None,
+        "blocked_reason": None,
+        "ai_dispatched": False,
+        "dispatch_session": None
     }
+    record_event("task_created", f"Task '{name}' (priority: {priority})")
 
     with open(task_file, "w") as f:
         json.dump(task, f, indent=2)
 
+    # Sync to workspace so OpenClaw AI can see the task
+    sync_all_tasks()
+
     return jsonify({"success": True, "task": task})
+
 
 @app.route("/api/tasks/<task_id>/complete", methods=["POST"])
 def complete_task(task_id):
@@ -370,11 +556,343 @@ def complete_task(task_id):
             task = json.load(f)
         task["status"] = "completed"
         task["completed_at"] = datetime.now().isoformat()
+        task["updated_at"] = datetime.now().isoformat()
         task["proof"] = request.json.get("proof", "")
         with open(task_file, "w") as f:
             json.dump(task, f, indent=2)
+        record_event("task_completed", f"Task '{task_id}' completed")
+        sync_all_tasks()
         return jsonify({"success": True})
     return jsonify({"success": False, "error": "Task not found"}), 404
+
+
+@app.route("/api/tasks/<task_id>/status", methods=["POST"])
+def update_task_status(task_id):
+    """Change task status with full lifecycle support."""
+    task_file = TASKS_DIR / f"{task_id}.json"
+    if not task_file.exists():
+        return jsonify({"success": False, "error": "Task not found"}), 404
+    data = request.json
+    new_status = data.get("status", "")
+    valid_statuses = ["pending", "in_progress", "completed", "blocked", "cancelled", "deferred"]
+    if new_status not in valid_statuses:
+        return jsonify({"success": False, "error": f"Invalid status. Use: {', '.join(valid_statuses)}"}), 400
+    with open(task_file) as f:
+        task = json.load(f)
+    old_status = task.get("status")
+    task["status"] = new_status
+    task["updated_at"] = datetime.now().isoformat()
+    if new_status == "completed":
+        task["completed_at"] = datetime.now().isoformat()
+    if new_status == "blocked":
+        task["blocked_reason"] = data.get("reason", "")
+    with open(task_file, "w") as f:
+        json.dump(task, f, indent=2)
+    record_event("task_status_changed", f"Task '{task_id}': {old_status} → {new_status}")
+    sync_all_tasks()
+    return jsonify({"success": True, "old_status": old_status, "new_status": new_status})
+
+
+@app.route("/api/tasks/<task_id>/update", methods=["POST"])
+def update_task(task_id):
+    """Update any task fields (description, priority, tags, due_date, etc)."""
+    task_file = TASKS_DIR / f"{task_id}.json"
+    if not task_file.exists():
+        return jsonify({"success": False, "error": "Task not found"}), 404
+    data = request.json
+    with open(task_file) as f:
+        task = json.load(f)
+    # Allow updating these fields
+    updatable = ["description", "priority", "tags", "due_date", "estimated_minutes",
+                 "depends_on", "execution_mode", "blocked_reason"]
+    changed = []
+    for key in updatable:
+        if key in data:
+            task[key] = data[key]
+            changed.append(key)
+    if changed:
+        task["updated_at"] = datetime.now().isoformat()
+        with open(task_file, "w") as f:
+            json.dump(task, f, indent=2)
+        record_event("task_updated", f"Task '{task_id}' updated: {', '.join(changed)}")
+        sync_all_tasks()
+    return jsonify({"success": True, "updated": changed})
+
+
+@app.route("/api/tasks/<task_id>/delete", methods=["DELETE"])
+def delete_task(task_id):
+    """Delete a task permanently."""
+    task_file = TASKS_DIR / f"{task_id}.json"
+    if not task_file.exists():
+        return jsonify({"success": False, "error": "Task not found"}), 404
+    task_file.unlink()
+    record_event("task_deleted", f"Task '{task_id}' deleted")
+    sync_all_tasks()
+    return jsonify({"success": True})
+
+
+@app.route("/api/tasks/<task_id>/notes", methods=["POST"])
+def add_task_note(task_id):
+    """Add a note/comment to a task."""
+    task_file = TASKS_DIR / f"{task_id}.json"
+    if not task_file.exists():
+        return jsonify({"success": False, "error": "Task not found"}), 404
+    data = request.json
+    text = data.get("text", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Note text required"}), 400
+    with open(task_file) as f:
+        task = json.load(f)
+    if "notes" not in task:
+        task["notes"] = []
+    task["notes"].append({
+        "text": text,
+        "timestamp": datetime.now().isoformat()
+    })
+    task["updated_at"] = datetime.now().isoformat()
+    with open(task_file, "w") as f:
+        json.dump(task, f, indent=2)
+    return jsonify({"success": True, "notes_count": len(task["notes"])})
+
+
+@app.route("/api/tasks/<task_id>/dispatch", methods=["POST"])
+def dispatch_task(task_id):
+    """Send a task to OpenClaw AI for execution via sub-agent or cron.
+    This is the key integration — makes the AI actually work on the task."""
+    task_file = TASKS_DIR / f"{task_id}.json"
+    if not task_file.exists():
+        return jsonify({"success": False, "error": "Task not found"}), 404
+    with open(task_file) as f:
+        task = json.load(f)
+
+    data = request.json or {}
+    mode = data.get("mode", task.get("execution_mode", "agent"))
+
+    # Build the prompt for the AI
+    prompt_lines = [f"Work on this task: {task['name']}"]
+    prompt_lines.append(f"Description: {task.get('description', 'No description')}")
+    if task.get("priority") in ("critical", "high"):
+        prompt_lines.append(f"⚠️ This is a {task['priority']} priority task.")
+    if task.get("subtasks"):
+        prompt_lines.append("Subtasks:")
+        for s in task["subtasks"]:
+            check = "✅" if s.get("completed") else "⬜"
+            prompt_lines.append(f"  {check} {s['name']}")
+    if task.get("notes"):
+        prompt_lines.append(f"Latest note: {task['notes'][-1]['text']}")
+    prompt_lines.append(f"\nWhen done, update the task status. The task file is at: {task_file}")
+    prompt_lines.append("Mark subtasks as completed as you work through them.")
+    prompt = "\n".join(prompt_lines)
+
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    session_id = f"autonomy-task-{task_id}-{timestamp}"
+
+    try:
+        if mode == "cron":
+            # Register as a one-shot cron job
+            result = subprocess.run(
+                ["openclaw", "cron", "add",
+                 "--name", f"task:{task_id}",
+                 "--at", "now",
+                 "--session", "isolated",
+                 "--message", prompt],
+                capture_output=True, text=True, timeout=15
+            )
+            dispatch_type = "cron"
+        else:
+            # Spawn a sub-agent (default — most reliable)
+            result = subprocess.run(
+                ["openclaw", "agent",
+                 "--local",
+                 "--session-id", session_id,
+                 "--message", prompt,
+                 "--thinking", "low",
+                 "--timeout", "300"],
+                capture_output=True, text=True,
+                timeout=310
+            )
+            dispatch_type = "agent"
+
+        # Update task status and record dispatch
+        task["status"] = "in_progress"
+        task["updated_at"] = datetime.now().isoformat()
+        task["ai_dispatched"] = True
+        task["dispatch_session"] = session_id
+        task["execution_mode"] = mode
+        with open(task_file, "w") as f:
+            json.dump(task, f, indent=2)
+
+        record_event("task_dispatched", f"Task '{task_id}' sent to AI ({dispatch_type})")
+        sync_all_tasks()
+
+        # Parse AI response
+        output = ""
+        if result.stdout:
+            lines = [l.strip() for l in result.stdout.strip().split('\n') if l.strip()]
+            content_lines = [l for l in lines if not l.startswith(('Runtime:', 'Session:', 'Model:', 'Tools:'))]
+            output = '\n'.join(content_lines[-10:]) if content_lines else ""
+
+        return jsonify({
+            "success": True,
+            "dispatch_type": dispatch_type,
+            "session_id": session_id,
+            "output": output,
+            "return_code": result.returncode
+        })
+
+    except subprocess.TimeoutExpired:
+        task["status"] = "in_progress"
+        task["ai_dispatched"] = True
+        task["dispatch_session"] = session_id
+        task["updated_at"] = datetime.now().isoformat()
+        with open(task_file, "w") as f:
+            json.dump(task, f, indent=2)
+        sync_all_tasks()
+        return jsonify({"success": True, "dispatch_type": "agent", "session_id": session_id,
+                        "output": "Task dispatched — AI is still working on it in the background."})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+
+@app.route("/api/tasks/sync", methods=["POST"])
+def api_sync_tasks():
+    """Force sync tasks to OpenClaw workspace files."""
+    success = sync_all_tasks()
+    return jsonify({"success": success, "message": "Tasks synced to TASKS.md and HEARTBEAT.md"})
+
+
+@app.route("/api/tasks/parse", methods=["POST"])
+def parse_natural_language_task():
+    """Parse natural language into a structured task using AI."""
+    data = request.json
+    text = data.get("text", "").strip()
+    if not text:
+        return jsonify({"success": False, "error": "Text required"}), 400
+
+    # Try local parsing first (fast, no AI needed)
+    parsed = local_parse_task(text)
+
+    # If local parse is confident, use it
+    if parsed.get("confidence", 0) > 0.7:
+        return jsonify({"success": True, "task": parsed, "method": "local"})
+
+    # Fall back to AI parsing
+    prompt = f"""Parse this into a task JSON. Return ONLY valid JSON, no explanation.
+Input: "{text}"
+Return format: {{"name": "slug-name", "description": "what to do", "priority": "low|medium|high|critical", "tags": ["tag1"], "due_date": "YYYY-MM-DD or null", "estimated_minutes": number_or_null}}"""
+
+    try:
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        result = subprocess.run(
+            ["openclaw", "agent", "--local", "--session-id", f"webui-parse-{timestamp}",
+             "--message", prompt, "--thinking", "minimal", "--timeout", "20"],
+            capture_output=True, text=True, timeout=25
+        )
+        if result.stdout:
+            # Extract JSON from response
+            stdout = result.stdout.strip()
+            # Find JSON in output
+            json_match = re.search(r'\{[^{}]*"name"[^{}]*\}', stdout)
+            if json_match:
+                ai_parsed = json.loads(json_match.group())
+                # Sanitize name
+                ai_parsed["name"] = re.sub(r'[^a-z0-9_-]', '', ai_parsed.get("name", "").replace(" ", "_").lower())
+                return jsonify({"success": True, "task": ai_parsed, "method": "ai"})
+    except:
+        pass
+
+    # Return local parse as fallback
+    return jsonify({"success": True, "task": parsed, "method": "local"})
+
+
+def local_parse_task(text):
+    """Fast local parser for natural language task input."""
+    text_lower = text.lower().strip()
+
+    # Extract priority from keywords
+    priority = "medium"
+    if any(w in text_lower for w in ["urgent", "asap", "critical", "emergency", "immediately"]):
+        priority = "critical"
+    elif any(w in text_lower for w in ["important", "high priority", "high prio"]):
+        priority = "high"
+    elif any(w in text_lower for w in ["when you can", "low priority", "eventually", "someday"]):
+        priority = "low"
+
+    # Extract due date
+    due_date = None
+    today = datetime.now()
+    if "tomorrow" in text_lower:
+        due_date = (today + timedelta(days=1)).strftime("%Y-%m-%d")
+    elif "today" in text_lower:
+        due_date = today.strftime("%Y-%m-%d")
+    elif "next week" in text_lower:
+        due_date = (today + timedelta(days=7)).strftime("%Y-%m-%d")
+    elif "next month" in text_lower:
+        due_date = (today + timedelta(days=30)).strftime("%Y-%m-%d")
+    else:
+        # Try to match YYYY-MM-DD
+        date_match = re.search(r'(\d{4}-\d{2}-\d{2})', text)
+        if date_match:
+            due_date = date_match.group(1)
+
+    # Extract tags from hashtags
+    tags = re.findall(r'#(\w+)', text)
+
+    # Detect common task types for implicit tags
+    if any(w in text_lower for w in ["review pr", "pull request", "code review"]):
+        tags.append("review")
+    if any(w in text_lower for w in ["fix bug", "bugfix", "broken", "not working"]):
+        tags.append("bugfix")
+    if any(w in text_lower for w in ["deploy", "release", "ship"]):
+        tags.append("deploy")
+    if any(w in text_lower for w in ["test", "testing", "write test"]):
+        tags.append("testing")
+    if any(w in text_lower for w in ["docs", "documentation", "readme"]):
+        tags.append("docs")
+
+    # Extract estimated time
+    estimated_minutes = None
+    time_match = re.search(r'(\d+)\s*(min|minute|minutes|mins|m)\b', text_lower)
+    if time_match:
+        estimated_minutes = int(time_match.group(1))
+    else:
+        hr_match = re.search(r'(\d+)\s*(hour|hours|hr|hrs|h)\b', text_lower)
+        if hr_match:
+            estimated_minutes = int(hr_match.group(1)) * 60
+
+    # Clean up the text to generate name and description
+    # Remove special tokens we already parsed
+    clean = re.sub(r'#\w+', '', text)  # Remove hashtags
+    clean = re.sub(r'\d{4}-\d{2}-\d{2}', '', clean)  # Remove dates
+    clean = re.sub(r'\d+\s*(min|minute|minutes|mins|m|hour|hours|hr|hrs|h)\b', '', clean, flags=re.I)
+    for word in ["urgent", "asap", "critical", "important", "tomorrow", "today", "next week", "next month",
+                 "high priority", "low priority", "when you can", "eventually", "someday"]:
+        clean = clean.replace(word, "")
+    clean = re.sub(r'\s+', ' ', clean).strip()
+
+    # Generate slug name (first ~4 words)
+    words = clean.split()[:4]
+    name = re.sub(r'[^a-z0-9_-]', '', "-".join(words).lower())
+    if not name:
+        name = f"task-{int(datetime.now().timestamp())}"
+
+    confidence = 0.8 if (priority != "medium" or due_date or tags) else 0.5
+
+    return {
+        "name": name,
+        "description": clean or text,
+        "priority": priority,
+        "tags": list(set(tags)),
+        "due_date": due_date,
+        "estimated_minutes": estimated_minutes,
+        "confidence": confidence
+    }
+
+
+@app.route("/api/tasks/templates")
+def api_task_templates():
+    """Get available task templates."""
+    return jsonify(TASK_TEMPLATES)
 
 @app.route("/api/skills/<name>")
 def skill_detail(name):
@@ -409,7 +927,7 @@ def toggle_skill(name):
 @app.route("/api/personality/<filename>")
 def get_personality_file(filename):
     """Get content of a specific personality file"""
-    workspace = Path("/root/.openclaw/workspace")
+    workspace = WORKSPACE_DIR
     safe_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md", "HEARTBEAT.md"]
 
     if filename not in safe_files:
@@ -441,7 +959,7 @@ def save_personality():
     if filename not in safe_files:
         return jsonify({"success": False, "error": "Invalid file"})
 
-    workspace = Path("/root/.openclaw/workspace")
+    workspace = WORKSPACE_DIR
     fpath = workspace / filename
 
     try:
@@ -474,7 +992,7 @@ def suggest_personality():
     if filename not in safe_files:
         return jsonify({"success": False, "error": "Invalid file"})
 
-    workspace = Path("/root/.openclaw/workspace")
+    workspace = WORKSPACE_DIR
     fpath = workspace / filename
 
     try:
@@ -517,7 +1035,7 @@ Please apply the suggestion by editing {fpath} directly. Keep the existing struc
         )
 
         # Log the result for debugging
-        log_dir = workspace / ".autonomy_logs"
+        log_dir = LOGS_DIR
         log_dir.mkdir(exist_ok=True)
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
@@ -613,7 +1131,7 @@ Keep it conversational and friendly."""
                     response_text = ' '.join(content_lines[-3:])  # Last 3 lines
 
         # Log for debugging
-        log_dir = Path("/root/.openclaw/workspace/.autonomy_logs")
+        log_dir = LOGS_DIR
         log_dir.mkdir(exist_ok=True)
         with open(log_dir / f"skill_request_{timestamp}.log", 'w') as f:
             f.write(f"Description: {description}\n")
@@ -639,6 +1157,600 @@ Keep it conversational and friendly."""
         })
 
 
+# --- State & History Management ---
+
+def get_state():
+    """Load persistent state from state.json."""
+    if STATE_FILE.exists():
+        try:
+            with open(STATE_FILE) as f:
+                return json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass
+    return {"check_count": 0, "last_check": None, "daily_tasks_created": 0, "last_reset_date": None}
+
+
+def save_state(state):
+    """Persist state to state.json."""
+    with open(STATE_FILE, 'w') as f:
+        json.dump(state, f, indent=2)
+
+
+def record_event(event_type, details=""):
+    """Append an event to the history log."""
+    entry = {
+        "timestamp": datetime.now().isoformat(),
+        "type": event_type,
+        "details": details
+    }
+    history = []
+    if HISTORY_FILE.exists():
+        try:
+            with open(HISTORY_FILE) as f:
+                history = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            history = []
+    history.append(entry)
+    history = history[-500:]  # Rolling window
+    with open(HISTORY_FILE, 'w') as f:
+        json.dump(history, f, indent=2)
+
+
+# --- New API Endpoints ---
+
+@app.route("/api/webhook", methods=["POST"])
+def webhook():
+    """Receive external webhook events. Optionally auto-create tasks."""
+    data = request.json or {}
+    event_type = data.get("event", "webhook")
+    source = data.get("source", "external")
+    payload = data.get("payload", {})
+
+    record_event(f"webhook:{event_type}", f"From {source}: {json.dumps(payload)[:200]}")
+
+    # Auto-create task if requested
+    created_task = None
+    if data.get("create_task"):
+        ct = data["create_task"]
+        task_name = ct.get("name", f"webhook-{int(datetime.now().timestamp())}")
+        task_desc = ct.get("description", f"Created by webhook from {source}")
+        task_priority = ct.get("priority", "medium")
+
+        task_file = TASKS_DIR / f"{task_name}.json"
+        TASKS_DIR.mkdir(exist_ok=True)
+        if not task_file.exists():
+            created_task = {
+                "id": int(datetime.now().timestamp()),
+                "name": task_name,
+                "description": task_desc,
+                "status": "pending",
+                "priority": task_priority,
+                "depends_on": ct.get("depends_on", []),
+                "created_at": datetime.now().isoformat(),
+                "updated_at": datetime.now().isoformat(),
+                "completed_at": None,
+                "proof": None,
+            }
+            with open(task_file, "w") as f:
+                json.dump(created_task, f, indent=2)
+            record_event("task_created", f"Webhook task '{task_name}' from {source}")
+
+    return jsonify({"success": True, "message": "Webhook received", "task_created": created_task is not None})
+
+
+@app.route("/api/history")
+def api_history():
+    """Return recent event history."""
+    history = []
+    if HISTORY_FILE.exists():
+        try:
+            with open(HISTORY_FILE) as f:
+                history = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            pass
+    limit = request.args.get("limit", 100, type=int)
+    return jsonify(history[-limit:])
+
+
+@app.route("/api/state")
+def api_state():
+    """Return persistent autonomy state."""
+    return jsonify(get_state())
+
+
+# ═══════════════════════════════════════════════════════════
+# Feature 5: Context Window Monitor
+# ═══════════════════════════════════════════════════════════
+
+@app.route("/api/context-window")
+def api_context_window():
+    """Get context window usage estimates for active OpenClaw sessions."""
+    sessions_dir = OPENCLAW_HOME / "sessions"
+    sessions = []
+    if sessions_dir.exists():
+        dirs = sorted(
+            [d for d in sessions_dir.iterdir() if d.is_dir()],
+            key=lambda x: x.stat().st_mtime, reverse=True
+        )[:10]
+        for session_dir in dirs:
+            for transcript in session_dir.glob("*.jsonl"):
+                try:
+                    content = transcript.read_text(errors='ignore')
+                    tokens_est = estimate_tokens(content)
+                    model = "unknown"
+                    for line in content.split('\n')[:30]:
+                        if '"model"' in line:
+                            try:
+                                data = json.loads(line)
+                                if 'model' in data:
+                                    model = data['model']
+                                    break
+                            except:
+                                pass
+                    limit = 200000
+                    for key, val in MODEL_CONTEXT_LIMITS.items():
+                        if key in model.lower():
+                            limit = val
+                            break
+                    sessions.append({
+                        "session": session_dir.name,
+                        "model": model,
+                        "tokens_estimated": tokens_est,
+                        "context_limit": limit,
+                        "usage_pct": min(round(tokens_est / limit * 100, 1), 100),
+                        "last_modified": datetime.fromtimestamp(transcript.stat().st_mtime).isoformat()
+                    })
+                except:
+                    pass
+    return jsonify({"sessions": sessions, "model_limits": MODEL_CONTEXT_LIMITS})
+
+
+# ═══════════════════════════════════════════════════════════
+# Feature 7: Subtasks & Progress
+# ═══════════════════════════════════════════════════════════
+
+@app.route("/api/tasks/<task_id>/subtask", methods=["POST"])
+def add_subtask(task_id):
+    """Add a subtask to a parent task."""
+    task_file = TASKS_DIR / f"{task_id}.json"
+    if not task_file.exists():
+        return jsonify({"success": False, "error": "Task not found"}), 404
+    data = request.json
+    subtask_name = data.get("name", "")
+    if not subtask_name:
+        return jsonify({"success": False, "error": "Subtask name required"})
+    with open(task_file) as f:
+        task = json.load(f)
+    if "subtasks" not in task:
+        task["subtasks"] = []
+    task["subtasks"].append({
+        "name": subtask_name,
+        "completed": False,
+        "created_at": datetime.now().isoformat()
+    })
+    task["updated_at"] = datetime.now().isoformat()
+    with open(task_file, "w") as f:
+        json.dump(task, f, indent=2)
+    record_event("subtask_added", f"Subtask '{subtask_name}' added to '{task_id}'")
+    return jsonify({"success": True})
+
+
+@app.route("/api/tasks/<task_id>/subtask/<int:sub_index>/toggle", methods=["POST"])
+def toggle_subtask(task_id, sub_index):
+    """Toggle a subtask completion status."""
+    task_file = TASKS_DIR / f"{task_id}.json"
+    if not task_file.exists():
+        return jsonify({"success": False, "error": "Task not found"}), 404
+    with open(task_file) as f:
+        task = json.load(f)
+    subtasks = task.get("subtasks", [])
+    if sub_index < 0 or sub_index >= len(subtasks):
+        return jsonify({"success": False, "error": "Invalid subtask index"})
+    subtasks[sub_index]["completed"] = not subtasks[sub_index]["completed"]
+    if subtasks[sub_index]["completed"]:
+        subtasks[sub_index]["completed_at"] = datetime.now().isoformat()
+    else:
+        subtasks[sub_index].pop("completed_at", None)
+    task["updated_at"] = datetime.now().isoformat()
+    with open(task_file, "w") as f:
+        json.dump(task, f, indent=2)
+    return jsonify({"success": True, "completed": subtasks[sub_index]["completed"]})
+
+
+@app.route("/api/tasks/<task_id>/subtask/<int:sub_index>", methods=["DELETE"])
+def delete_subtask(task_id, sub_index):
+    """Delete a subtask."""
+    task_file = TASKS_DIR / f"{task_id}.json"
+    if not task_file.exists():
+        return jsonify({"success": False, "error": "Task not found"}), 404
+    with open(task_file) as f:
+        task = json.load(f)
+    subtasks = task.get("subtasks", [])
+    if sub_index < 0 or sub_index >= len(subtasks):
+        return jsonify({"success": False, "error": "Invalid subtask index"})
+    subtasks.pop(sub_index)
+    task["updated_at"] = datetime.now().isoformat()
+    with open(task_file, "w") as f:
+        json.dump(task, f, indent=2)
+    return jsonify({"success": True})
+
+
+# ═══════════════════════════════════════════════════════════
+# Feature 8: Task Dependency Graph
+# ═══════════════════════════════════════════════════════════
+
+@app.route("/api/tasks/graph")
+def task_graph():
+    """Return task dependency graph as nodes + edges for DAG visualization."""
+    tasks = get_all_tasks()
+    nodes = []
+    edges = []
+    for task in tasks:
+        nodes.append({
+            "id": task["name"],
+            "label": task["name"].replace("_", " ").title(),
+            "status": task.get("status", "pending"),
+            "priority": task.get("priority", "medium"),
+            "progress": calculate_progress(task)
+        })
+        for dep in task.get("depends_on", []):
+            edges.append({"from": dep, "to": task["name"]})
+    return jsonify({"nodes": nodes, "edges": edges})
+
+
+# ═══════════════════════════════════════════════════════════
+# Feature 12: AI-Generated Digests
+# ═══════════════════════════════════════════════════════════
+
+@app.route("/api/digests")
+def api_digests():
+    """List recent digest summaries."""
+    digests = []
+    if DIGESTS_DIR.exists():
+        for f in sorted(DIGESTS_DIR.glob("*.json"), reverse=True)[:20]:
+            try:
+                with open(f) as fh:
+                    digests.append(json.load(fh))
+            except:
+                pass
+    return jsonify(digests)
+
+
+@app.route("/api/digests/generate", methods=["POST"])
+def generate_digest():
+    """Generate an AI-written digest of recent activity."""
+    DIGESTS_DIR.mkdir(exist_ok=True)
+    data = request.json or {}
+    period = data.get("period", "daily")
+    now = datetime.now()
+    cutoff = now - timedelta(days=7 if period == "weekly" else 1)
+    tasks = get_all_tasks()
+    history = []
+    if HISTORY_FILE.exists():
+        try:
+            with open(HISTORY_FILE) as f:
+                history = json.load(f)
+        except:
+            pass
+    recent = [e for e in history if e.get("timestamp", "") >= cutoff.isoformat()]
+    pending = [t for t in tasks if t.get("status") == "pending"]
+    in_progress = [t for t in tasks if t.get("status") == "in_progress"]
+    completed_recent = [t for t in tasks if (t.get("completed_at") or "") >= cutoff.isoformat()]
+    health = get_system_health()
+    github = get_github_status()
+    summary_data = (
+        f"Period: {period} ({cutoff.strftime('%b %d')} - {now.strftime('%b %d, %Y')})\n"
+        f"Tasks: {len(pending)} pending, {len(in_progress)} in progress, {len(completed_recent)} completed\n"
+        f"Total events: {len(recent)}\n"
+        f"Event types: {', '.join(set(e.get('type','?') for e in recent[-20:]))}\n"
+        f"System: CPU {health.get('cpu','N/A')}, Memory {health.get('memory','N/A')}, Disk {health.get('disk','N/A')}\n"
+        f"GitHub: {github.get('notifications',0)} notifs, {github.get('my_prs',0)} PRs, {github.get('reviews',0)} reviews\n"
+        f"Completed: {', '.join(t.get('name','?') for t in completed_recent[:10])}\n"
+        f"Pending: {', '.join(t.get('name','?') for t in pending[:10])}"
+    )
+    prompt = f"""Write a concise {period} digest report for a developer workspace. Be conversational but informative.
+
+DATA:
+{summary_data}
+
+Format: One-line summary, then key highlights as bullet points (max 6), then one sentence on what to focus on next. Under 200 words."""
+    try:
+        timestamp = now.strftime('%Y%m%d_%H%M%S')
+        result = subprocess.run(
+            ["openclaw", "agent", "--local", "--session-id", f"webui-digest-{timestamp}",
+             "--message", prompt, "--thinking", "minimal", "--timeout", "45"],
+            capture_output=True, text=True, timeout=50
+        )
+        digest_text = "No response received."
+        if result.stdout:
+            lines = [l.strip() for l in result.stdout.strip().split('\n') if l.strip()]
+            content_lines = [l for l in lines if not l.startswith(('Runtime:', 'Session:', 'Model:', 'Tools:'))]
+            if content_lines:
+                digest_text = '\n'.join(content_lines)
+        digest = {
+            "id": timestamp, "period": period, "generated_at": now.isoformat(),
+            "content": digest_text, "ai_generated": True,
+            "stats": {"tasks_pending": len(pending), "tasks_completed": len(completed_recent),
+                      "events": len(recent), "github_notifs": github.get('notifications', 0)}
+        }
+        with open(DIGESTS_DIR / f"{timestamp}.json", 'w') as f:
+            json.dump(digest, f, indent=2)
+        record_event("digest_generated", f"{period.title()} digest generated")
+        return jsonify({"success": True, "digest": digest})
+    except (subprocess.TimeoutExpired, Exception) as e:
+        digest = {
+            "id": now.strftime('%Y%m%d_%H%M%S'), "period": period,
+            "generated_at": now.isoformat(), "ai_generated": False,
+            "content": (
+                f"**{period.title()} Summary** ({cutoff.strftime('%b %d')} \u2013 {now.strftime('%b %d')})\n\n"
+                f"\u2022 {len(completed_recent)} tasks completed, {len(pending)} pending\n"
+                f"\u2022 {len(recent)} events recorded\n"
+                f"\u2022 System: CPU {health.get('cpu','N/A')}, Mem {health.get('memory','N/A')}\n"
+                f"\u2022 GitHub: {github.get('notifications',0)} notifs, {github.get('my_prs',0)} open PRs"
+            ),
+            "stats": {"tasks_pending": len(pending), "tasks_completed": len(completed_recent),
+                      "events": len(recent), "github_notifs": github.get('notifications', 0)}
+        }
+        with open(DIGESTS_DIR / f"{digest['id']}.json", 'w') as f:
+            json.dump(digest, f, indent=2)
+        return jsonify({"success": True, "digest": digest})
+
+
+# ═══════════════════════════════════════════════════════════
+# Feature 13: Skill Compatibility Checker
+# ═══════════════════════════════════════════════════════════
+
+@app.route("/api/skills/check-compat", methods=["POST"])
+def check_skill_compat():
+    """Check skill compatibility against current system."""
+    data = request.json
+    skill_name = data.get("name", "")
+    skill_dir = SKILLS_DIR / skill_name if skill_name else None
+    results = {
+        "os": {"status": "pass", "detail": ""},
+        "binaries": [], "env_vars": [],
+        "model_support": {"status": "pass", "detail": ""}
+    }
+    current_os = platform.system().lower()
+    os_map = {"linux": "linux", "darwin": "darwin", "windows": "win32"}
+    skill_content = ""
+    if skill_dir and skill_dir.exists():
+        sf = skill_dir / "SKILL.md"
+        if sf.exists():
+            skill_content = sf.read_text()
+    required_os, required_bins, required_env = [], [], []
+    in_fm, in_bins, in_os, in_env = False, False, False, False
+    for line in skill_content.split('\n'):
+        s = line.strip()
+        if s == '---':
+            in_fm = not in_fm
+            continue
+        if not in_fm:
+            continue
+        if s.startswith('os:'):
+            if '[' in s:
+                items = s.split('[')[1].split(']')[0]
+                required_os = [x.strip().strip('"').strip("'") for x in items.split(',')]
+            else:
+                in_os = True
+            continue
+        if in_os and s.startswith('- '):
+            required_os.append(s[2:].strip())
+            continue
+        elif in_os:
+            in_os = False
+        if 'bins:' in s or 'binaries:' in s:
+            in_bins = True
+            continue
+        if in_bins and s.startswith('- '):
+            required_bins.append(s[2:].strip())
+            continue
+        elif in_bins:
+            in_bins = False
+        if 'env:' in s or 'env_vars:' in s:
+            in_env = True
+            continue
+        if in_env and s.startswith('- '):
+            required_env.append(s[2:].strip())
+            continue
+        elif in_env:
+            in_env = False
+    if required_os:
+        if os_map.get(current_os, current_os) in required_os:
+            results["os"] = {"status": "pass", "detail": f"{current_os} (requires: {', '.join(required_os)})"}
+        else:
+            results["os"] = {"status": "fail", "detail": f"{current_os} (requires: {', '.join(required_os)})"}
+    else:
+        results["os"] = {"status": "pass", "detail": f"{current_os} (no restriction)"}
+    for b in required_bins:
+        found = shutil.which(b)
+        results["binaries"].append({"name": b, "status": "pass" if found else "fail", "path": found or "not found"})
+    for e in required_env:
+        val = os.environ.get(e)
+        results["env_vars"].append({"name": e, "status": "pass" if val else "fail", "detail": "set" if val else "not set"})
+    oc = get_openclaw_status()
+    results["model_support"] = (
+        {"status": "pass", "detail": "OpenClaw running"} if oc
+        else {"status": "warn", "detail": "OpenClaw not detected"}
+    )
+    checks = [results["os"]["status"]] + [b["status"] for b in results["binaries"]] + [e["status"] for e in results["env_vars"]] + [results["model_support"]["status"]]
+    total = len(checks)
+    passed = sum(1 for c in checks if c == "pass")
+    results["summary"] = {
+        "passed": passed, "total": total,
+        "score": round(passed / total * 100) if total > 0 else 100,
+        "overall": "pass" if all(c == "pass" for c in checks) else ("warn" if all(c != "fail" for c in checks) else "fail")
+    }
+    return jsonify(results)
+
+
+# ═══════════════════════════════════════════════════════════
+# Feature 14: Personality A/B Testing
+# ═══════════════════════════════════════════════════════════
+
+@app.route("/api/personality/ab-test", methods=["POST"])
+def ab_test_personality():
+    """Run A/B test comparing current vs modified personality."""
+    data = request.json
+    filename = data.get("file", "")
+    modified_content = data.get("modified_content", "")
+    test_prompt = data.get("test_prompt", "")
+    if not filename or not modified_content or not test_prompt:
+        return jsonify({"success": False, "error": "File, modified content, and test prompt required"})
+    safe_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md"]
+    if filename not in safe_files:
+        return jsonify({"success": False, "error": "Invalid file"})
+    workspace = WORKSPACE_DIR
+    fpath = workspace / filename
+    try:
+        current_content = fpath.read_text() if fpath.exists() else ""
+        prompt_a = f"""Personality ({filename}) version A:\n{current_content}\n\nRespond to: {test_prompt}\n\nKeep response to 2-3 sentences, stay in character."""
+        prompt_b = f"""Personality ({filename}) version B:\n{modified_content}\n\nRespond to: {test_prompt}\n\nKeep response to 2-3 sentences, stay in character."""
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        def run_version(label, prompt):
+            try:
+                r = subprocess.run(
+                    ["openclaw", "agent", "--local", "--session-id", f"ab-{label}-{timestamp}",
+                     "--message", prompt, "--thinking", "minimal", "--timeout", "30"],
+                    capture_output=True, text=True, timeout=35
+                )
+                if r.stdout:
+                    lines = [l.strip() for l in r.stdout.strip().split('\n') if l.strip()]
+                    cl = [l for l in lines if not l.startswith(('Runtime:', 'Session:', 'Model:', 'Tools:'))]
+                    return ' '.join(cl[-3:]) if cl else "No response"
+            except:
+                pass
+            return "No response (timed out)"
+        response_a = run_version("a", prompt_a)
+        response_b = run_version("b", prompt_b)
+        ABTESTS_DIR.mkdir(exist_ok=True)
+        test_result = {
+            "id": timestamp, "file": filename, "test_prompt": test_prompt,
+            "version_a": {"label": "Current", "response": response_a},
+            "version_b": {"label": "Modified", "response": response_b},
+            "timestamp": datetime.now().isoformat()
+        }
+        with open(ABTESTS_DIR / f"{timestamp}.json", 'w') as f:
+            json.dump(test_result, f, indent=2)
+        record_event("ab_test_run", f"A/B test on {filename}")
+        return jsonify({"success": True, "result": test_result})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+
+@app.route("/api/personality/ab-tests")
+def list_ab_tests():
+    """List past A/B test results."""
+    tests = []
+    if ABTESTS_DIR.exists():
+        for f in sorted(ABTESTS_DIR.glob("*.json"), reverse=True)[:20]:
+            try:
+                with open(f) as fh:
+                    tests.append(json.load(fh))
+            except:
+                pass
+    return jsonify(tests)
+
+
+# ═══════════════════════════════════════════════════════════
+# Feature 15: Personality Version History
+# ═══════════════════════════════════════════════════════════
+
+@app.route("/api/personality/history/<filename>")
+def personality_history(filename):
+    """Get version history for a personality file from backups."""
+    safe_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md"]
+    if filename not in safe_files:
+        return jsonify({"error": "Invalid file"}), 400
+    workspace = WORKSPACE_DIR
+    backup_dir = workspace / "backups"
+    versions = []
+    current_file = workspace / filename
+    if current_file.exists():
+        stat = current_file.stat()
+        with open(current_file) as f:
+            content = f.read()
+        versions.append({
+            "label": "Current", "timestamp": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+            "size": stat.st_size, "is_current": True, "preview": content[:300]
+        })
+    if backup_dir.exists():
+        for bak in sorted(backup_dir.glob(f"{filename}.*"), key=lambda x: x.stat().st_mtime, reverse=True)[:20]:
+            try:
+                stat = bak.stat()
+                with open(bak) as f:
+                    content = f.read()
+                ts_str = bak.name.replace(filename + '.', '').replace('.bak', '')
+                versions.append({
+                    "label": ts_str, "filename": bak.name,
+                    "timestamp": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+                    "size": stat.st_size, "is_current": False, "preview": content[:300]
+                })
+            except:
+                pass
+    return jsonify({"file": filename, "versions": versions})
+
+
+@app.route("/api/personality/restore", methods=["POST"])
+def restore_personality():
+    """Restore a personality file from a backup version."""
+    data = request.json
+    filename = data.get("file", "")
+    backup_name = data.get("backup", "")
+    safe_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md"]
+    if filename not in safe_files:
+        return jsonify({"success": False, "error": "Invalid file"})
+    workspace = WORKSPACE_DIR
+    backup_path = workspace / "backups" / backup_name
+    current_path = workspace / filename
+    if not backup_path.exists():
+        return jsonify({"success": False, "error": "Backup not found"})
+    try:
+        backup_dir = workspace / "backups"
+        backup_dir.mkdir(exist_ok=True)
+        if current_path.exists():
+            shutil.copy(current_path, backup_dir / f"{filename}.{datetime.now().strftime('%Y%m%d_%H%M%S')}.bak")
+        shutil.copy(backup_path, current_path)
+        record_event("personality_restored", f"Restored {filename} from {backup_name}")
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+
+
+@app.route("/api/personality/diff", methods=["POST"])
+def personality_diff():
+    """Get diff between current file and a backup version."""
+    data = request.json
+    filename = data.get("file", "")
+    backup_name = data.get("backup", "")
+    safe_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md"]
+    if filename not in safe_files:
+        return jsonify({"error": "Invalid file"}), 400
+    workspace = WORKSPACE_DIR
+    current_path = workspace / filename
+    backup_path = workspace / "backups" / backup_name
+    if not current_path.exists() or not backup_path.exists():
+        return jsonify({"error": "File not found"}), 404
+    try:
+        with open(current_path) as f:
+            current_lines = f.readlines()
+        with open(backup_path) as f:
+            backup_lines = f.readlines()
+        diff = list(difflib.unified_diff(
+            backup_lines, current_lines,
+            fromfile=f"backup/{backup_name}", tofile=filename, lineterm=''
+        ))
+        added = sum(1 for l in diff if l.startswith('+') and not l.startswith('+++'))
+        removed = sum(1 for l in diff if l.startswith('-') and not l.startswith('---'))
+        return jsonify({
+            "diff": '\n'.join(diff), "current_lines": len(current_lines),
+            "backup_lines": len(backup_lines), "added": added, "removed": removed
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("AUTONOMY_WEB_PORT", 8767))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    host = os.environ.get("AUTONOMY_HOST", "127.0.0.1")
+    app.run(host=host, port=port, debug=False)

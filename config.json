@@ -1,5 +1,5 @@
 {
-  "version": "3.0.0",
+  "version": "3.1.0",
   "limits": {
     "max_concurrent_tasks": 5,
     "daily_task_budget": 20
@@ -7,5 +7,18 @@
   "github": {
     "default_repo": null,
     "notify_on_ci_fail": true
+  },
+  "web_ui": {
+    "port": 8767,
+    "host": "127.0.0.1",
+    "auto_refresh": 30
+  },
+  "watcher": {
+    "debounce_seconds": 2,
+    "enabled": true
+  },
+  "webhook": {
+    "enabled": true,
+    "auto_create_tasks": true
   }
 }
