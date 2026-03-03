@@ -485,20 +485,19 @@ def suggest_personality():
                 current_content = f.read()
         
         # Create the prompt for OpenClaw
-        prompt = f"""[AUTONOMY SUGGESTION] Update personality file
+        prompt = f"""[PERSONALITY UPDATE REQUEST]
 
-File: {filename}
-User Suggestion: {suggestion}
+The user wants to update {filename} with the following suggestion:
+"{suggestion}"
 
-Current Content:
-```
-{current_content[:3000]}{"..." if len(current_content) > 3000 else ""}
-```
+Please read the current content of {filename} and apply the user's suggestion. Edit the file directly using the edit tool.
 
-Please review this suggestion and update the file accordingly. Apply the changes directly using your file editing tools.
+Current content preview (first 2000 chars):
+{current_content[:2000]}
+{"..." if len(current_content) > 2000 else ""}
 """
         
-        # Write to a trigger file that OpenClaw monitors
+        # Write to trigger file
         trigger_dir = workspace / ".autonomy_triggers"
         trigger_dir.mkdir(exist_ok=True)
         
@@ -508,16 +507,46 @@ Please review this suggestion and update the file accordingly. Apply the changes
         with open(trigger_file, 'w') as f:
             f.write(prompt)
         
-        # Also save for record
-        pending_dir = workspace / "pending_personality_changes"
-        pending_dir.mkdir(exist_ok=True)
-        record_file = pending_dir / f"{filename}_{timestamp}.txt"
-        with open(record_file, 'w') as f:
-            f.write(f"File: {filename}\nSuggestion: {suggestion}\nTimestamp: {timestamp}\n")
+        # INSTANT ACTION: Spawn OpenClaw agent via subprocess
+        # This creates a detached process that runs immediately
+        spawn_script = f"""#!/usr/bin/env python3
+import subprocess
+import sys
+import json
+
+# Read the trigger file
+with open('{trigger_file}') as f:
+    prompt = f.read()
+
+# Call openclaw to run the task immediately
+try:
+    result = subprocess.run(
+        ["openclaw", "run", "--inline", prompt],
+        capture_output=True, text=True, timeout=60
+    )
+    # Also write completion marker
+    with open('{trigger_file}.done', 'w') as f:
+        f.write('completed')
+except Exception as e:
+    with open('{trigger_file}.error', 'w') as f:
+        f.write(str(e))
+"""
+        
+        spawn_path = trigger_dir / f"spawn_{timestamp}.py"
+        with open(spawn_path, 'w') as f:
+            f.write(spawn_script)
+        
+        # Execute immediately in background
+        subprocess.Popen(
+            [sys.executable, str(spawn_path)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True
+        )
         
         return jsonify({
             "success": True, 
-            "message": f"Suggestion sent to OpenClaw for {filename}",
+            "message": f"OpenClaw is now updating {filename}",
             "trigger": str(trigger_file)
         })
     except Exception as e:
