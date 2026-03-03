@@ -497,11 +497,15 @@ CURRENT CONTENT:
 Please apply the suggestion by editing {fpath} directly. Keep the existing structure and style, just incorporate the requested changes."""
         
         # Spawn OpenClaw agent to handle this immediately
-        # Uses --local to run without needing external channels
+        # Uses --local with a session-id to identify this as web UI triggered
+        timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+        session_id = f"webui-personality-{timestamp}"
+        
         result = subprocess.run(
             [
                 "openclaw", "agent", 
                 "--local",
+                "--session-id", session_id,
                 "--message", prompt,
                 "--thinking", "low",
                 "--timeout", "120"
