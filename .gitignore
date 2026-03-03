@@ -1,7 +1,7 @@
 # === NEVER COMMIT THESE FILES ===
-# See FILES_NEVER_COMMIT.md for full list and reasoning
+# This file lists what should stay local and never be pushed to GitHub
 
-# Runtime / Generated Data
+# Runtime / Generated Data (NEVER COMMIT)
 .autonomy/
 .autonomy_triggers/
 .autonomy_logs/
@@ -10,6 +10,7 @@ tasks/
 test_output/
 *.log
 *.tmp
+*.pid
 
 # Python Artifacts
 __pycache__/
@@ -38,19 +39,19 @@ ENV/
 .DS_Store
 Thumbs.db
 
-# Web UI (separate project - do not commit to skill repo)
-# Uncomment below to exclude from commits:
-# web_ui.py
-# templates/
-# static/
+# Local Reference Files (keep local)
+FILES_NEVER_COMMIT.md
+COMMIT_CHECKLIST.md
+PRE_COMMIT.md
 
-# Development Scripts (temporary)
+# Development Scripts (temporary - never commit)
 fix_*.py
 test_*.py
 *_test.py
 
-# Local Notes
+# Local Notes and Research
 notes/
 RESEARCH_*.md
+*.local.md
 
 # === END NEVER COMMIT ===
