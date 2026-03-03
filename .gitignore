@@ -1,9 +1,55 @@
-venv/
-__pycache__/
+# === NEVER COMMIT THESE FILES ===
+# See FILES_NEVER_COMMIT.md for full list and reasoning
+
+# Runtime / Generated Data
+.autonomy/
+.autonomy_triggers/
+.autonomy_logs/
 logs/
 tasks/
 test_output/
 *.log
 *.tmp
+
+# Python Artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
 .pytest_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+
+# Virtual Environments
+venv/
+env/
+ENV/
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
+Thumbs.db
+
+# Web UI (separate project - do not commit)
+# web_ui.py
+# templates/
+# static/
+
+# Development Scripts (temporary)
+fix_*.py
+test_*.py
+*_test.py
+
+# Local Notes
+notes/
+RESEARCH_*.md
+
+# === END NEVER COMMIT ===
