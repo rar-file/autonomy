@@ -1,2 +1,9 @@
 venv/
 __pycache__/
+logs/
+tasks/
+test_output/
+*.log
+*.tmp
+.pytest_cache/
+.DS_Store
