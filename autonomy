@@ -65,25 +65,33 @@ cmd_task() {
         create|add)
             local name="${1:-}"
             local desc="${2:-}"
+            local priority="${3:-medium}"
             [[ -z "$name" ]] && { error "Task name required"; return 1; }
             [[ -z "$desc" ]] && read -rp "Description: " desc
             
             local task_file="$TASKS_DIR/${name}.json"
             [[ -f "$task_file" ]] && { error "Task '$name' already exists"; return 1; }
             
-            cat > "$task_file" << EOF
-{
-  "id": "$(date +%s)",
-  "name": "$name",
-  "description": "$desc",
-  "status": "pending",
-  "created_at": "$(date -Iseconds)",
-  "updated_at": "$(date -Iseconds)",
-  "completed_at": null,
-  "proof": null
-}
-EOF
-            success "Task '$name' created"
+            jq -n \
+                --arg id "$(date +%s)" \
+                --arg name "$name" \
+                --arg desc "$desc" \
+                --arg priority "$priority" \
+                --arg created "$(date -Iseconds)" \
+                '{
+                    id: $id,
+                    name: $name,
+                    description: $desc,
+                    status: "pending",
+                    priority: $priority,
+                    depends_on: [],
+                    created_at: $created,
+                    updated_at: $created,
+                    completed_at: null,
+                    proof: null
+                }' > "$task_file"
+            
+            success "Task '$name' created (priority: $priority)"
             ;;
             
         list|ls)
@@ -122,7 +130,9 @@ EOF
             local task_file="$TASKS_DIR/${name}.json"
             [[ ! -f "$task_file" ]] && { error "Task '$name' not found"; return 1; }
             
-            jq '.status = "completed" | .completed_at = "'$(date -Iseconds)'" | .proof = "'$proof'" | .updated_at = "'$(date -Iseconds)'"' "$task_file" > "$task_file.tmp" && mv "$task_file.tmp" "$task_file"
+            jq --arg proof "$proof" --arg now "$(date -Iseconds)" \
+                '.status = "completed" | .completed_at = $now | .proof = $proof | .updated_at = $now' \
+                "$task_file" > "$task_file.tmp" && mv "$task_file.tmp" "$task_file"
             success "Task '$name' completed"
             echo "  Proof: $proof"
             ;;
@@ -135,9 +145,128 @@ EOF
             rm "$task_file"
             success "Task '$name' deleted"
             ;;
+
+        sync)
+            log "Syncing tasks to OpenClaw workspace..."
+            local workspace="${OPENCLAW_HOME:-$HOME/.openclaw}/workspace"
+            mkdir -p "$workspace"
+
+            # Write TASKS.md
+            local tasks_md="$workspace/TASKS.md"
+            local pending=0 in_prog=0 completed=0
+            for task in "$TASKS_DIR"/*.json; do
+                [[ -f "$task" ]] || continue
+                local status=$(jq -r '.status' "$task")
+                case "$status" in
+                    pending) ((pending++)) ;;
+                    in_progress) ((in_prog++)) ;;
+                    completed) ((completed++)) ;;
+                esac
+            done
+
+            {
+                echo "# Autonomy Tasks"
+                echo ""
+                echo "*Synced at $(date '+%Y-%m-%d %H:%M')*"
+                echo ""
+                echo "**${pending}** pending · **${in_prog}** in progress · **${completed}** completed"
+                echo ""
+                echo "## Active Tasks"
+                echo ""
+                for task in "$TASKS_DIR"/*.json; do
+                    [[ -f "$task" ]] || continue
+                    local s=$(jq -r '.status' "$task")
+                    [[ "$s" == "completed" || "$s" == "cancelled" ]] && continue
+                    local n=$(jq -r '.name' "$task")
+                    local d=$(jq -r '.description // "No description"' "$task" | cut -c1-80)
+                    local p=$(jq -r '.priority // "medium"' "$task")
+                    local icon="⏳"
+                    [[ "$s" == "in_progress" ]] && icon="🔄"
+                    [[ "$s" == "blocked" ]] && icon="🚫"
+                    local picon="🟡"
+                    [[ "$p" == "critical" ]] && picon="🔴"
+                    [[ "$p" == "high" ]] && picon="🟠"
+                    [[ "$p" == "low" ]] && picon="🟢"
+                    echo "- $icon $picon **$n** — $d"
+                done
+                echo ""
+                echo "---"
+                echo "*Managed by autonomy skill.*"
+            } > "$tasks_md"
+
+            # Inject into HEARTBEAT.md
+            local hb="$workspace/HEARTBEAT.md"
+            local marker_start="<!-- AUTONOMY-TASKS-START -->"
+            local marker_end="<!-- AUTONOMY-TASKS-END -->"
+            if [[ -f "$hb" ]]; then
+                # Remove old section
+                sed -i "/${marker_start}/,/${marker_end}/d" "$hb" 2>/dev/null || true
+            fi
+            {
+                echo ""
+                echo "$marker_start"
+                echo ""
+                echo "## Autonomy Tasks ($((pending + in_prog)) active)"
+                echo ""
+                for task in "$TASKS_DIR"/*.json; do
+                    [[ -f "$task" ]] || continue
+                    local s=$(jq -r '.status' "$task")
+                    [[ "$s" == "completed" || "$s" == "cancelled" ]] && continue
+                    local n=$(jq -r '.name' "$task")
+                    local d=$(jq -r '.description // ""' "$task" | cut -c1-60)
+                    echo "- [ ] **$n**: $d"
+                done
+                echo ""
+                echo "*Last synced: $(date '+%Y-%m-%d %H:%M')*"
+                echo "$marker_end"
+            } >> "$hb"
+
+            success "Tasks synced to $tasks_md and $hb"
+            ;;
+
+        dispatch|send)
+            local name="${1:-}"
+            [[ -z "$name" ]] && { error "Task name required"; return 1; }
+            local task_file="$TASKS_DIR/${name}.json"
+            [[ ! -f "$task_file" ]] && { error "Task '$name' not found"; return 1; }
+
+            local desc=$(jq -r '.description // "No description"' "$task_file")
+            local priority=$(jq -r '.priority // "medium"' "$task_file")
+            local prompt="Work on this task: $name\nDescription: $desc\nPriority: $priority\nWhen done, update the task file at $task_file"
+
+            log "Dispatching task '$name' to OpenClaw AI..."
+            local session_id="autonomy-task-${name}-$(date +%s)"
+
+            # Update status to in_progress
+            jq --arg now "$(date -Iseconds)" --arg sid "$session_id" \
+                '.status = "in_progress" | .updated_at = $now | .ai_dispatched = true | .dispatch_session = $sid' \
+                "$task_file" > "$task_file.tmp" && mv "$task_file.tmp" "$task_file"
+
+            openclaw agent --local --session-id "$session_id" --message "$prompt" --thinking low --timeout 300 2>&1 && \
+                success "Task '$name' dispatched to AI (session: $session_id)" || \
+                error "Dispatch failed — check OpenClaw logs"
+            ;;
+
+        status|info)
+            local name="${1:-}"
+            [[ -z "$name" ]] && { error "Task name required"; return 1; }
+            local task_file="$TASKS_DIR/${name}.json"
+            [[ ! -f "$task_file" ]] && { error "Task '$name' not found"; return 1; }
+            jq '.' "$task_file"
+            ;;
             
         *)
-            echo "Usage: autonomy task {create|list|work|complete|delete} [args]"
+            echo "Usage: autonomy task {create|list|work|complete|delete|sync|dispatch|status} [args]"
+            echo ""
+            echo "Commands:"
+            echo "  create <name> <desc> [priority]   Create a new task"
+            echo "  list                               List all tasks"
+            echo "  work <name>                        Mark task as in-progress"
+            echo "  complete <name> <proof>            Complete with proof"
+            echo "  delete <name>                      Delete a task"
+            echo "  sync                               Sync tasks to OpenClaw workspace"
+            echo "  dispatch <name>                    Send task to AI for execution"
+            echo "  status <name>                      Show task details"
             ;;
     esac
 }
@@ -244,6 +373,47 @@ cmd_vm() {
     esac
 }
 
+# File Watcher
+cmd_watcher() {
+    local subcmd="${1:-help}"
+    shift 2>/dev/null || true
+    
+    case "$subcmd" in
+        add)
+            local path="${1:-}"
+            shift 2>/dev/null || true
+            local command="$*"
+            [[ -z "$path" ]] && { error "Watch path required"; return 1; }
+            [[ -z "$command" ]] && { error "Command required"; return 1; }
+            python3 "$SCRIPT_DIR/watcher.py" add "$path" "$command"
+            ;;
+        remove|rm)
+            local index="${1:-}"
+            [[ -z "$index" ]] && { error "Watcher index required"; return 1; }
+            python3 "$SCRIPT_DIR/watcher.py" remove "$index"
+            ;;
+        list|ls)
+            log "Active watchers:"
+            python3 "$SCRIPT_DIR/watcher.py" list
+            ;;
+        start)
+            python3 "$SCRIPT_DIR/watcher.py" start
+            ;;
+        *)
+            echo "Usage: autonomy watcher {add|remove|list|start}"
+            echo ""
+            echo "  add <path> <command>   Add a file watcher"
+            echo "  remove <index>         Remove a watcher by index"
+            echo "  list                   List all watchers"
+            echo "  start                  Start watching (foreground)"
+            echo ""
+            echo "Examples:"
+            echo "  autonomy watcher add ./src \"autonomy task create review-src 'Review changes'\""
+            echo "  autonomy watcher start"
+            ;;
+    esac
+}
+
 # Check command (for cron/heartbeat)
 cmd_check() {
     local notify=false
@@ -288,22 +458,33 @@ case "$cmd" in
     vm|system)
         cmd_vm "$@"
         ;;
+    watcher|watch)
+        cmd_watcher "$@"
+        ;;
     check)
         cmd_check "$@"
         ;;
     help|--help|-h)
-        echo "Autonomy v2 — OpenClaw-Native Task Management"
+        echo "Autonomy v3.2 — OpenClaw-Native Task Management"
         echo ""
         echo "Commands:"
-        echo "  task {create|list|work|complete|delete}  Task management"
+        echo "  task {create|list|work|complete|delete|sync|dispatch|status}"
+        echo "                                          Task management"
         echo "  gh {prs|reviews|ci-status|notifications}   GitHub integration"
         echo "  vm {process_list|health|docker_ps|...}     System monitoring"
+        echo "  watcher {add|remove|list|start}            File watching"
         echo "  check [--notify]                           Check for issues"
         echo ""
-        echo "Examples:"
-        echo "  autonomy task create 'fix-auth' 'Fix login bug'"
+        echo "Task Examples:"
+        echo "  autonomy task create 'fix-auth' 'Fix login bug' high"
+        echo "  autonomy task sync          # Sync to OpenClaw workspace"
+        echo "  autonomy task dispatch fix-auth  # Send to AI"
+        echo "  autonomy task status fix-auth    # View task details"
+        echo ""
+        echo "Other Examples:"
         echo "  autonomy gh prs"
         echo "  autonomy vm health"
+        echo "  autonomy watcher add ./src \"autonomy task create review 'Review changes'\""
         ;;
     *)
         error "Unknown command: $cmd"

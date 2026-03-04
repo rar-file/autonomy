@@ -59,10 +59,15 @@ def sync_tasks_to_workspace():
     try:
         WORKSPACE_DIR.mkdir(parents=True, exist_ok=True)
         lines = ["# Autonomy Tasks\n"]
+        lines.append(f"> **AI Agent: You MUST check these tasks at the start of every conversation. "
+                     f"If tasks are active, tell the user. If tasks are overdue, warn the user. "
+                     f"Use `autonomy task` CLI or POST to localhost:8767 API to manage them. "
+                     f"Run `autonomy task sync` after any changes.**\n")
         lines.append(f"*Auto-synced at {datetime.now().strftime('%Y-%m-%d %H:%M')}*\n")
         lines.append(f"**{len([t for t in tasks if t.get('status') == 'pending'])}** pending · "
                      f"**{len([t for t in tasks if t.get('status') == 'in_progress'])}** in progress · "
-                     f"**{len([t for t in tasks if t.get('status') == 'completed'])}** completed\n")
+                     f"**{len([t for t in tasks if t.get('status') == 'completed'])}** completed · "
+                     f"**{len([t for t in tasks if t.get('status') == 'blocked'])}** blocked\n")
 
         # Active tasks first (pending + in_progress)
         active = [t for t in tasks if t.get("status") in ("pending", "in_progress")]
@@ -103,7 +108,11 @@ def sync_tasks_to_workspace():
                 lines.append(f"- ✅ ~~{t['name']}~~ — {t.get('proof', 'completed')}")
 
         lines.append("\n---\n")
-        lines.append("*Managed by [autonomy](autonomy/) skill. Use `autonomy task` CLI or web dashboard at localhost:8767.*\n")
+        lines.append("*Managed by the [autonomy](autonomy/) skill. "
+                     "CLI: `autonomy task {create|list|work|complete|delete|sync|dispatch|status}` | "
+                     "Dashboard: http://localhost:8767 | "
+                     "API: POST `/api/task/create`, GET `/api/tasks`, POST `/api/tasks/sync`*\n")
+        lines.append("> **After ANY task change, run `autonomy task sync` to update this file.**\n")
 
         with open(tasks_md, "w") as f:
             f.write("\n".join(lines))
@@ -115,10 +124,12 @@ def sync_tasks_to_workspace():
 
 def inject_tasks_into_heartbeat():
     """Append task summary to HEARTBEAT.md so the heartbeat checks tasks every 30 min.
-    OpenClaw's heartbeat reads HEARTBEAT.md and decides what needs attention."""
+    OpenClaw's heartbeat reads HEARTBEAT.md and decides what needs attention.
+    Written to be IMPOSSIBLE for the AI to misunderstand or ignore."""
     heartbeat_path = WORKSPACE_DIR / "HEARTBEAT.md"
     tasks = get_all_tasks()
     active = [t for t in tasks if t.get("status") in ("pending", "in_progress")]
+    blocked = [t for t in tasks if t.get("status") == "blocked"]
 
     try:
         # Read existing HEARTBEAT.md
@@ -135,24 +146,49 @@ def inject_tasks_into_heartbeat():
             after = existing[existing.index(marker_end) + len(marker_end):] if marker_end in existing else ""
             existing = before.rstrip() + "\n" + after.lstrip()
 
-        # Build task section
+        # Build task section — harsh and explicit
         section_lines = [marker_start]
-        section_lines.append(f"\n## Autonomy Tasks ({len(active)} active)")
+        section_lines.append(f"\n## Autonomy Tasks — YOU MUST CHECK THESE")
+        section_lines.append(f"**{len(active)} active** | **{len(blocked)} blocked** | "
+                           f"**{len([t for t in tasks if t.get('status') == 'completed'])} completed**")
+
         if active:
             overdue = [t for t in active if t.get("due_date") and t["due_date"] < datetime.now().strftime("%Y-%m-%d")]
             if overdue:
-                section_lines.append(f"\n⚠️ **{len(overdue)} OVERDUE task(s)** — check these first!")
-            for t in active[:10]:  # Max 10 in heartbeat to keep it concise
+                section_lines.append(f"\n**⚠️ {len(overdue)} OVERDUE TASK(S) — DEAL WITH THESE IMMEDIATELY:**")
+                for t in overdue:
+                    section_lines.append(f"- **OVERDUE** 🔴 **{t['name']}**: {t.get('description', '')[:80]} (was due: {t['due_date']})")
+
+            section_lines.append("\n**Active tasks — report status on each:**")
+            for t in active[:10]:
                 priority_icon = {"critical": "🔴", "high": "🟠", "medium": "🟡", "low": "🟢"}.get(t.get("priority", "medium"), "⚪")
-                line = f"- [ ] {priority_icon} **{t['name']}**: {t.get('description', '')[:80]}"
+                status_label = "IN PROGRESS" if t.get("status") == "in_progress" else "PENDING"
+                line = f"- [ ] {priority_icon} [{status_label}] **{t['name']}**: {t.get('description', '')[:80]}"
                 if t.get("due_date"):
                     line += f" (due: {t['due_date']})"
+                if t.get("ai_dispatched"):
+                    line += " [DISPATCHED TO AI]"
                 section_lines.append(line)
+                # Show subtask progress if any
+                subtasks = t.get("subtasks", [])
+                if subtasks:
+                    done = sum(1 for s in subtasks if s.get("completed"))
+                    section_lines.append(f"  ↳ Subtasks: {done}/{len(subtasks)} done")
             if len(active) > 10:
-                section_lines.append(f"- ...and {len(active) - 10} more (see TASKS.md)")
+                section_lines.append(f"- ...and {len(active) - 10} more tasks (see TASKS.md for full list)")
         else:
-            section_lines.append("\n✅ No active tasks. All clear!")
-        section_lines.append(f"\n*Last synced: {datetime.now().strftime('%Y-%m-%d %H:%M')}*")
+            section_lines.append("\n✅ No active tasks right now.")
+
+        if blocked:
+            section_lines.append(f"\n**🚫 {len(blocked)} BLOCKED task(s) — check if blockers are resolved:**")
+            for t in blocked[:5]:
+                reason = t.get("blocked_reason", "no reason given")
+                section_lines.append(f"- 🚫 **{t['name']}** — blocked: {reason}")
+
+        section_lines.append(f"\n**Instructions:** Report the status of each active task. If overdue tasks exist, warn the user. "
+                           f"Use `autonomy task work <name>` to start, `autonomy task complete <name> \"proof\"` to finish. "
+                           f"Run `autonomy task sync` after any changes.")
+        section_lines.append(f"*Synced: {datetime.now().strftime('%Y-%m-%d %H:%M')}* | Dashboard: http://localhost:8767")
         section_lines.append(marker_end)
 
         # Append to heartbeat
@@ -165,11 +201,116 @@ def inject_tasks_into_heartbeat():
         return False
 
 
+def ensure_agents_instructions():
+    """Write/update the autonomy instructions block in AGENTS.md so the AI
+    agent ALWAYS knows how to use the task system. This is injected between
+    markers so it doesn't clobber user content."""
+    agents_path = WORKSPACE_DIR / "AGENTS.md"
+    marker_start = "<!-- AUTONOMY-INSTRUCTIONS-START -->"
+    marker_end = "<!-- AUTONOMY-INSTRUCTIONS-END -->"
+
+    instructions = f"""{marker_start}
+
+## Autonomy Task System — MANDATORY INSTRUCTIONS
+
+> **YOU ARE REQUIRED TO FOLLOW THESE INSTRUCTIONS. THEY ARE NOT OPTIONAL. NOT SUGGESTIONS. NOT GUIDELINES. THEY ARE RULES. VIOLATING THEM MEANS TASKS WILL BE LOST, IGNORED, OR INVISIBLE.**
+
+### What Is Autonomy?
+
+Autonomy is YOUR task management system. It stores tasks as JSON files in the `autonomy/tasks/` directory and syncs them to `TASKS.md` (this workspace) and `HEARTBEAT.md` (your heartbeat loop). You have a CLI (`autonomy`) and a web API (`localhost:8767`) to manage tasks.
+
+### RULES — READ EVERY SINGLE ONE
+
+1. **USE THE TASK SYSTEM.** When the user asks you to track work, create tasks, manage a to-do list, or anything involving work items — use `autonomy task create`. Do NOT track work in your head, in memory files, in conversation, or anywhere else. The task system exists. Use it.
+
+2. **CHECK TASKS.MD AT CONVERSATION START.** Every single time a new conversation begins, read `TASKS.md` in this workspace. If there are active tasks, tell the user: "You have N active tasks." List the top priorities. Ask if they want to work on any.
+
+3. **SYNC AFTER EVERY CHANGE.** After you create, complete, update, delete, or change the status of any task — you MUST run `autonomy task sync` (CLI) or POST to `http://localhost:8767/api/tasks/sync` (API). If you do not sync, your changes will NOT appear in TASKS.md or HEARTBEAT.md. The user will think nothing happened. This is the #1 cause of "tasks don't work."
+
+4. **MARK TASKS IN PROGRESS.** Before you start working on a task, mark it as in_progress: `autonomy task work <name>`. This tells the user (and the dashboard) that you are actively working on it.
+
+5. **COMPLETE WITH PROOF.** When you finish a task, you MUST provide proof: `autonomy task complete <name> "What I actually did"`. Examples of good proof: "Fixed the null check in auth.py line 42, added unit test", "Deployed v2.1.0 to staging, verified health endpoint". Examples of BAD proof: "Done", "Completed", "Finished task". Be specific.
+
+6. **BREAK BIG TASKS INTO SUBTASKS.** If a task has multiple steps, create subtasks. POST to `/api/tasks/<id>/subtask` with `{{"name": "step description"}}`. Toggle them done as you complete each step. This gives the user visibility into your progress.
+
+7. **ADD NOTES FOR LONG TASKS.** If you're working on something that takes multiple messages or you find important information, add a note: POST to `/api/tasks/<id>/notes` with `{{"text": "Found root cause: the config file was missing..."}}`.
+
+8. **USE DISPATCH FOR PARALLEL WORK.** If the user wants multiple things done simultaneously, use task dispatch: POST to `/api/tasks/<id>/dispatch`. This spawns a sub-agent that works on the task independently. Do NOT try to do everything sequentially when parallel execution is possible.
+
+9. **RESPECT STATUS LIFECYCLE.** Valid statuses: `pending`, `in_progress`, `completed`, `blocked`, `cancelled`, `deferred`. Only move forward in the lifecycle. If you're blocked, set status to `blocked` with a `blocked_reason`. Don't leave tasks in limbo.
+
+10. **DURING HEARTBEAT.** When the heartbeat fires, check the Autonomy Tasks section of HEARTBEAT.md. If there are overdue tasks (past due_date), WARN the user immediately. Report status of in_progress tasks. Suggest next actions for pending tasks.
+
+### Quick Reference
+
+| Action | CLI Command | API Endpoint |
+|--------|------------|--------------|
+| Create task | `autonomy task create "name" "desc" [priority]` | POST `/api/task/create` |
+| List tasks | `autonomy task list` | GET `/api/tasks` |
+| Start work | `autonomy task work "name"` | POST `/api/tasks/<id>/status` `{{"status":"in_progress"}}` |
+| Complete | `autonomy task complete "name" "proof"` | POST `/api/tasks/<id>/complete` `{{"proof":"..."}}` |
+| Delete | `autonomy task delete "name"` | DELETE `/api/tasks/<id>/delete` |
+| Add note | — | POST `/api/tasks/<id>/notes` `{{"text":"..."}}` |
+| Add subtask | — | POST `/api/tasks/<id>/subtask` `{{"name":"..."}}` |
+| Dispatch to AI | `autonomy task dispatch "name"` | POST `/api/tasks/<id>/dispatch` |
+| **Sync (REQUIRED)** | `autonomy task sync` | POST `/api/tasks/sync` |
+| Parse NL | — | POST `/api/tasks/parse` `{{"text":"Fix bug by Friday #urgent !high"}}` |
+| Templates | — | GET `/api/tasks/templates` |
+
+### NL Parsing Syntax
+
+`"Fix the auth bug by March 10 #security #backend !critical ~60m"`
+
+- `#tag` → tags: ["security", "backend"]
+- `!critical` → priority: critical (also: !high, !medium, !low)
+- `~60m` → estimated_minutes: 60 (also: ~2h = 120)
+- `by March 10` → due_date: 2026-03-10 (also: by tomorrow, by next week, by Friday)
+
+### Dashboard
+
+Web UI at `http://localhost:8767` — has full task management, skill browser, personality editor, system health, GitHub integration, and activity history. Tell the user about it if they want a visual overview.
+
+### What Happens If You Ignore These Rules
+
+- Tasks will be invisible to the user
+- The heartbeat will show "No active tasks" even when work is pending
+- The dashboard will be empty
+- The user will be frustrated
+- You will have failed at your job
+
+**Do not fail at your job.**
+
+{marker_end}"""
+
+    try:
+        WORKSPACE_DIR.mkdir(parents=True, exist_ok=True)
+        existing = ""
+        if agents_path.exists():
+            with open(agents_path) as f:
+                existing = f.read()
+
+        # Remove old autonomy section if present
+        if marker_start in existing:
+            before = existing[:existing.index(marker_start)]
+            after = existing[existing.index(marker_end) + len(marker_end):] if marker_end in existing else ""
+            existing = before.rstrip() + "\n" + after.lstrip()
+
+        # Append instructions
+        content = existing.rstrip() + "\n\n" + instructions + "\n"
+        with open(agents_path, "w") as f:
+            f.write(content)
+        return True
+    except Exception as e:
+        print(f"[autonomy] Failed to write AGENTS.md instructions: {e}")
+        return False
+
+
 def sync_all_tasks():
-    """Sync tasks to both workspace TASKS.md and HEARTBEAT.md."""
+    """Sync tasks to workspace TASKS.md, HEARTBEAT.md, and ensure AGENTS.md has instructions."""
     s1 = sync_tasks_to_workspace()
     s2 = inject_tasks_into_heartbeat()
-    return s1 and s2
+    s3 = ensure_agents_instructions()
+    return s1 and s2 and s3
 
 
 def estimate_tokens(text):
@@ -319,7 +460,7 @@ def get_skill_detail(name):
 def get_personality_files():
     files = []
     workspace = WORKSPACE_DIR
-    personality_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md"]
+    personality_files = ["SOUL.md", "IDENTITY.md", "USER.md", "AGENTS.md", "TOOLS.md", "MEMORY.md", "HEARTBEAT.md", "TASKS.md", "BOOT.md"]
 
     for fname in personality_files:
         fpath = workspace / fname
@@ -1753,4 +1894,11 @@ def personality_diff():
 if __name__ == "__main__":
     port = int(os.environ.get("AUTONOMY_WEB_PORT", 8767))
     host = os.environ.get("AUTONOMY_HOST", "127.0.0.1")
+    # Initial sync on startup — ensure TASKS.md, HEARTBEAT.md, and AGENTS.md are current
+    print("[autonomy] Running initial sync to workspace...")
+    try:
+        sync_all_tasks()
+        print("[autonomy] Synced: TASKS.md + HEARTBEAT.md + AGENTS.md instructions")
+    except Exception as e:
+        print(f"[autonomy] Initial sync failed (non-fatal): {e}")
     app.run(host=host, port=port, debug=False)

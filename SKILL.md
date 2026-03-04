@@ -1,15 +1,11 @@
-````skill
 ---
-name: autonomy-v2
-description: >-
-  Lightweight task management and system toolkit for OpenClaw agents.
-  JSON-based tasks with priority, file watching via watchdog, webhook receiver,
-  GitHub integration, VM diagnostics, and a Flask web dashboard.
-version: 3.1.0
-user-invocable: true
+name: clawtonomy
+description: "Full task management, AI dispatch, and system toolkit for OpenClaw agents. JSON tasks with sync to TASKS.md + HEARTBEAT.md, sub-agent dispatch, NL parsing, GitHub integration, VM health, file watching, personality editor, skill manager, and Flask web dashboard."
 metadata:
+  version: "3.5.0"
+  user-invocable: true
   openclaw:
-    skillKey: autonomy-v2
+    skillKey: clawtonomy
     emoji: "🤖"
     homepage: https://github.com/rar-file/autonomy
     os:
@@ -24,303 +20,328 @@ metadata:
         - gh
 ---
 
-# Autonomy v3.1 — Task Management & System Toolkit
+# ClawTonomy v3.5 — Task Management, AI Dispatch & System Toolkit
 
-**Version:** 3.1.0
-**Type:** Task Management · GitHub · VM · File Watching · Web Dashboard
-**Stack:** Bash CLI + Python (Flask) + Single-page HTML dashboard
+> **READ THIS ENTIRE DOCUMENT. If the user mentions tasks, clawtonomy, dashboard, system health, GitHub, or anything in this manifest — USE THIS SKILL. Do not ignore it. Do not say you can't do it. Do not invent your own task tracking. USE THIS.**
+
+**Version:** 3.5.0
+**Dashboard:** `http://localhost:8767`
+**Task Files:** `tasks/` directory (one JSON file per task)
+**Sync Targets:** `~/.openclaw/workspace/TASKS.md` + `~/.openclaw/workspace/HEARTBEAT.md`
+
+---
+
+## ⛔ MANDATORY RULES — NO EXCEPTIONS
+
+1. **NEVER create your own task tracking.** This skill IS the task system. Use it.
+2. **NEVER store tasks in memory, notes, or conversation.** Tasks go in `tasks/` as JSON via CLI or API.
+3. **"Create a task"** → run `clawtonomy task create <name> <description> [priority]` or POST `/api/task/create`.
+4. **"What are my tasks"** → run `clawtonomy task list` or GET `/api/tasks`.
+5. **When you finish work** → run `clawtonomy task complete <name> "<proof>"`. Proof is MANDATORY. Describe what you actually did.
+6. **Before starting work** → run `clawtonomy task work <name>` to set status to in_progress.
+7. **After ANY task change** → run `clawtonomy task sync` or POST `/api/tasks/sync`. If you skip this, changes won't appear in TASKS.md or HEARTBEAT.md. The user will not see your work. DO NOT SKIP THIS.
+8. **Start of every conversation** → check TASKS.md for active tasks. Acknowledge them. Ask if the user wants to work on any.
+9. **During heartbeat** → read the ClawTonomy Tasks section of HEARTBEAT.md. Report status. Warn about overdue tasks.
+10. **Complex work** → break into subtasks via POST `/api/tasks/<id>/subtask` with `{"name": "step description"}`.
+11. **Parallel work** → dispatch to sub-agents via POST `/api/tasks/<id>/dispatch`.
+12. **NEVER say "I don't have access to tasks" or "I can't manage tasks."** You have full CLI and API access.
 
 ---
 
 ## File Structure
 
 ```
-autonomy/             # Bash CLI (main entry point)
-web_ui.py             # Flask web dashboard (port 8767)
-watcher.py            # Watchdog-based file watcher
-config.json           # User configuration
-requirements.txt      # Python deps (flask, watchdog)
-install.sh            # Installer (venv, deps, optional cron)
-templates/
-  index.html          # Single-page dashboard (dark theme)
-assets/
-  *.svg               # Logo and diagram assets
-tasks/                # Created at runtime — JSON task files
-logs/                 # Created at runtime — watcher & suggestion logs
-state.json            # Created at runtime — persistent counters
-history.json          # Created at runtime — event log (rolling 500)
-watchers.json         # Created at runtime — watcher configurations
+clawtonomy               # Bash CLI entry point
+web_ui.py                # Flask dashboard (port 8767)
+watcher.py               # Watchdog file watcher
+config.json              # Configuration
+templates/index.html     # Dashboard UI
+tasks/                   # JSON task files (one per task)
+logs/                    # Watcher & suggestion logs
+digests/                 # Generated digests
+ab_tests/                # Personality A/B tests
+state.json               # Persistent counters
+history.json             # Event log (rolling 500)
+watchers.json            # Watcher configs
 ```
 
 ---
 
-## CLI Reference (`autonomy`)
-
-All commands are implemented in the `autonomy` bash script.
+## CLI Commands — USE THESE
 
 ### Task Management
 
 ```bash
-autonomy task create <name> <description> [priority]
-autonomy task list
-autonomy task work <name>
-autonomy task complete <name> <proof>
-autonomy task delete <name>
+clawtonomy task create <name> <description> [priority]   # Create task
+clawtonomy task list                                      # List all tasks
+clawtonomy task work <name>                               # Mark in_progress
+clawtonomy task complete <name> "<proof>"                 # Complete with proof
+clawtonomy task delete <name>                             # Delete task
+clawtonomy task sync                                      # Sync to TASKS.md + HEARTBEAT.md
+clawtonomy task dispatch <name>                           # Send to AI sub-agent
+clawtonomy task status <name>                             # View task details
 ```
 
-- Tasks stored as individual JSON files in `tasks/`
-- Priority: `low`, `medium` (default), `high`, `critical`
-- Each task has: `id`, `name`, `description`, `status`, `priority`, `depends_on`, `created_at`, `updated_at`, `completed_at`, `proof`
-- Task creation uses `jq -n` for safe JSON building (no shell injection)
+**Priority:** `low`, `medium` (default), `high`, `critical`
 
-### GitHub Integration
+**Task fields:** id, name, description, status, priority, tags[], due_date, estimated_minutes, execution_mode, subtasks[], notes[], depends_on[], ai_dispatched, dispatch_session, proof, blocked_reason, created_at, updated_at, completed_at
 
-Requires `gh` CLI authenticated.
+**Status values:** `pending` → `in_progress` → `completed` | `blocked` | `cancelled` | `deferred`
+
+### GitHub
 
 ```bash
-autonomy gh prs              # Your open PRs
-autonomy gh reviews          # PRs needing your review
-autonomy gh ci-status        # Last 5 CI runs
-autonomy gh notifications    # Unread notifications
-autonomy gh issues           # Your open issues
-autonomy gh status           # Summary (PR count + review count)
+clawtonomy gh prs              # Your open PRs
+clawtonomy gh reviews          # PRs needing your review
+clawtonomy gh ci-status        # Last 5 CI runs
+clawtonomy gh notifications    # Unread notifications
+clawtonomy gh issues           # Your open issues
+clawtonomy gh status           # Summary
 ```
 
-### VM / System Diagnostics
+### VM / System
 
 ```bash
-autonomy vm health           # CPU, memory, disk, load summary
-autonomy vm process_list     # ps aux sorted by CPU
-autonomy vm top_cpu          # Top 10 CPU processes
-autonomy vm top_memory       # Top 10 memory processes
-autonomy vm disk             # df -h
-autonomy vm memory           # free -h
-autonomy vm load             # uptime
-autonomy vm docker_ps        # Running containers
-autonomy vm docker_images    # Docker images
-autonomy vm service_list     # systemd running services
-autonomy vm service_status <name>  # Status of a specific service
+clawtonomy vm health           # CPU, memory, disk, load
+clawtonomy vm process_list     # ps aux by CPU
+clawtonomy vm top_cpu          # Top 10 CPU
+clawtonomy vm top_memory       # Top 10 memory
+clawtonomy vm disk             # df -h
+clawtonomy vm memory           # free -h
+clawtonomy vm load             # uptime
+clawtonomy vm docker_ps        # Running containers
+clawtonomy vm docker_images    # Docker images
+clawtonomy vm service_list     # systemd services
+clawtonomy vm service_status <name>
 ```
 
 ### File Watcher
 
-Delegates to `watcher.py` (requires `watchdog`).
-
 ```bash
-autonomy watcher add <path> <command>   # Add a watcher
-autonomy watcher remove <index>         # Remove by index
-autonomy watcher list                   # List configured watchers
-autonomy watcher start                  # Start watching (foreground, blocking)
+clawtonomy watcher add <path> <command>
+clawtonomy watcher remove <index>
+clawtonomy watcher list
+clawtonomy watcher start
 ```
-
-- Watcher configs stored in `watchers.json`
-- Commands support `{file}` and `{event}` placeholders
-- Events are debounced (default 2s, configurable in `config.json`)
-- Logs written to `logs/watcher.log`
 
 ### Health Check
 
 ```bash
-autonomy check               # Check for pending tasks, GitHub notifs, CI failures
-autonomy check --notify      # Same, with notification-friendly output
+clawtonomy check               # Check pending tasks, GitHub notifs, CI failures
+clawtonomy check --notify      # Notification-friendly output
 ```
 
 ---
 
-## Web Dashboard (`web_ui.py`)
+## API REFERENCE — COMPLETE
 
-Flask server on port **8767**, bound to **127.0.0.1** by default.
+**Base:** `http://localhost:8767`
 
-```bash
-python3 web_ui.py
-# or with env overrides:
-AUTONOMY_WEB_PORT=9000 AUTONOMY_HOST=0.0.0.0 python3 web_ui.py
-```
-
-### Dashboard Pages
-
-| Page | What it shows |
-|------|--------------|
-| Dashboard | Task counts, GitHub summary, system health, OpenClaw status |
-| Tasks | Full task list with create/complete actions |
-| Alerts | Auto-generated alerts (pending task backlog, GitHub notifs, CI failures) |
-| Skills | Installed OpenClaw skills — view detail, toggle enable/disable |
-| Personality | SOUL.md, IDENTITY.md, USER.md, etc. — view/edit, AI-powered suggestions |
-| Logs | Recent journalctl entries for the `openclaw` service |
-| System | CPU, memory, disk, load, top processes, Docker containers |
-| GitHub | PRs, reviews, notifications, CI status |
-| History | Activity timeline, event stats (tasks created, webhooks received, checks run) |
-
-### API Endpoints
+### Status
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `GET` | `/api/status` | Full status JSON (tasks, skills, health, github, alerts, etc.) |
-| `GET` | `/api/tasks` | All tasks |
-| `POST` | `/api/task/create` | Create task `{name, description, priority?, depends_on?}` |
-| `POST` | `/api/tasks/<id>/complete` | Complete task `{proof}` |
-| `GET` | `/api/skills/<name>` | Skill detail (version, files, readme, SKILL.md content) |
-| `POST` | `/api/skills/<name>/toggle` | Enable/disable `{enabled: bool}` |
-| `POST` | `/api/skills/install` | Install from ClawHub `{repo}` |
-| `POST` | `/api/skills/request` | AI skill request — spawns `openclaw agent` `{description}` |
-| `GET` | `/api/personality/<file>` | Read personality file content |
-| `POST` | `/api/personality/save` | Save personality file `{file, content}` (creates timestamped backup) |
-| `POST` | `/api/personality/suggest` | AI suggestion — spawns `openclaw agent --local` `{file, suggestion}` |
-| `POST` | `/api/webhook` | Receive external events `{event, source, payload?, create_task?}` |
-| `GET` | `/api/history` | Event history (rolling 500, `?limit=N`) |
-| `GET` | `/api/state` | Persistent state (check_count, daily_tasks_created) |
+| GET | `/api/status` | Full system status |
+| GET | `/api/state` | Persistent counters |
+| GET | `/api/history` | Event log (`?limit=N`) |
+| GET | `/api/context-window` | Token usage estimate |
 
-### Webhook Details
+### Tasks — CRUD
 
-The `/api/webhook` endpoint accepts:
+| Method | Path | Body | Description |
+|--------|------|------|-------------|
+| GET | `/api/tasks` | — | List ALL tasks |
+| POST | `/api/task/create` | `{name, description, priority?, tags?, due_date?, estimated_minutes?, execution_mode?, depends_on?}` | Create task |
+| POST | `/api/tasks/<id>/status` | `{status, blocked_reason?, proof?}` | Change status |
+| POST | `/api/tasks/<id>/update` | `{field: value, ...}` | Update any field |
+| POST | `/api/tasks/<id>/complete` | `{proof}` | Complete (proof REQUIRED) |
+| DELETE | `/api/tasks/<id>/delete` | — | Delete task |
 
-```json
-{
-  "event": "deploy",
-  "source": "ci",
-  "payload": {},
-  "create_task": {
-    "name": "verify-deploy",
-    "description": "Verify deployment succeeded",
-    "priority": "high",
-    "depends_on": []
-  }
-}
-```
+### Tasks — Notes & Subtasks
 
-When `create_task` is present and `webhook.auto_create_tasks` is enabled in config, a task JSON file is created automatically.
+| Method | Path | Body | Description |
+|--------|------|------|-------------|
+| POST | `/api/tasks/<id>/notes` | `{text}` | Add progress note |
+| POST | `/api/tasks/<id>/subtask` | `{name}` | Add subtask |
+| POST | `/api/tasks/<id>/subtask/<idx>/toggle` | — | Toggle subtask done |
+| DELETE | `/api/tasks/<id>/subtask/<idx>` | — | Remove subtask |
 
----
+### Tasks — Dispatch & Sync
 
-## Watcher Module (`watcher.py`)
+| Method | Path | Body | Description |
+|--------|------|------|-------------|
+| POST | `/api/tasks/<id>/dispatch` | `{mode?: "agent" or "cron"}` | Send to AI sub-agent |
+| POST | `/api/tasks/sync` | — | Sync to TASKS.md + HEARTBEAT.md |
+| POST | `/api/tasks/parse` | `{text}` | NL text → structured task |
+| GET | `/api/tasks/templates` | — | Pre-built task templates |
+| GET | `/api/tasks/graph` | — | Dependency graph |
 
-Standalone Python script using the `watchdog` library. Can be run directly or via the CLI.
+### Digests
 
-```bash
-python3 watcher.py start               # Start all enabled watchers
-python3 watcher.py add ./src "echo changed"
-python3 watcher.py remove 0
-python3 watcher.py list
-```
+| Method | Path | Body | Description |
+|--------|------|------|-------------|
+| GET | `/api/digests` | — | List digests |
+| POST | `/api/digests/generate` | `{type?, since?}` | Generate digest |
 
-- `AutonomyEventHandler` — debounced handler for `on_modified` and `on_created`
-- Skips directory events
-- Placeholder substitution: `{file}` → changed file path, `{event}` → `modified` / `created`
-- Debounce interval from `config.json` → `watcher.debounce_seconds` (default 2)
-- Watchers persisted in `watchers.json`, each with `path`, `command`, `enabled`, `created_at`
+### Skills
 
----
+| Method | Path | Body | Description |
+|--------|------|------|-------------|
+| GET | `/api/skills/<name>` | — | Skill detail |
+| POST | `/api/skills/<name>/toggle` | `{enabled: bool}` | Toggle skill |
+| POST | `/api/skills/install` | `{repo}` | Install from ClawHub |
+| POST | `/api/skills/request` | `{description}` | AI-generated skill |
+| POST | `/api/skills/check-compat` | `{skill_name?, os?, bins?}` | Compatibility check |
 
-## Installation
+### Personality Files
 
-```bash
-bash install.sh                  # Create venv, install deps, set permissions
-bash install.sh --enable-cron    # Also register OpenClaw cron job
-```
+| Method | Path | Body | Description |
+|--------|------|------|-------------|
+| GET | `/api/personality/<file>` | — | Read file |
+| POST | `/api/personality/save` | `{file, content}` | Save (creates backup) |
+| POST | `/api/personality/suggest` | `{file, suggestion}` | AI suggestion |
+| GET | `/api/personality/history/<file>` | — | Version history |
+| POST | `/api/personality/restore` | `{file, backup}` | Restore from backup |
+| POST | `/api/personality/diff` | `{file, backup}` | Diff versions |
+| POST | `/api/personality/ab-test` | `{file, variant_a, variant_b}` | A/B test |
+| GET | `/api/personality/ab-tests` | — | List A/B tests |
 
-What `install.sh` does:
+### Webhooks
 
-1. Detects platform (Linux / macOS / WSL2 via `/proc/version`)
-2. Checks for required binaries (`jq`, `python3`, `git`, `gh`)
-3. Creates Python venv at `./venv/` and installs from `requirements.txt`
-4. Falls back to global pip install if venv creation fails
-5. Creates `tasks/` and `logs/` directories
-6. Sets execute permissions on `autonomy`, `web_ui.py`, `watcher.py`
-7. Creates default `config.json` if missing
-8. With `--enable-cron`: registers `openclaw cron add --name autonomy-check --schedule "*/30 * * * *"`
-
-### Python Dependencies
-
-Managed via `requirements.txt`:
-
-- `flask>=3.0.0,<4.0.0` — web dashboard server
-- `watchdog>=4.0.0,<5.0.0` — file system watcher
-
-### Platform Notes
-
-- **Linux** — fully supported
-- **macOS (darwin)** — fully supported; `free` / `systemctl` commands degrade gracefully
-- **WSL2** — detected automatically; fully functional
-- **Windows native** — not supported (bash CLI requires a POSIX shell)
+| Method | Path | Body | Description |
+|--------|------|------|-------------|
+| POST | `/api/webhook` | `{event, source, payload?, create_task?}` | Receive events |
 
 ---
 
-## OpenClaw Integration Points
+## HOW TASKS SYNC TO OPENCLAW
 
-This skill uses the following OpenClaw features when available:
+OpenClaw has NO native task system. THIS skill is the task system. Here is the bridge:
 
-| Feature | How it's used |
-|---------|--------------|
-| `openclaw status --json` | Dashboard fetches session info via `get_openclaw_status()` |
-| `openclaw agent --local` | Personality suggestions and skill requests spawn a local agent |
-| `openclaw cron add` | Optional scheduled health checks via `install.sh --enable-cron` |
-| `clawhub install` | Install skills from ClawHub registry via web UI |
-| Personality files | Reads/writes `SOUL.md`, `IDENTITY.md`, `USER.md`, `AGENTS.md`, `TOOLS.md`, `MEMORY.md` from workspace |
-| Skill discovery | Scans `$OPENCLAW_HOME/workspace/skills/*/SKILL.md` for installed skills |
+1. **Tasks = JSON files** in `tasks/` directory.
+2. **`sync_tasks_to_workspace()`** writes `~/.openclaw/workspace/TASKS.md` — markdown summary with status icons, priorities, due dates, subtasks, notes. OpenClaw reads this every conversation.
+3. **`inject_tasks_into_heartbeat()`** injects task checklist into `HEARTBEAT.md` between `<!-- CLAWTONOMY-TASKS-START -->` and `<!-- CLAWTONOMY-TASKS-END -->` markers. Heartbeat reads this every 30 min.
+4. **After ANY task change** → sync runs automatically via API. If using CLI, run `clawtonomy task sync` manually.
 
-### Path Resolution
+---
+
+## DISPATCH — SUB-AGENT EXECUTION
+
+POST `/api/tasks/<id>/dispatch` with `{mode: "agent"}` (default) or `{mode: "cron"}`.
+
+- **Agent mode:** `openclaw agent --local --session-id clawtonomy-task-<id>-<ts> --message "<prompt>" --thinking low --timeout 300`
+- **Cron mode:** `openclaw cron add --name task:<id> --at now --session isolated --message "<prompt>"`
+- Task auto-set to `in_progress`, `ai_dispatched = true`
+- Check dispatched tasks later to verify completion
+
+---
+
+## NL TASK PARSING
+
+POST `/api/tasks/parse` with `{text: "Fix login bug by Friday #frontend !high ~45m"}`
+
+Syntax: `#tag` → tag, `!high` → priority, `~30m`/`~2h` → time, `by March 10`/`by tomorrow`/`by next week` → due date
+
+---
+
+## TASK LIFECYCLE
+
+```
+pending → in_progress → completed
+   ↓          ↓
+ deferred   blocked → in_progress → completed
+   ↓
+ cancelled
+```
+
+1. Create → `pending`
+2. Start work → `in_progress` (use `clawtonomy task work <name>`)
+3. Add notes → POST `/api/tasks/<id>/notes`
+4. Add subtasks → POST `/api/tasks/<id>/subtask`
+5. Complete → `completed` with proof (use `clawtonomy task complete <name> "<proof>"`)
+6. Block → `blocked` with reason
+7. **SYNC AFTER EVERY STEP** → `clawtonomy task sync`
+
+---
+
+## TASK TEMPLATES
+
+| Template | Priority | Tags | Time |
+|----------|----------|------|------|
+| Review PR | high | github, review | 30m |
+| Fix Bug | high | bugfix, code | 60m |
+| Write Tests | medium | testing, quality | 45m |
+| Deploy | critical | devops, deploy | 20m |
+| Update Docs | low | docs | 30m |
+| Security Audit | critical | security, audit | 90m |
+| Refactor Code | medium | refactor, code | 60m |
+| System Check | medium | monitoring, ops | 15m |
+
+---
+
+## OpenClaw Integration
+
+| Feature | Usage |
+|---------|-------|
+| TASKS.md | Written by ClawTonomy. Read every conversation. |
+| HEARTBEAT.md | Task checklist injected between markers. Read every heartbeat. |
+| `openclaw status --json` | Dashboard status |
+| `openclaw agent --local` | Task dispatch, suggestions, skill requests |
+| `openclaw cron add` | Scheduled checks, one-shot dispatch |
+| Personality files | Full CRUD on SOUL.md, IDENTITY.md, USER.md, AGENTS.md, TOOLS.md, MEMORY.md |
+| Skill discovery | Scans `$OPENCLAW_HOME/workspace/skills/*/SKILL.md` |
+
+### Paths
 
 ```
 OPENCLAW_HOME  = $OPENCLAW_HOME or ~/.openclaw
 WORKSPACE_DIR  = $OPENCLAW_HOME/workspace
 SKILLS_DIR     = $OPENCLAW_HOME/workspace/skills
-AUTONOMY_DIR   = directory containing this skill's files
+CLAWTONOMY_DIR = skill directory
+TASKS_DIR      = $CLAWTONOMY_DIR/tasks
 ```
 
 ---
 
 ## Configuration
 
-`config.json` (created by `install.sh` or on first CLI run):
+`config.json`:
 
 ```json
 {
-  "version": "3.1.0",
-  "limits": {
-    "max_concurrent_tasks": 5,
-    "daily_task_budget": 20
-  },
-  "github": {
-    "default_repo": null,
-    "notify_on_ci_fail": true
-  },
-  "web_ui": {
-    "port": 8767,
-    "host": "127.0.0.1",
-    "auto_refresh": 30
-  },
-  "watcher": {
-    "debounce_seconds": 2,
-    "enabled": true
-  },
-  "webhook": {
-    "enabled": true,
-    "auto_create_tasks": true
-  }
+  "version": "3.5.0",
+  "limits": { "max_concurrent_tasks": 5, "daily_task_budget": 20 },
+  "github": { "default_repo": null, "notify_on_ci_fail": true },
+  "web_ui": { "port": 8767, "host": "127.0.0.1", "auto_refresh": 30 },
+  "watcher": { "debounce_seconds": 2, "enabled": true },
+  "webhook": { "enabled": true, "auto_create_tasks": true }
 }
 ```
 
-Environment variable overrides:
-
-- `OPENCLAW_HOME` — base OpenClaw directory (default `~/.openclaw`)
-- `AUTONOMY_WEB_PORT` — web UI port (default `8767`)
-- `AUTONOMY_HOST` — web UI bind address (default `127.0.0.1`)
-- `AUTONOMY_DIR` — skill directory override (CLI only)
-- `WORKSPACE` — workspace directory override (CLI only)
+Env overrides: `OPENCLAW_HOME`, `CLAWTONOMY_WEB_PORT`, `CLAWTONOMY_HOST`, `CLAWTONOMY_DIR`, `WORKSPACE`
 
 ---
 
-## Safety Notes
+## Installation
 
-- Web UI binds to `127.0.0.1` by default (not exposed to network)
-- Personality file saves create timestamped backups in `workspace/backups/`
-- Personality file access limited to a hardcoded safe list of filenames
-- Task JSON built with `jq -n --arg` in the CLI (no shell injection)
-- Agent spawns use `--timeout` to prevent runaway processes
-- History log capped at 500 entries (rolling window)
+```bash
+bash install.sh                  # venv, deps, permissions
+bash install.sh --enable-cron    # + register cron job
+```
+
+Requires: `flask>=3.0.0`, `watchdog>=4.0.0`
+Platforms: Linux, macOS, WSL2 (not Windows native)
+
+---
+
+## Safety
+
+- Web UI on 127.0.0.1 only
+- Personality saves create backups
+- Task JSON built with `jq -n --arg` (no injection)
+- Agent spawns use `--timeout`
+- History capped at 500 entries
 
 ## License
 
 MIT
-
-````

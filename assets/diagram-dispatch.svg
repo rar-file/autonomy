@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 260" fill="none">
+  <rect width="800" height="260" fill="#0d1117" rx="10"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" fill="#58a6ff" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="bold">Task Dispatch — Parallel AI Execution</text>
+
+  <!-- User -->
+  <rect x="30" y="70" width="120" height="70" fill="#21262d" stroke="#e6edf3" stroke-width="2" rx="8"/>
+  <text x="90" y="98" text-anchor="middle" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="18">👤</text>
+  <text x="90" y="118" text-anchor="middle" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="12" font-weight="bold">User</text>
+  <text x="90" y="133" text-anchor="middle" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="9">Creates tasks</text>
+
+  <!-- Arrow to ClawTonomy -->
+  <line x1="150" y1="105" x2="195" y2="105" stroke="#8b949e" stroke-width="2"/>
+  <polygon points="190,100 200,105 190,110" fill="#8b949e"/>
+
+  <!-- ClawTonomy Core -->
+  <rect x="200" y="55" width="160" height="100" fill="#238636" rx="10"/>
+  <text x="280" y="83" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="bold">ClawTonomy</text>
+  <text x="280" y="103" text-anchor="middle" fill="#aff5b4" font-family="system-ui, -apple-system, sans-serif" font-size="11">POST /dispatch</text>
+  <text x="280" y="123" text-anchor="middle" fill="#aff5b4" font-family="system-ui, -apple-system, sans-serif" font-size="10">Builds AI prompt</text>
+  <text x="280" y="140" text-anchor="middle" fill="#aff5b4" font-family="system-ui, -apple-system, sans-serif" font-size="10">with task context</text>
+
+  <!-- Agent mode arrow -->
+  <line x1="360" y1="85" x2="430" y2="70" stroke="#1f6feb" stroke-width="2"/>
+  <polygon points="425,64 435,68 426,75" fill="#1f6feb"/>
+
+  <!-- Cron mode arrow -->
+  <line x1="360" y1="125" x2="430" y2="145" stroke="#8957e5" stroke-width="2"/>
+  <polygon points="425,140 435,147 426,150" fill="#8957e5"/>
+
+  <!-- Agent Mode Box -->
+  <rect x="435" y="40" width="170" height="65" fill="#161b22" stroke="#1f6feb" stroke-width="2" rx="8"/>
+  <text x="520" y="62" text-anchor="middle" fill="#1f6feb" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="bold">Agent Mode</text>
+  <text x="520" y="80" text-anchor="middle" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="10">openclaw agent --local</text>
+  <text x="520" y="95" text-anchor="middle" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="10">Sub-agent session</text>
+
+  <!-- Cron Mode Box -->
+  <rect x="435" y="120" width="170" height="65" fill="#161b22" stroke="#8957e5" stroke-width="2" rx="8"/>
+  <text x="520" y="142" text-anchor="middle" fill="#8957e5" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="bold">Cron Mode</text>
+  <text x="520" y="160" text-anchor="middle" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="10">openclaw cron add --at now</text>
+  <text x="520" y="175" text-anchor="middle" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="10">Isolated session</text>
+
+  <!-- Arrow to sub-agents -->
+  <line x1="605" y1="72" x2="650" y2="72" stroke="#1f6feb" stroke-width="2"/>
+  <polygon points="645,67 655,72 645,77" fill="#1f6feb"/>
+  <line x1="605" y1="152" x2="650" y2="152" stroke="#8957e5" stroke-width="2"/>
+  <polygon points="645,147 655,152 645,157" fill="#8957e5"/>
+
+  <!-- Sub-agent 1 -->
+  <rect x="655" y="45" width="120" height="55" fill="#1f6feb" rx="8"/>
+  <text x="715" y="68" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="16">🤖</text>
+  <text x="715" y="88" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="bold">Sub-Agent</text>
+
+  <!-- Sub-agent 2 -->
+  <rect x="655" y="125" width="120" height="55" fill="#8957e5" rx="8"/>
+  <text x="715" y="148" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="16">⏱️</text>
+  <text x="715" y="168" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="11" font-weight="bold">Cron Job</text>
+
+  <!-- Status update -->
+  <rect x="150" y="200" width="500" height="40" fill="#161b22" stroke="#3fb950" stroke-width="1" rx="6"/>
+  <text x="400" y="218" text-anchor="middle" fill="#3fb950" font-family="system-ui, -apple-system, sans-serif" font-size="11">Task auto-set to in_progress | ai_dispatched = true | Session ID tracked</text>
+  <text x="400" y="233" text-anchor="middle" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="10">Check dispatched tasks later to verify completion</text>
+</svg>

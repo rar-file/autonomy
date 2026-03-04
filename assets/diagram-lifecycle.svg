@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 300" fill="none">
+  <rect width="800" height="300" fill="#0d1117" rx="10"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" fill="#58a6ff" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="bold">Task Lifecycle</text>
+
+  <!-- PENDING -->
+  <rect x="60" y="80" width="120" height="60" fill="#f0883e" rx="8"/>
+  <text x="120" y="108" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="bold">PENDING</text>
+  <text x="120" y="128" text-anchor="middle" fill="#ffdcd7" font-family="system-ui, -apple-system, sans-serif" font-size="10">Just created</text>
+
+  <!-- Arrow: pending -> in_progress -->
+  <line x1="180" y1="110" x2="240" y2="110" stroke="#8b949e" stroke-width="2"/>
+  <polygon points="235,105 245,110 235,115" fill="#8b949e"/>
+
+  <!-- IN_PROGRESS -->
+  <rect x="245" y="80" width="140" height="60" fill="#1f6feb" rx="8"/>
+  <text x="315" y="108" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="bold">IN_PROGRESS</text>
+  <text x="315" y="128" text-anchor="middle" fill="#a5d6ff" font-family="system-ui, -apple-system, sans-serif" font-size="10">Actively working</text>
+
+  <!-- Arrow: in_progress -> completed -->
+  <line x1="385" y1="110" x2="445" y2="110" stroke="#8b949e" stroke-width="2"/>
+  <polygon points="440,105 450,110 440,115" fill="#8b949e"/>
+
+  <!-- COMPLETED -->
+  <rect x="450" y="80" width="130" height="60" fill="#238636" rx="8"/>
+  <text x="515" y="108" text-anchor="middle" fill="white" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="bold">COMPLETED</text>
+  <text x="515" y="128" text-anchor="middle" fill="#aff5b4" font-family="system-ui, -apple-system, sans-serif" font-size="10">With proof ✓</text>
+
+  <!-- Arrow: pending -> deferred -->
+  <line x1="120" y1="140" x2="120" y2="185" stroke="#8b949e" stroke-width="2"/>
+  <polygon points="115,180 120,190 125,180" fill="#8b949e"/>
+
+  <!-- DEFERRED -->
+  <rect x="60" y="190" width="120" height="50" fill="#21262d" stroke="#8b949e" stroke-width="2" rx="8"/>
+  <text x="120" y="213" text-anchor="middle" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="bold">DEFERRED</text>
+  <text x="120" y="230" text-anchor="middle" fill="#484f58" font-family="system-ui, -apple-system, sans-serif" font-size="9">Later</text>
+
+  <!-- Arrow: deferred -> cancelled -->
+  <line x1="120" y1="240" x2="120" y2="265" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="4"/>
+
+  <!-- CANCELLED label -->
+  <text x="120" y="280" text-anchor="middle" fill="#484f58" font-family="system-ui, -apple-system, sans-serif" font-size="11">CANCELLED</text>
+
+  <!-- Arrow: in_progress -> blocked -->
+  <line x1="315" y1="140" x2="315" y2="185" stroke="#da3633" stroke-width="2"/>
+  <polygon points="310,180 315,190 320,180" fill="#da3633"/>
+
+  <!-- BLOCKED -->
+  <rect x="245" y="190" width="140" height="50" fill="#21262d" stroke="#da3633" stroke-width="2" rx="8"/>
+  <text x="315" y="213" text-anchor="middle" fill="#da3633" font-family="system-ui, -apple-system, sans-serif" font-size="13" font-weight="bold">BLOCKED</text>
+  <text x="315" y="230" text-anchor="middle" fill="#f85149" font-family="system-ui, -apple-system, sans-serif" font-size="9">With reason</text>
+
+  <!-- Arrow: blocked -> in_progress (curved right) -->
+  <line x1="385" y1="215" x2="450" y2="215" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="4"/>
+  <line x1="450" y1="215" x2="450" y2="140" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="4"/>
+  <line x1="450" y1="140" x2="385" y2="140" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="4"/>
+  <polygon points="390,135 382,140 390,145" fill="#8b949e"/>
+
+  <!-- SYNC reminder -->
+  <rect x="610" y="80" width="160" height="160" fill="#161b22" stroke="#3fb950" stroke-width="2" rx="10"/>
+  <text x="690" y="108" text-anchor="middle" fill="#3fb950" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="bold">⚡ SYNC</text>
+  <text x="690" y="132" text-anchor="middle" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11">After EVERY</text>
+  <text x="690" y="148" text-anchor="middle" fill="#e6edf3" font-family="system-ui, -apple-system, sans-serif" font-size="11">status change:</text>
+  <text x="690" y="172" text-anchor="middle" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="10">clawtonomy task sync</text>
+  <text x="690" y="192" text-anchor="middle" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="10">or</text>
+  <text x="690" y="210" text-anchor="middle" fill="#8b949e" font-family="system-ui, -apple-system, sans-serif" font-size="10">POST /api/tasks/sync</text>
+  <text x="690" y="232" text-anchor="middle" fill="#f85149" font-family="system-ui, -apple-system, sans-serif" font-size="10" font-weight="bold">DO NOT SKIP</text>
+</svg>
