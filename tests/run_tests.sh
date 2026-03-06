@@ -1,26 +1,28 @@
 #!/bin/bash
-# Simple tests for Autonomy v3
+# Simple tests for Autonomy
 
-set -e
+set -euo pipefail
 
-echo "Running Autonomy v3 tests..."
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+echo "Running Autonomy tests..."
 
 # Test 1: Check autonomy script exists and is executable
-test -x ../autonomy && echo "✓ autonomy is executable"
+[[ -x "$ROOT_DIR/autonomy" ]] && echo "✓ autonomy is executable"
 
 # Test 2: Check syntax
-bash -n ../autonomy && echo "✓ autonomy syntax OK"
+bash -n "$ROOT_DIR/autonomy" && echo "✓ autonomy syntax OK"
 
 # Test 3: Check web_ui.py syntax
-python3 -m py_compile ../web_ui.py && echo "✓ web_ui.py syntax OK"
+python3 -m py_compile "$ROOT_DIR/web_ui.py" && echo "✓ web_ui.py syntax OK"
 
 # Test 4: Check config.json is valid JSON
-jq empty ../config.json && echo "✓ config.json is valid JSON"
+jq empty "$ROOT_DIR/config.json" && echo "✓ config.json is valid JSON"
 
 # Test 5: Check required directories exist
-test -d ../tasks && echo "✓ tasks/ directory exists"
-test -d ../logs && echo "✓ logs/ directory exists"
-test -d ../templates && echo "✓ templates/ directory exists"
+[[ -d "$ROOT_DIR/tasks" ]] && echo "✓ tasks/ directory exists"
+[[ -d "$ROOT_DIR/logs" ]] && echo "✓ logs/ directory exists"
+[[ -d "$ROOT_DIR/templates" ]] && echo "✓ templates/ directory exists"
 
 echo ""
 echo "All tests passed!"

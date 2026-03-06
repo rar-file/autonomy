@@ -20,5 +20,9 @@
   "webhook": {
     "enabled": true,
     "auto_create_tasks": true
+  },
+  "features": {
+    "inject_agents_instructions": false,
+    "skills_manager": true
   }
 }
