@@ -56,6 +56,44 @@ success() {
     echo -e "${GREEN}[✓]${NC} $1"
 }
 
+# Task lookup helpers
+find_task_file() {
+    local key="$1"
+    [[ -z "$key" ]] && return 1
+
+    # Direct filename matches
+    if [[ -f "$TASKS_DIR/${key}.json" ]]; then
+        echo "$TASKS_DIR/${key}.json"
+        return 0
+    fi
+
+    # Search by .name or .id
+    for f in "$TASKS_DIR"/*.json; do
+        [[ -f "$f" ]] || continue
+        local n
+        n=$(jq -r '.name // ""' "$f" 2>/dev/null || echo "")
+        local id
+        id=$(jq -r '.id // ""' "$f" 2>/dev/null || echo "")
+        if [[ "$n" == "$key" || "$id" == "$key" ]]; then
+            echo "$f"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+name_exists() {
+    local name="$1"
+    for f in "$TASKS_DIR"/*.json; do
+        [[ -f "$f" ]] || continue
+        local n
+        n=$(jq -r '.name // ""' "$f" 2>/dev/null || echo "")
+        [[ "$n" == "$name" ]] && return 0
+    done
+    return 1
+}
+
 # Task Management
 cmd_task() {
     local subcmd="${1:-list}"
@@ -68,12 +106,17 @@ cmd_task() {
             local priority="${3:-medium}"
             [[ -z "$name" ]] && { error "Task name required"; return 1; }
             [[ -z "$desc" ]] && read -rp "Description: " desc
-            
-            local task_file="$TASKS_DIR/${name}.json"
-            [[ -f "$task_file" ]] && { error "Task '$name' already exists"; return 1; }
-            
+
+            if name_exists "$name"; then
+                error "Task '$name' already exists"
+                return 1
+            fi
+
+            local id="$(date +%s)"
+            local task_file="$TASKS_DIR/${id}.json"
+
             jq -n \
-                --arg id "$(date +%s)" \
+                --arg id "$id" \
                 --arg name "$name" \
                 --arg desc "$desc" \
                 --arg priority "$priority" \
@@ -85,12 +128,21 @@ cmd_task() {
                     status: "pending",
                     priority: $priority,
                     depends_on: [],
+                    notes: [],
+                    subtasks: [],
+                    tags: [],
+                    due_date: null,
+                    estimated_minutes: null,
+                    execution_mode: "agent",
+                    ai_dispatched: false,
+                    dispatch_session: null,
+                    blocked_reason: null,
                     created_at: $created,
                     updated_at: $created,
                     completed_at: null,
                     proof: null
                 }' > "$task_file"
-            
+
             success "Task '$name' created (priority: $priority)"
             ;;
             
@@ -106,7 +158,7 @@ cmd_task() {
                 [[ "$status" == "completed" ]] && color="${GREEN}"
                 [[ "$status" == "in_progress" ]] && color="${YELLOW}"
                 echo -e "  ${color}[$status]${NC} $name: $desc"
-                ((count++))
+                count=$((count+1))
             done
             [[ $count -eq 0 ]] && echo "  No tasks"
             ;;
@@ -114,9 +166,10 @@ cmd_task() {
         work|start)
             local name="${1:-}"
             [[ -z "$name" ]] && { error "Task name required"; return 1; }
-            local task_file="$TASKS_DIR/${name}.json"
-            [[ ! -f "$task_file" ]] && { error "Task '$name' not found"; return 1; }
-            
+
+            local task_file
+            task_file=$(find_task_file "$name") || { error "Task '$name' not found"; return 1; }
+
             jq '.status = "in_progress" | .updated_at = "'$(date -Iseconds)'"' "$task_file" > "$task_file.tmp" && mv "$task_file.tmp" "$task_file"
             success "Task '$name' marked as in-progress"
             ;;
@@ -126,10 +179,10 @@ cmd_task() {
             local proof="${2:-}"
             [[ -z "$name" ]] && { error "Task name required"; return 1; }
             [[ -z "$proof" ]] && { error "Proof required (what was tested/verified)"; return 1; }
-            
-            local task_file="$TASKS_DIR/${name}.json"
-            [[ ! -f "$task_file" ]] && { error "Task '$name' not found"; return 1; }
-            
+
+            local task_file
+            task_file=$(find_task_file "$name") || { error "Task '$name' not found"; return 1; }
+
             jq --arg proof "$proof" --arg now "$(date -Iseconds)" \
                 '.status = "completed" | .completed_at = $now | .proof = $proof | .updated_at = $now' \
                 "$task_file" > "$task_file.tmp" && mv "$task_file.tmp" "$task_file"
@@ -140,8 +193,10 @@ cmd_task() {
         delete|rm)
             local name="${1:-}"
             [[ -z "$name" ]] && { error "Task name required"; return 1; }
-            local task_file="$TASKS_DIR/${name}.json"
-            [[ ! -f "$task_file" ]] && { error "Task '$name' not found"; return 1; }
+
+            local task_file
+            task_file=$(find_task_file "$name") || { error "Task '$name' not found"; return 1; }
+
             rm "$task_file"
             success "Task '$name' deleted"
             ;;
@@ -158,9 +213,9 @@ cmd_task() {
                 [[ -f "$task" ]] || continue
                 local status=$(jq -r '.status' "$task")
                 case "$status" in
-                    pending) ((pending++)) ;;
-                    in_progress) ((in_prog++)) ;;
-                    completed) ((completed++)) ;;
+                    pending) pending=$((pending+1)) ;;
+                    in_progress) in_prog=$((in_prog+1)) ;;
+                    completed) completed=$((completed+1)) ;;
                 esac
             done
 
@@ -227,8 +282,9 @@ cmd_task() {
         dispatch|send)
             local name="${1:-}"
             [[ -z "$name" ]] && { error "Task name required"; return 1; }
-            local task_file="$TASKS_DIR/${name}.json"
-            [[ ! -f "$task_file" ]] && { error "Task '$name' not found"; return 1; }
+
+            local task_file
+            task_file=$(find_task_file "$name") || { error "Task '$name' not found"; return 1; }
 
             local desc=$(jq -r '.description // "No description"' "$task_file")
             local priority=$(jq -r '.priority // "medium"' "$task_file")
@@ -250,8 +306,10 @@ cmd_task() {
         status|info)
             local name="${1:-}"
             [[ -z "$name" ]] && { error "Task name required"; return 1; }
-            local task_file="$TASKS_DIR/${name}.json"
-            [[ ! -f "$task_file" ]] && { error "Task '$name' not found"; return 1; }
+
+            local task_file
+            task_file=$(find_task_file "$name") || { error "Task '$name' not found"; return 1; }
+
             jq '.' "$task_file"
             ;;
             

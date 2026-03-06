@@ -2614,7 +2614,7 @@
                 '<div class="skill-card '+(s.enabled===false?'disabled':'')+'" onclick="viewSkill(\''+s.name+'\')" style="animation:itemIn 0.2s ease '+(i*0.04)+'s both">' +
                 '<div class="skill-card-header"><div style="display:flex;align-items:center;gap:0.75rem">' +
                 '<div style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--accent-muted);display:flex;align-items:center;justify-content:center;font-size:1.2rem">'+(s.icon||'⚡')+'</div>' +
-                '<div><div class="skill-name">'+esc(s.name)+'</div><div class="skill-version">v'+esc(s.version||'1.0.0')+'</div></div></div>' +
+                '<div><div class="skill-name">'+esc(s.displayName||s.name)+'</div><div class="skill-version">v'+esc(s.version||'1.0.0')+'</div></div></div>' +
                 '<label class="toggle" onclick="event.stopPropagation()"><input type="checkbox" '+(s.enabled!==false?'checked':'')+' onchange="toggleSkill(\''+s.name+'\',this.checked)"><span class="toggle-slider"></span></label></div>' +
                 '<div class="skill-desc">'+esc(s.description||'No description')+'</div></div>'
             ).join('');
@@ -3195,7 +3195,19 @@
         try {
             const r = await fetch('/api/skills/request', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({description:desc}) });
             const d = await r.json();
-            if (d.success) { chatC.innerHTML = esc(d.response); chat.classList.add('visible'); showStatus(st, '✅ Response received!', 'success'); toast('OpenClaw responded!','success'); }
+            if (d.success) {
+                // New behavior: skill is actually built and installed
+                const name = d.skill?.name || 'new-skill';
+                chatC.innerHTML = '✅ Built skill: <b>' + esc(name) + '</b><br>' +
+                    '<span style="color:var(--text-dim)">Click the skill in the left panel to view SKILL.md.</span>';
+                chat.classList.add('visible');
+                showStatus(st, '✅ Skill built + installed!', 'success');
+                toast('Skill built: ' + name,'success');
+                document.getElementById('skill-description').value='';
+                fetchData();
+                // Auto-open the modal
+                setTimeout(() => viewSkill(name), 250);
+            }
             else showStatus(st, '❌ ' + esc(d.error||'Request failed'), 'error');
         } catch(e) { showStatus(st, '❌ Network error', 'error'); }
         finally { btn.disabled=false; btn.classList.remove('btn-loading'); btn.innerHTML=orig; }
@@ -3257,6 +3269,17 @@
             h += '<div class="detail-chip">'+(d.enabled!==false?'✅ Enabled':'❌ Disabled')+'</div>';
             h += '<div class="detail-chip">📁 '+(d.files||[]).length+' files</div></div>';
             if (d.description) h += '<div class="detail-section"><h4>Description</h4><p style="color:var(--text-secondary);font-size:0.85rem;line-height:1.6">'+esc(d.description)+'</p></div>';
+
+            if (d.skill_md) {
+                h += '<div class="detail-section"><h4>SKILL.md</h4>';
+                h += '<div style="display:flex;gap:0.5rem;margin-bottom:0.6rem">' +
+                     '<button class="btn btn-secondary btn-sm" onclick="copyText('+"'"+'skillmd'+"'"+')">Copy</button>' +
+                     '<button class="btn btn-secondary btn-sm" onclick="downloadText('+"'"+'SKILL.md'+"'"+', '+"'"+name+"'"+')">Download</button>' +
+                     '</div>';
+                h += '<pre id="skillmd" style="white-space:pre-wrap;word-break:break-word;background:var(--bg-secondary);border:1px solid var(--border-subtle);border-radius:var(--radius-md);padding:0.85rem;font-size:0.78rem;line-height:1.6;color:var(--text-primary);max-height:360px;overflow:auto">'+esc(d.skill_md)+'</pre>';
+                h += '</div>';
+            }
+
             if (d.readme) h += '<div class="detail-section"><h4>README</h4><div class="detail-readme">'+esc(d.readme)+'</div></div>';
             if (d.files?.length) {
                 h += '<div class="detail-section"><h4>Files</h4><div class="detail-files">';
@@ -3662,6 +3685,31 @@
         t.textContent = msg;
         document.body.appendChild(t);
         setTimeout(() => { t.style.opacity='0'; t.style.transform='translateY(10px)'; t.style.transition='all 0.3s ease'; setTimeout(() => t.remove(), 300); }, 3000);
+    }
+
+    function copyText(preId) {
+        const el = document.getElementById(preId);
+        if (!el) return;
+        const txt = el.textContent || '';
+        navigator.clipboard.writeText(txt).then(() => toast('Copied', 'success')).catch(() => toast('Copy failed', 'error'));
+    }
+
+    function downloadText(filename, skillName) {
+        // Download SKILL.md from the currently viewed skill
+        fetch('/api/skills/' + encodeURIComponent(skillName) + '/file?path=' + encodeURIComponent(filename))
+            .then(r => r.json())
+            .then(d => {
+                if (!d.success) { toast(d.error || 'Download failed', 'error'); return; }
+                const blob = new Blob([d.content || ''], { type: 'text/plain;charset=utf-8' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = skillName + '-' + filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            })
+            .catch(() => toast('Download failed', 'error'));
     }
 
     /* ── Init ── */

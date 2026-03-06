@@ -18,8 +18,55 @@ from flask import Flask, render_template, jsonify, request
 
 app = Flask(__name__)
 
+def require_feature(name: str):
+    if not CONFIG.get("features", {}).get(name, False):
+        return jsonify({"success": False, "error": f"Feature disabled: {name}"}), 403
+    return None
+
+
 AUTONOMY_DIR = Path(__file__).parent
 TASKS_DIR = AUTONOMY_DIR / "tasks"
+
+
+def task_path(task_id: str) -> Path:
+    """Resolve a task JSON path from either an id or a task name.
+
+    Canonical storage is <id>.json. For backwards-compat, we also support
+    legacy <name>.json and auto-migrate when possible.
+    """
+    # direct id
+    p = TASKS_DIR / f"{task_id}.json"
+    if p.exists():
+        return p
+
+    # legacy: name.json
+    legacy = TASKS_DIR / f"{task_id}.json"  # (same as above)
+    if legacy.exists():
+        return legacy
+
+    name_path = TASKS_DIR / f"{task_id}.json"
+    if name_path.exists():
+        return name_path
+
+    # scan by .name or .id
+    for f in TASKS_DIR.glob("*.json"):
+        try:
+            data = json.loads(f.read_text())
+        except Exception:
+            continue
+        if str(data.get("id")) == str(task_id) or data.get("name") == task_id:
+            # migrate: if filename != <id>.json and id present
+            tid = str(data.get("id")) if data.get("id") is not None else None
+            if tid and f.name != f"{tid}.json":
+                newp = TASKS_DIR / f"{tid}.json"
+                if not newp.exists():
+                    try:
+                        f.rename(newp)
+                        return newp
+                    except Exception:
+                        pass
+            return f
+    return p
 LOGS_DIR = AUTONOMY_DIR / "logs"
 CONFIG_FILE = AUTONOMY_DIR / "config.json"
 OPENCLAW_HOME = Path(os.environ.get("OPENCLAW_HOME", str(Path.home() / ".openclaw")))
@@ -50,6 +97,29 @@ TASK_TEMPLATES = [
     {"id": "monitor-check", "name": "System Check", "description": "Check system health and resolve issues", "priority": "medium", "tags": ["monitoring", "ops"], "estimated_minutes": 15},
 ]
 
+
+
+def load_config():
+    """Load config.json with sane defaults."""
+    cfg = {
+        "web_ui": {"host": "0.0.0.0", "port": 8767, "auto_refresh": 30},
+        "features": {"inject_agents_instructions": False, "skills_manager": False},
+    }
+    try:
+        if CONFIG_FILE.exists():
+            with open(CONFIG_FILE) as f:
+                user = json.load(f)
+            # shallow merge
+            for k,v in user.items():
+                if isinstance(v, dict) and isinstance(cfg.get(k), dict):
+                    cfg[k].update(v)
+                else:
+                    cfg[k]=v
+    except Exception as e:
+        print(f"[autonomy] config load failed: {e}")
+    return cfg
+
+CONFIG = load_config()
 
 def sync_tasks_to_workspace():
     """Write current tasks to ~/.openclaw/workspace/TASKS.md so the AI agent can see them.
@@ -306,10 +376,13 @@ Web UI at `http://localhost:8767` — has full task management, skill browser, p
 
 
 def sync_all_tasks():
-    """Sync tasks to workspace TASKS.md, HEARTBEAT.md, and ensure AGENTS.md has instructions."""
+    """Sync tasks to workspace TASKS.md + HEARTBEAT.md (and optionally AGENTS.md instructions)."""
     s1 = sync_tasks_to_workspace()
     s2 = inject_tasks_into_heartbeat()
-    s3 = ensure_agents_instructions()
+    if CONFIG.get("features", {}).get("inject_agents_instructions", False):
+        s3 = ensure_agents_instructions()
+    else:
+        s3 = True
     return s1 and s2 and s3
 
 
@@ -373,41 +446,64 @@ def get_all_tasks():
                 pass
     return sorted(tasks, key=lambda x: x.get("created_at", ""), reverse=True)
 
+def parse_skill_frontmatter(content: str):
+    """Very small frontmatter parser for SKILL.md."""
+    name = None
+    desc = None
+    version = None
+    if content.lstrip().startswith('---'):
+        # take lines between first two ---
+        parts = content.split("\n")
+        # find second ---
+        try:
+            i0 = parts.index('---')
+            i1 = parts.index('---', i0+1)
+            fm = parts[i0+1:i1]
+        except ValueError:
+            fm = []
+        for line in fm:
+            line=line.strip()
+            if line.startswith('name:'):
+                name=line.split(':',1)[1].strip().strip('"').strip("'")
+            elif line.startswith('description:'):
+                desc=line.split(':',1)[1].strip().strip('"').strip("'")
+            elif line.startswith('version:'):
+                version=line.split(':',1)[1].strip().strip('"').strip("'")
+    # fallback: scan top few lines
+    if not desc:
+        for line in content.split("\n")[:30]:
+            if line.startswith('description:'):
+                desc=line.split(':',1)[1].strip().strip('"').strip("'")
+                break
+    return name, desc, version
+
+
 def get_skills():
     skills = []
     if SKILLS_DIR.exists():
-        for skill_dir in SKILLS_DIR.iterdir():
-            if skill_dir.is_dir():
-                skill_file = skill_dir / "SKILL.md"
-                readme_file = skill_dir / "README.md"
-                if skill_file.exists():
-                    try:
-                        with open(skill_file) as f:
-                            content = f.read()
-                            name = skill_dir.name
-                            desc = ""
-                            version = "1.0.0"
-                            # Parse SKILL.md
-                            for line in content.split("\n")[:20]:
-                                if line.startswith("description:") or line.startswith("_"):
-                                    desc = line.split(":", 1)[1].strip() if ":" in line else line.strip("_ ")
-                                if "version" in line.lower() and ":" in line:
-                                    version = line.split(":", 1)[1].strip().strip('"').strip("'")
-
-                            # Check for enabled/disabled state
-                            config_file = skill_dir / ".disabled"
-                            enabled = not config_file.exists()
-
-                            skills.append({
-                                "name": name,
-                                "description": desc or "No description",
-                                "path": str(skill_dir),
-                                "version": version,
-                                "enabled": enabled,
-                                "icon": "⚡"
-                            })
-                    except:
-                        pass
+        for skill_dir in sorted([d for d in SKILLS_DIR.iterdir() if d.is_dir()], key=lambda p: p.name.lower()):
+            skill_file = skill_dir / 'SKILL.md'
+            if not skill_file.exists():
+                continue
+            try:
+                content = skill_file.read_text(errors='replace')
+                fm_name, fm_desc, fm_ver = parse_skill_frontmatter(content)
+                # display name: frontmatter name or folder name
+                display = fm_name or skill_dir.name
+                desc = fm_desc or 'No description'
+                version = fm_ver or '1.0.0'
+                enabled = not (skill_dir / '.disabled').exists()
+                skills.append({
+                    'name': skill_dir.name,            # folder key
+                    'displayName': display,            # frontmatter name
+                    'description': desc,
+                    'path': str(skill_dir),
+                    'version': version,
+                    'enabled': enabled,
+                    'icon': '⚡'
+                })
+            except Exception:
+                continue
     return skills
 
 def get_skill_detail(name):
@@ -649,9 +745,6 @@ def create_task():
         return jsonify({"success": False, "error": "Name required"}), 400
 
     TASKS_DIR.mkdir(exist_ok=True)
-    task_file = TASKS_DIR / f"{name}.json"
-    if task_file.exists():
-        return jsonify({"success": False, "error": "Task already exists"}), 400
 
     priority = data.get("priority", "medium")
     if priority not in ("critical", "high", "medium", "low"):
@@ -678,6 +771,11 @@ def create_task():
         "ai_dispatched": False,
         "dispatch_session": None
     }
+
+    task_file = TASKS_DIR / f"{task['id']}.json"
+    if task_file.exists():
+        return jsonify({"success": False, "error": "Task already exists"}), 400
+
     record_event("task_created", f"Task '{name}' (priority: {priority})")
 
     with open(task_file, "w") as f:
@@ -691,7 +789,7 @@ def create_task():
 
 @app.route("/api/tasks/<task_id>/complete", methods=["POST"])
 def complete_task(task_id):
-    task_file = TASKS_DIR / f"{task_id}.json"
+    task_file = task_path(task_id)
     if task_file.exists():
         with open(task_file) as f:
             task = json.load(f)
@@ -710,7 +808,7 @@ def complete_task(task_id):
 @app.route("/api/tasks/<task_id>/status", methods=["POST"])
 def update_task_status(task_id):
     """Change task status with full lifecycle support."""
-    task_file = TASKS_DIR / f"{task_id}.json"
+    task_file = task_path(task_id)
     if not task_file.exists():
         return jsonify({"success": False, "error": "Task not found"}), 404
     data = request.json
@@ -737,7 +835,7 @@ def update_task_status(task_id):
 @app.route("/api/tasks/<task_id>/update", methods=["POST"])
 def update_task(task_id):
     """Update any task fields (description, priority, tags, due_date, etc)."""
-    task_file = TASKS_DIR / f"{task_id}.json"
+    task_file = task_path(task_id)
     if not task_file.exists():
         return jsonify({"success": False, "error": "Task not found"}), 404
     data = request.json
@@ -763,7 +861,7 @@ def update_task(task_id):
 @app.route("/api/tasks/<task_id>/delete", methods=["DELETE"])
 def delete_task(task_id):
     """Delete a task permanently."""
-    task_file = TASKS_DIR / f"{task_id}.json"
+    task_file = task_path(task_id)
     if not task_file.exists():
         return jsonify({"success": False, "error": "Task not found"}), 404
     task_file.unlink()
@@ -775,7 +873,7 @@ def delete_task(task_id):
 @app.route("/api/tasks/<task_id>/notes", methods=["POST"])
 def add_task_note(task_id):
     """Add a note/comment to a task."""
-    task_file = TASKS_DIR / f"{task_id}.json"
+    task_file = task_path(task_id)
     if not task_file.exists():
         return jsonify({"success": False, "error": "Task not found"}), 404
     data = request.json
@@ -800,7 +898,7 @@ def add_task_note(task_id):
 def dispatch_task(task_id):
     """Send a task to OpenClaw AI for execution via sub-agent or cron.
     This is the key integration — makes the AI actually work on the task."""
-    task_file = TASKS_DIR / f"{task_id}.json"
+    task_file = task_path(task_id)
     if not task_file.exists():
         return jsonify({"success": False, "error": "Task not found"}), 404
     with open(task_file) as f:
@@ -834,7 +932,7 @@ def dispatch_task(task_id):
             result = subprocess.run(
                 ["openclaw", "cron", "add",
                  "--name", f"task:{task_id}",
-                 "--at", "now",
+                 "--at", "1s",
                  "--session", "isolated",
                  "--message", prompt],
                 capture_output=True, text=True, timeout=15
@@ -1037,6 +1135,10 @@ def api_task_templates():
 
 @app.route("/api/skills/<name>")
 def skill_detail(name):
+    blocked = require_feature("skills_manager")
+    if blocked:
+        return blocked
+
     """Get detailed info about a specific skill"""
     detail = get_skill_detail(name)
     if detail:
@@ -1045,6 +1147,10 @@ def skill_detail(name):
 
 @app.route("/api/skills/<name>/toggle", methods=["POST"])
 def toggle_skill(name):
+    blocked = require_feature("skills_manager")
+    if blocked:
+        return blocked
+
     """Enable/disable a skill"""
     skill_dir = SKILLS_DIR / name
     if not skill_dir.exists():
@@ -1064,6 +1170,110 @@ def toggle_skill(name):
         disabled_file.touch()
 
     return jsonify({"success": True, "enabled": enabled})
+
+
+@app.route("/api/skills/<name>/files")
+def list_skill_files(name):
+    blocked = require_feature("skills_manager")
+    if blocked:
+        return blocked
+
+    skill_dir = (SKILLS_DIR / name).resolve()
+    if not skill_dir.exists():
+        return jsonify({"success": False, "error": "Skill not found"}), 404
+
+    # Prevent traversal
+    if SKILLS_DIR.resolve() not in skill_dir.parents:
+        return jsonify({"success": False, "error": "Invalid skill path"}), 400
+
+    files = []
+    for f in skill_dir.rglob("*"):
+        if f.is_file():
+            rel = str(f.relative_to(skill_dir))
+            if any(part in rel.split("/") for part in (".git", "__pycache__")):
+                continue
+            files.append({"path": rel, "bytes": f.stat().st_size})
+
+    files.sort(key=lambda x: x["path"])
+    return jsonify({"success": True, "name": name, "files": files})
+
+
+@app.route("/api/skills/<name>/file")
+def get_skill_file(name):
+    blocked = require_feature("skills_manager")
+    if blocked:
+        return blocked
+
+    relpath = request.args.get("path", "SKILL.md")
+    skill_dir = (SKILLS_DIR / name).resolve()
+    if not skill_dir.exists():
+        return jsonify({"success": False, "error": "Skill not found"}), 404
+
+    if SKILLS_DIR.resolve() not in skill_dir.parents:
+        return jsonify({"success": False, "error": "Invalid skill path"}), 400
+
+    fpath = (skill_dir / relpath).resolve()
+    if skill_dir not in fpath.parents and fpath != skill_dir:
+        return jsonify({"success": False, "error": "Invalid file path"}), 400
+
+    if not fpath.exists() or not fpath.is_file():
+        return jsonify({"success": False, "error": "File not found"}), 404
+
+    if fpath.stat().st_size > 200_000:
+        return jsonify({"success": False, "error": "File too large"}), 413
+
+    return jsonify({"success": True, "name": name, "path": relpath, "content": fpath.read_text(errors="replace")})
+
+
+@app.route("/api/skills/<name>/file", methods=["POST"])
+def save_skill_file(name):
+    blocked = require_feature("skills_manager")
+    if blocked:
+        return blocked
+
+    data = request.json or {}
+    relpath = (data.get("path") or "SKILL.md").strip()
+    content = data.get("content")
+    if content is None:
+        return jsonify({"success": False, "error": "content required"}), 400
+
+    skill_dir = (SKILLS_DIR / name).resolve()
+    if not skill_dir.exists():
+        return jsonify({"success": False, "error": "Skill not found"}), 404
+
+    if SKILLS_DIR.resolve() not in skill_dir.parents:
+        return jsonify({"success": False, "error": "Invalid skill path"}), 400
+
+    fpath = (skill_dir / relpath).resolve()
+    if skill_dir not in fpath.parents:
+        return jsonify({"success": False, "error": "Invalid file path"}), 400
+
+    if any(part in (".git",) for part in fpath.parts):
+        return jsonify({"success": False, "error": "Blocked path"}), 400
+
+    fpath.parent.mkdir(parents=True, exist_ok=True)
+    fpath.write_text(content)
+    record_event("skill_file_saved", f"{name}:{relpath}")
+    return jsonify({"success": True, "message": "Saved", "path": relpath})
+
+
+@app.route("/api/skills/<name>/delete", methods=["DELETE"])
+def delete_skill(name):
+    blocked = require_feature("skills_manager")
+    if blocked:
+        return blocked
+
+    skill_dir = (SKILLS_DIR / name).resolve()
+    if not skill_dir.exists():
+        return jsonify({"success": False, "error": "Skill not found"}), 404
+
+    if SKILLS_DIR.resolve() not in skill_dir.parents:
+        return jsonify({"success": False, "error": "Invalid skill path"}), 400
+
+    import shutil
+    shutil.rmtree(skill_dir)
+    record_event("skill_deleted", name)
+    return jsonify({"success": True, "message": f"Deleted {name}"})
 
 @app.route("/api/personality/<filename>")
 def get_personality_file(filename):
@@ -1224,27 +1434,83 @@ def install_skill():
 
 @app.route("/api/skills/request", methods=["POST"])
 def request_skill():
-    """Request a custom skill - gets mini response from OpenClaw"""
-    data = request.json
-    description = data.get("description", "")
+    """Build a real OpenClaw skill from a natural-language description.
+
+    Flow:
+    - Create skills/<skill_name>/SKILL.md
+    - Use `openclaw agent --local` to generate quality SKILL.md content (metadata + trigger description + workflows)
+    - Write file to disk so it shows up instantly in installed skills.
+
+    The endpoint stays synchronous but with tight timeouts.
+    """
+    blocked = require_feature("skills_manager")
+    if blocked:
+        return blocked
+
+    data = request.json or {}
+    description = (data.get("description", "") or "").strip()
+    requested_name = (data.get("name", "") or "").strip()
 
     if not description:
-        return jsonify({"success": False, "error": "Description required"})
+        return jsonify({"success": False, "error": "Description required"}), 400
 
+    # Reject meta/non-skill requests that create junk.
+    meta_phrases = [
+        "allow you to form opinions",
+        "make you feel",
+        "become sentient",
+        "change your system prompt",
+    ]
+    low = description.lower()
+    if any(p in low for p in meta_phrases):
+        return jsonify({
+            "success": False,
+            "error": "That description isn’t a concrete skill (it’s meta). Describe a real workflow/tool you want automated instead."
+        }), 400
+
+    def slugify(s: str) -> str:
+        s = s.lower()
+        s = re.sub(r"[^a-z0-9\s_-]", "", s)
+        s = re.sub(r"\s+", "-", s).strip("-")
+        return s
+
+    # Prefer provided name; else derive a short slug from the description.
+    skill_name = slugify(requested_name) if requested_name else slugify(description)
+    skill_name = (skill_name[:48] or f"skill-{int(datetime.now().timestamp())}").strip("-")
+
+    # Ensure folder exists
+    SKILLS_DIR.mkdir(parents=True, exist_ok=True)
+    skill_dir = (SKILLS_DIR / skill_name)
+    skill_dir.mkdir(parents=True, exist_ok=True)
+
+    skill_md = skill_dir / "SKILL.md"
+
+    # Seed file so it exists even if generation fails
+    seed = f"""---\nname: {skill_name}\ndescription: \"{description}\"\n---\n\n# {skill_name}\n\n(autogenerated draft)\n"""
+    if not skill_md.exists():
+        skill_md.write_text(seed)
+
+    # Use OpenClaw to generate a real SKILL.md body.
     try:
-        # Build a short prompt for OpenClaw - just a quick response
-        prompt = f"""The user wants a custom skill: "{description}"
-
-Give a brief, helpful response (2-3 sentences max):
-1. Acknowledge what they want
-2. Say if it's feasible
-3. Give one tip or next step
-
-Keep it conversational and friendly."""
-
-        # Spawn OpenClaw agent for quick response
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        session_id = f"webui-skill-request-{timestamp}"
+        session_id = f"webui-skill-build-{skill_name}-{timestamp}"
+
+        prompt = f"""You are building an OpenClaw skill.
+
+Target path to write: {skill_md}
+
+User description:
+{description}
+
+Requirements:
+- Output MUST be the full contents of SKILL.md.
+- Include YAML frontmatter with fields: name, description.
+- The description must clearly say WHEN to use this skill (trigger phrases) and WHAT it does.
+- Keep SKILL.md under ~250 lines.
+- Use Discord-friendly guidance (no markdown tables unless necessary).
+- Avoid meta instructions (no system prompt changes).
+
+Now write the complete SKILL.md file content."""
 
         result = subprocess.run(
             [
@@ -1252,50 +1518,74 @@ Keep it conversational and friendly."""
                 "--local",
                 "--session-id", session_id,
                 "--message", prompt,
-                "--thinking", "minimal",  # Fast response
-                "--timeout", "30"  # Short timeout for quick response
+                "--thinking", "low",
+                "--timeout", "60"
             ],
             capture_output=True,
             text=True,
-            timeout=35
+            timeout=75
         )
 
-        # Parse response - try to extract just the message content
-        response_text = "I'll work on that skill for you! Check back soon."
-        if result.stdout:
-            # Take last few lines which usually contain the actual response
-            lines = [l.strip() for l in result.stdout.strip().split('\n') if l.strip()]
-            if lines:
-                # Skip metadata lines and take actual content
-                content_lines = [l for l in lines if not l.startswith(('Runtime:', 'Session:', 'Model:', 'Tools:'))]
-                if content_lines:
-                    response_text = ' '.join(content_lines[-3:])  # Last 3 lines
+        # Extract a markdown-ish payload from stdout (best-effort)
+        out = (result.stdout or "").strip()
+        # Heuristic: take from first frontmatter marker
+        idx = out.find('---')
+        if idx != -1:
+            out = out[idx:]
 
-        # Log for debugging
-        log_dir = LOGS_DIR
-        log_dir.mkdir(exist_ok=True)
-        with open(log_dir / f"skill_request_{timestamp}.log", 'w') as f:
-            f.write(f"Description: {description}\n")
-            f.write(f"Return code: {result.returncode}\n")
-            f.write(f"Response: {response_text}\n")
-            f.write(f"Stdout:\n{result.stdout}\n")
-            f.write(f"Stderr:\n{result.stderr}\n")
+        if result.returncode != 0 or len(out) < 20:
+            # keep seed, but report error
+            record_event("skill_build_failed", f"{skill_name}: {result.stderr[-200:] if result.stderr else 'unknown'}")
+            return jsonify({
+                "success": False,
+                "error": (result.stderr[-200:] if result.stderr else "Skill build failed"),
+                "skill": {"name": skill_name, "path": str(skill_dir), "skill_md": str(skill_md)}
+            }), 500
+
+        # Write the skill
+        skill_md.write_text(out)
+
+        # Prefer the frontmatter name as the canonical folder name (nicer + stable)
+        fm_name, _, _ = parse_skill_frontmatter(out)
+        final_name = slugify(fm_name) if fm_name else skill_name
+        final_name = (final_name[:48] or skill_name).strip("-")
+
+        final_dir = (SKILLS_DIR / final_name)
+        final_md = final_dir / "SKILL.md"
+
+        if final_name != skill_name:
+            # Move folder if target doesn't exist
+            if not final_dir.exists():
+                skill_dir.rename(final_dir)
+                skill_dir = final_dir
+                skill_md = final_md
+            else:
+                # Collision: keep original folder name
+                final_name = skill_name
+
+        record_event("skill_created", f"Built skill '{final_name}'")
 
         return jsonify({
             "success": True,
-            "response": response_text
+            "skill": {"name": final_name, "path": str(skill_dir), "skill_md": str(skill_md)},
+            "message": f"Built skill '{final_name}'",
+            "session_id": session_id
         })
 
     except subprocess.TimeoutExpired:
+        record_event("skill_build_timeout", skill_name)
         return jsonify({
-            "success": True,
-            "response": "That's an interesting skill idea! I'm thinking about how to build it..."
-        })
+            "success": False,
+            "error": "Skill build timed out. Try a shorter description.",
+            "skill": {"name": skill_name, "path": str(skill_dir), "skill_md": str(skill_md)}
+        }), 504
     except Exception as e:
+        record_event("skill_build_error", f"{skill_name}: {e}")
         return jsonify({
-            "success": True,
-            "response": f"Got it! I'll look into building that skill for you. (Error: {str(e)[:50]})"
-        })
+            "success": False,
+            "error": f"Skill build error: {str(e)}",
+            "skill": {"name": skill_name, "path": str(skill_dir), "skill_md": str(skill_md)}
+        }), 500
 
 
 # --- State & History Management ---
@@ -1453,7 +1743,7 @@ def api_context_window():
 @app.route("/api/tasks/<task_id>/subtask", methods=["POST"])
 def add_subtask(task_id):
     """Add a subtask to a parent task."""
-    task_file = TASKS_DIR / f"{task_id}.json"
+    task_file = task_path(task_id)
     if not task_file.exists():
         return jsonify({"success": False, "error": "Task not found"}), 404
     data = request.json
@@ -1479,7 +1769,7 @@ def add_subtask(task_id):
 @app.route("/api/tasks/<task_id>/subtask/<int:sub_index>/toggle", methods=["POST"])
 def toggle_subtask(task_id, sub_index):
     """Toggle a subtask completion status."""
-    task_file = TASKS_DIR / f"{task_id}.json"
+    task_file = task_path(task_id)
     if not task_file.exists():
         return jsonify({"success": False, "error": "Task not found"}), 404
     with open(task_file) as f:
@@ -1501,7 +1791,7 @@ def toggle_subtask(task_id, sub_index):
 @app.route("/api/tasks/<task_id>/subtask/<int:sub_index>", methods=["DELETE"])
 def delete_subtask(task_id, sub_index):
     """Delete a subtask."""
-    task_file = TASKS_DIR / f"{task_id}.json"
+    task_file = task_path(task_id)
     if not task_file.exists():
         return jsonify({"success": False, "error": "Task not found"}), 404
     with open(task_file) as f:
@@ -1892,8 +2182,8 @@ def personality_diff():
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("AUTONOMY_WEB_PORT", 8767))
-    host = os.environ.get("AUTONOMY_HOST", "127.0.0.1")
+    port = int(os.environ.get("AUTONOMY_WEB_PORT", CONFIG.get("web_ui", {}).get("port", 8767)))
+    host = os.environ.get("AUTONOMY_HOST", CONFIG.get("web_ui", {}).get("host", "0.0.0.0"))
     # Initial sync on startup — ensure TASKS.md, HEARTBEAT.md, and AGENTS.md are current
     print("[autonomy] Running initial sync to workspace...")
     try:

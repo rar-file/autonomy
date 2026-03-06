@@ -8,6 +8,8 @@
 logs/
 tasks/
 test_output/
+digests/
+history.json
 *.log
 *.tmp
 *.pid
